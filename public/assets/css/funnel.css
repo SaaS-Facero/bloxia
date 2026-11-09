@@ -210,3 +210,12 @@ textarea.fx-in{min-height:112px}.fx-mic{position:absolute;right:10px;bottom:10px
 @media(max-width:860px){.pr-card.feat{order:-1}.pr-purpose{min-height:0}.pr-guar{flex-direction:column;text-align:center}}
 @media(prefers-reduced-motion:reduce){.pr-emb,.pr-guar .pa-seal{animation:none}}
 @media(max-width:620px){.fx-offer{top:168px}}
+/* récap final + avis */
+.pr-end{margin-top:30px;padding:26px 20px;border-radius:26px;background:radial-gradient(120% 80% at 50% 0%,rgba(255,197,61,.16),transparent 60%),rgba(10,12,20,.88);border:1px solid rgba(255,197,61,.35);display:flex;flex-direction:column;gap:18px}
+.pr-endh{text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}.pr-endh .pr-h2{margin:0}.pr-endh .pr-h2 b{color:var(--gold)}
+.pr-mini{display:flex;flex-direction:column;gap:10px}.pr-mc{display:flex;align-items:center;gap:14px;padding:12px 12px 12px 14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid color-mix(in srgb,var(--pc) 35%,transparent);transition:transform .25s var(--ease),border-color .25s}.pr-mc:hover{transform:translateY(-2px);border-color:var(--pc)}
+.pr-mc.feat{border:2px solid var(--gold);background:rgba(255,197,61,.08)}.pr-mce{width:46px;height:46px;flex:none}.pr-mct{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}.pr-mct b{font:800 18px var(--display)}.pr-mct span{color:var(--ink-2);font-size:14px}.pr-mct span s{color:var(--muted);margin-right:5px}.pr-mct strong{font:800 18px var(--display);color:#fff}.pr-mc.feat .pr-mct strong{color:var(--gold)}.pr-mct small{color:#8dffb0;font-weight:700;font-size:12px}
+.pr-mc .btn{min-height:46px;padding:0 16px;font-size:15px;flex:none}
+.pr-rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}.pr-rev{margin:0;padding:16px;border-radius:18px;background:rgba(10,12,20,.82);border:1px solid var(--line-2);animation:cin .5s var(--ease) both;animation-delay:var(--d)}
+.pr-rh{display:flex;gap:10px;align-items:center;margin-bottom:10px}.pr-rh img,.pr-rav{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none}.pr-rav{display:grid;place-items:center;background:var(--accent);font:800 18px var(--display)}.pr-rh b{display:block}.pr-rh small{color:var(--muted);font-size:12.500px}.pr-rev blockquote{margin:0;font-size:15px;line-height:1.45}
+@media(max-width:520px){.pr-mc{flex-wrap:wrap}.pr-mc .btn{width:100%}}

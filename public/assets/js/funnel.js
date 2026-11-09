@@ -221,12 +221,14 @@
         <div class="pr-trust"><span>${PA.fi('shield')}Paiement sécurisé par Whop</span><span>${PA.fi('cancel')}Résiliable en un clic</span><span>${PA.fi('card')}Aucun débit pendant l'essai</span></div>
         <div class="pr-sec"><h2 class="pr-h2">Compare les formules</h2><div class="pr-table" id="prtable"></div></div>
         <div class="pr-guar">${PA.seal(BLOXIA_CONFIG.guaranteeDays)}<div><h3>Satisfait ou remboursé</h3><p>Si ta map ne s'importe pas ou si un script ne marche pas, écris-nous dans les ${BLOXIA_CONFIG.guaranteeDays} jours : on règle le problème avec toi, ou on te rembourse intégralement.</p></div></div>
+        <div class="pr-sec pr-revs" id="prrevs" hidden><h2 class="pr-h2">Ils ont lancé leur jeu</h2><div class="pr-rgrid" id="prrgrid"></div></div>
         <div class="pr-sec"><h2 class="pr-h2">Questions sur le paiement</h2><div class="pr-faq">
           <details><summary>Comment marche l'essai gratuit ?<span>${ic('chevron-down')}</span></summary><p>En annuel, tu ne paies rien pendant 3 jours. Tu as accès à tout. Si tu annules avant la fin de l'essai, tu n'es pas débité. Sinon, l'année est facturée au 4e jour.</p></details>
           <details><summary>Je peux annuler quand je veux ?<span>${ic('chevron-down')}</span></summary><p>Oui, depuis ton compte Whop, en un clic. Tu gardes l'accès jusqu'à la fin de la période déjà payée.</p></details>
           <details><summary>Je peux changer de formule ?<span>${ic('chevron-down')}</span></summary><p>Oui, à tout moment. Le changement prend effet à la prochaine période.</p></details>
           <details><summary>J'ai moins de 18 ans, je peux m'abonner ?<span>${ic('chevron-down')}</span></summary><p>Oui, avec un parent : c'est lui qui fait le paiement, ou qui te donne son accord.</p></details>
-        </div></div>`,
+        </div></div>
+        <div class="pr-end" id="prend"><div class="pr-endh"><span class="fx-kick">${ic('rocket')}Dernière ligne droite</span><h2 class="pr-h2">Prêt à lancer <b>${esc(an().title)}</b> ?</h2><p class="fx-help" id="prendsub"></p></div><div class="pr-mini" id="prmini"></div></div>`,
       after: st => {
         if (!S.a._id) { toast('Crée ton compte pour récupérer ton pack', true); setTimeout(() => go(10), 600); return; } sync();
         const eur = (n, z) => (z && n === 0 ? '0' : n.toFixed(2).replace('.', ',')) + ' €', r2 = n => Math.round(n * 100) / 100;
@@ -251,11 +253,16 @@
         const table = () => { const rows = [['Jeux générés par mois', ['1', '5', 'Illimité']], ['Prompts Roblox Studio et scripts Luau', [1, 1, 1]], ['Boutique avec prix conseillés', [1, 1, 1]], ['Plan de lancement', [1, 1, 1]], ['Idées de vidéos TikTok', [0, 1, 1]], ['Packs mis à jour chaque semaine', [0, 1, 1]], ['Places pour ton équipe', ['1', '1', '3']], ['Coaching en visio', [0, 0, 'Mensuel']], ['Support', ['Standard', 'Prioritaire', 'Dédié 24 h']]];
           const cell = (v, id) => `<td style="--pc:${COL[id]}">${v === 1 ? PA.fi('yes') : v === 0 ? PA.fi('no') : `<b>${v}</b>`}</td>`;
           st.querySelector('#prtable').innerHTML = `<table><thead><tr><th></th>${O.plans.map(p => `<th class="${p.featured ? 'feat' : ''}" style="--pc:${COL[p.id]}"><span class="pr-temb">${PA.emblem(p.id)}</span>${p.name}</th>`).join('')}</tr></thead><tbody>${rows.map(([l, v]) => `<tr><th>${l}</th>${v.map((x, i) => cell(x, O.plans[i].id)).join('')}</tr>`).join('')}</tbody></table>`; };
+        const revs = (BLOXIA_CONFIG.reviews || []).filter(r => r && r.pseudo && r.text);
+        if (revs.length >= 3) { st.querySelector('#prrevs').hidden = false; st.querySelector('#prrgrid').innerHTML = revs.slice(0, 9).map((r, k) => `<figure class="pr-rev" style="--d:${k * 70}ms"><div class="pr-rh">${r.avatar ? `<img src="${esc(r.avatar)}" alt="" loading="lazy" width="44" height="44">` : `<span class="pr-rav">${esc(r.pseudo.replace(/^@/, '').slice(0, 1).toUpperCase())}</span>`}<div><b>${esc(r.pseudo)}</b>${r.game ? `<small>${esc(r.game)}</small>` : ''}</div></div><blockquote>${esc(r.text)}</blockquote></figure>`).join(''); }
         const tilt = el => { el.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; el.style.transform = `perspective(900px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) translateY(-4px)`; el.style.setProperty('--gx', (x + .5) * 100 + '%'); el.style.setProperty('--gy', (y + .5) * 100 + '%'); }); el.addEventListener('pointerleave', () => { el.style.transform = ''; }); };
         const roll = el => { const to = +el.dataset.v, t0 = performance.now(), from = to * 1.6; const f = t => { const p = Math.min(1, (t - t0) / 650), e = 1 - Math.pow(1 - p, 3); el.textContent = eur(r2(from + (to - from) * e)); if (p < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); };
         const draw = (animate) => {
           st.querySelector('.pr-cycle').dataset.on = cycle; $$('.pr-cycle button', st).forEach(b => b.setAttribute('aria-checked', b.dataset.cycle === cycle)); st.querySelector('#prtrial').classList.toggle('on', cycle === 'year');
-          st.querySelector('#plans').innerHTML = O.plans.map(card).join(''); BX.hydrate(st);
+          st.querySelector('#plans').innerHTML = O.plans.map(card).join('');
+          st.querySelector('#prendsub').textContent = cycle === 'year' ? '3 jours d\'essai gratuit, 0 € aujourd\'hui. Annulable avant la fin de l\'essai.' : 'Sans engagement, résiliable en un clic.';
+          st.querySelector('#prmini').innerHTML = O.plans.map(p => { const c = calc(p); return `<div class="pr-mc ${p.featured ? 'feat' : ''}" style="--pc:${COL[p.id]}"><span class="pr-mce">${PA.emblem(p.id)}</span><div class="pr-mct"><b>${p.name}</b><span>${c.strike ? `<s>${eur(c.strike)}</s>` : ''}<strong>${eur(c.perDay)}</strong> / jour</span><small>${c.yr ? '0 € aujourd\'hui' : (expired ? eur(c.full) + ' / mois' : eur(c.first) + ' le 1er mois')}</small></div><button class="btn ${p.featured ? 'btn-gold' : 'pr-btn'}" data-plan="${p.id}"><span class="lbl">${c.yr ? 'Essayer' : 'Choisir'}</span>${ic('arrow-right')}</button></div>`; }).join('');
+          BX.hydrate(st);
           $$('.pr-card', st).forEach(tilt); if (animate) $$('.pr-price b', st).forEach(roll);
           $$('[data-plan]', st).forEach(btn => btn.onclick = async () => { const r0 = btn.getBoundingClientRect(); burst(r0.left + r0.width / 2, r0.top + r0.height / 2); $$('[data-plan]', st).forEach(x => x.disabled = true); BX.set({ done: true });
             try { const r = await fetch('/api/checkout', { method: 'POST', body: JSON.stringify({ id: S.a._id, token: S.a._t, plan: btn.dataset.plan, cycle }) }).then(r => r.json()); if (r.url) location.href = r.url; else throw 0; }
