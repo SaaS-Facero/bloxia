@@ -8,7 +8,7 @@
 <script src="icons.js"></script><script src="world.js"></script><script>
 const $=s=>document.querySelector(s),A={},ITEMS=[['tool','Pioche'],['file','Plan'],['key','Clé'],['coin','Pièce'],['star','Étoile'],['rocket','Fusée']];
 const w=World.mount($('#bg'),{progress:0,cy:.3,cx:.5,zoom:.7});let xp=0,i=0,snd=true,ctx;
-let idea='';try{idea=sessionStorage.getItem('bx_idea')||''}catch{}
+const PF=()=>{try{return JSON.parse(localStorage.getItem('bloxia.profile'))||{}}catch{return{}}},SP=o=>{try{localStorage.setItem('bloxia.profile',JSON.stringify(Object.assign(PF(),o)))}catch{}};let idea=PF().idea||'';
 if(idea)w.set(idea);
 const beep=(f=520,d=.12)=>{if(!snd)return;try{ctx=ctx||new AudioContext();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=f;o.type='square';g.gain.value=.04;o.connect(g);g.connect(ctx.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+d);o.stop(ctx.currentTime+d)}catch{}};
 $('#snd').innerHTML=ic('sound');$('#snd').onclick=()=>{snd=!snd;$('#snd').innerHTML=ic(snd?'sound':'mute')};
@@ -31,7 +31,7 @@ const S=[
 {g:"Où envoie-t-on ton pack ?",h:()=>`<h2>Ton e-mail</h2><input class="in" id="v" type="email" placeholder="toi@mail.com"><button class="btn" onclick="mail()">Continuer</button>`},
 {g:"Dernière étape : récupère ton pack complet.",h:()=>{const l=({Tycoon:'tycoon',Obby:'obby',Simulator:'simulator',Survie:'survie','RP / Ville':'RP'})[A.type]||'jeu';return`<h2>Ton pack ${l} est prêt</h2><div class="card" style="text-align:left;max-width:460px">${['4 prompts','3 scripts Luau','4 achats à créer','Briefs visuels','Idées de vidéos','Plan semaine 2'].map(x=>`<div>${ic('check')} ${x}</div>`).join('')}</div><button class="btn gold" id="pay" onclick="pay()">Construire mon ${l} ${ic('arrow')}</button><small style="color:#9fb0d0">Paiement sécurisé par Whop</small>`}}];
 function render(){const s=S[i];$('#stage').innerHTML='<div class="panel">'+s.h()+'</div>';paintIcons($('#stage'));say(typeof s.g==='function'?s.g():s.g);$('#pb').style.width=(i/(S.length-1)*100)+'%';w.setProgress(.15+i/(S.length-1)*.85);s.run&&s.run();const v=$('#v');v&&v.focus()}
-function next(){beep(660);xp+=100;$('#lvl').textContent=`Niv. ${1+Math.floor(xp/300)} · ${xp} XP`;const it=ITEMS[Math.floor(i/2)-1];if(i>=2&&i%2===0&&it){document.querySelectorAll('.slot')[Math.floor(i/2)-1]?.classList.add('on');toast('Objet débloqué : '+it[1]);beep(880,.25)}i++;render()}
+function next(){SP({name:A.name,step:i+1,done:i+1>=S.length-1});beep(660);xp+=100;$('#lvl').textContent=`Niv. ${1+Math.floor(xp/300)} · ${xp} XP`;const it=ITEMS[Math.floor(i/2)-1];if(i>=2&&i%2===0&&it){document.querySelectorAll('.slot')[Math.floor(i/2)-1]?.classList.add('on');toast('Objet débloqué : '+it[1]);beep(880,.25)}i++;render()}
 function pick(k,v){A[k]=v;next()}
 function txt(k){const v=$('#v').value.trim();if(!v){$('#v').focus();return}A[k]=v;if(k==='phrase')w.set(v);next()}
 function gen(){const m=['Terrain…','Décors…','Économie…','Scripts…','Finitions…'];let p=0;const t=setInterval(()=>{p+=2;$('#gb').style.width=p+'%';$('#gt').textContent=m[Math.min(4,p/20|0)];w.setProgress(.5+p/200);if(p>=100){clearInterval(t);w.setProgress(1);next()}},90)}

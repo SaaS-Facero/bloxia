@@ -1,32 +1,127 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bloxia — Ta map Roblox en une phrase</title>
-<meta name="description" content="Décris ton jeu en une phrase. Bloxia te donne la map, les scripts et le plan pour le lancer sur Roblox."><link rel="stylesheet" href="style.css"></head><body>
-<canvas id="bg"></canvas><div class="veil"></div>
-<header class="nav" id="nav"><b>Blox<i>ia</i></b><nav><a href="#recu">Ce que tu reçois</a><a href="#faq">Questions</a></nav><a class="btn gold" href="funnel.html" style="padding:10px 20px">Commencer</a></header>
-<main>
-<section class="hero"><h1>Ta map Roblox,<br>en <em>une phrase</em>.</h1><p>Tape l'idée de ton jeu. Regarde le monde se construire. Reçois ensuite les prompts, scripts et le plan pour le publier.</p>
-<form class="demo" id="f"><input id="idea" placeholder="Ex : un tycoon de glace avec des pingouins" autocomplete="off"><button class="btn" id="cta">Construire mon jeu <i data-i="arrow"></i></button></form></section>
-<section id="recu"><h2>Ce que tu reçois</h2><div class="grid">
-<div class="card"><i data-i="msg"></i><h3>4 prompts</h3><p>Prêts à coller dans ton IA pour générer map, économie et interface.</p></div>
-<div class="card"><i data-i="code"></i><h3>3 scripts Luau</h3><p>Leaderstats, collecteur, sauvegarde. Testés dans Studio.</p></div>
-<div class="card"><i data-i="cart"></i><h3>4 achats à créer</h3><p>Game Passes et produits pour monétiser dès le départ.</p></div>
-<div class="card"><i data-i="file"></i><h3>Briefs visuels</h3><p>Miniature et icône : quoi montrer, quoi éviter.</p></div>
-<div class="card"><i data-i="video"></i><h3>Idées de vidéos</h3><p>Formats courts pour attirer tes premiers joueurs.</p></div>
-<div class="card"><i data-i="cal"></i><h3>Plan semaine 2</h3><p>Jour par jour après la publication.</p></div></div></section>
-<section id="faq"><h2>Questions fréquentes</h2>
-<details><summary>Dois-je savoir coder ?</summary><p>Non. Les prompts et scripts sont prêts à l'emploi, mais il faut ouvrir Roblox Studio (gratuit).</p></details>
-<details><summary>Est-ce que ça publie le jeu à ma place ?</summary><p>Non. Tu publies toi-même depuis Studio ; le plan te guide pas à pas.</p></details>
-<details><summary>Vais-je gagner de l'argent ?</summary><p>Rien n'est garanti. Les revenus dépendent de la qualité du jeu et de sa promotion.</p></details>
-<details><summary>Comment je reçois le pack ?</summary><p>Après le funnel et le paiement, il s'affiche dans ton espace client.</p></details>
-<details><summary>Le paiement est-il sécurisé ?</summary><p>Oui, via Whop. Nous ne voyons jamais ta carte.</p></details></section>
-</main><footer>© Bloxia · Non affilié à Roblox Corporation.</footer>
-<script src="icons.js"></script><script src="world.js"></script><script>
-const w=World.mount(document.getElementById('bg'),{progress:0,cy:.55,cx:.74,zoom:.8});w.setProgress(1);
-const idea=document.getElementById('idea'),cta=document.getElementById('cta');
-const N={glace:'Glace',lave:'Lave',foret:'Forêt',ville:'Ville',desert:'Désert',espace:'Espace',def:''};
-idea.oninput=()=>{w.set(idea.value);const t=N[w.theme()];cta.innerHTML=(t?`Construire · ${t} `:'Construire mon jeu ')+ic('arrow')};
-document.getElementById('f').onsubmit=e=>{e.preventDefault();try{sessionStorage.setItem('bx_idea',idea.value)}catch{}location.href='funnel.html'};
-fetch('/bg.json').then(r=>r.json()).then(l=>{if(!l.length)return;const box=document.createElement('div');box.className='slides';
- box.innerHTML=l.map(u=>`<div style="background-image:url('${u}')"></div>`).join('');document.body.prepend(box);document.getElementById('bg').style.opacity='.35';
- const d=box.children;let k=0;const go=()=>{[...d].forEach((e,n)=>{e.classList.toggle('on',n===k);});k=(k+1)%d.length};go();if(d.length>1)setInterval(go,7000)}).catch(()=>{});
-const nav=document.getElementById('nav');addEventListener('scroll',()=>nav.classList.toggle('s',scrollY>40));
-</script></body></html>
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bloxia : une phrase, un jeu Roblox qui rapporte</title>
+<meta name="description" content="Décris ton jeu Roblox en une phrase. Bloxia te livre la map, les prompts Roblox Studio, les scripts et le plan pour le monétiser. Même si tu n'as jamais codé.">
+<meta property="og:title" content="Bloxia : une phrase, un jeu Roblox qui rapporte"><meta property="og:description" content="La map, les prompts Studio, les scripts et le plan de monétisation. En 30 secondes.">
+<meta name="theme-color" content="#06070c">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css"></head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="nav nav-float" id="nav"><div class="nav-bar">
+  <a class="logo" href="/" aria-label="Bloxia"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fa6ff"/><stop offset="1" stop-color="#9b6bff"/></linearGradient></defs><path d="M16 3l11 6.3-11 6.3L5 9.3z" fill="#dfe5ff"/><path d="M5 9.3l11 6.3v12.6L5 21.9z" fill="url(#lg1)"/><path d="M27 9.3l-11 6.3v12.6l11-6.3z" fill="#3b2a8f"/></svg><span>Bloxia</span></a>
+  <nav class="nav-center" aria-label="Navigation"><a href="#pack">Aperçu</a><a href="#comment">Comment ça marche</a><a href="#offre">Le pack</a><a href="#faq">FAQ</a></nav>
+  <div class="nav-actions"><a class="btn btn-light btn-sm" href="espace.html">Mon espace</a><a class="btn" href="funnel.html" data-cta="nav"><span class="lbl">Créer mon jeu</span><i data-i="arrow-right"></i></a></div>
+</div></header>
+
+<main id="main">
+<section class="hero" id="top">
+  <div class="backdrop" data-backdrop="0"></div><div class="hero-bg"></div>
+  <div class="hero-stage"><canvas id="world" aria-label="Map 3D de ton jeu, glisse pour la tourner"></canvas></div>
+  <div class="hero-scrim"></div>
+  <div class="wrap"><div class="hero-copy">
+    <span class="kicker"><i data-i="cube"></i>Pour Roblox Studio · aucun code requis</span>
+    <h1><span>Décris ton jeu Roblox.</span><span>On le construit.</span><span class="grad">Tu encaisses les Robux.</span></h1>
+    <div class="welcome" id="welcome"><span><b id="w-name"></b>, <span id="w-title"></span> t'attend.</span><a class="btn btn-sm" href="funnel.html" data-cta="resume"><span class="lbl">Reprendre</span><i data-i="arrow-right"></i></a></div>
+    <form class="prompt" id="hero-form" autocomplete="off">
+      <div class="prompt-head"><span class="mono"><i data-i="pen"></i>Décris ton jeu en une phrase</span><div class="tags"><span class="tag" id="tag-genre"></span><span class="tag" id="tag-theme"></span></div></div>
+      <textarea id="hero-input" rows="2" maxlength="180" aria-label="Décris ton jeu en une phrase"></textarea>
+      <button class="btn btn-block" type="submit" id="hero-cta" data-cta="hero"><span class="lbl">Générer ma map</span><i data-i="arrow-right"></i></button>
+    </form>
+    <div class="sugg" id="sugg"><span class="mono">Essaie</span></div>
+    <div class="assure"><span><i data-i="check"></i>Gratuit</span><span><i data-i="check"></i>Sans carte bancaire</span><span><i data-i="check"></i>Aperçu en 30 secondes</span></div>
+  </div></div>
+  <aside class="hud" aria-live="polite">
+    <div class="hud-row"><span class="mono">Type</span><b id="hud-genre"></b></div><div class="hud-row"><span class="mono">Thème</span><b id="hud-theme"></b></div>
+    <div class="hud-row"><span class="mono">Blocs posés</span><b id="hud-blocks">0</b></div><div class="bar"><i id="hud-bar"></i></div>
+    <div class="hud-tip"><i data-i="move"></i>Glisse pour tourner la map</div></aside>
+  <div class="notif" id="notif" role="status"><i data-i="check-circle"></i><div><b id="notif-t"></b><small>Prompts, scripts et boutique inclus</small></div></div>
+  <a class="scroll-down" href="#pack" aria-label="Descendre"><i data-i="arrow-down"></i></a>
+</section>
+
+<section class="sec" id="pack"><div class="wrap">
+  <div class="sec-head reveal"><span class="mono"><i data-i="layers"></i>Ton pack, en direct</span>
+    <h2>Pas juste une map.<br>Tout ce qu'il faut pour <span class="grad" id="pack-name">la publier</span>.</h2></div>
+  <div class="studio reveal" id="studio">
+    <div class="studio-bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span id="studio-file" style="margin-left:8px">bloxia · jeu.rbxl</span></div>
+    <div class="studio-body"><div class="tabs" role="tablist" aria-label="Contenu du pack" id="tabs"></div><div id="panels"></div></div>
+    <div class="studio-foot"><span><i data-i="unlock"></i>2 éléments débloqués sur 5</span><a class="btn btn-sm" href="funnel.html" data-cta="pack"><span class="lbl">Récupérer mon pack</span><i data-i="arrow-right"></i></a></div>
+  </div></div></section>
+
+<section class="launched" id="launched"><div class="wrap sec"><div class="sec-head"><span class="mono">Ils l'ont fait</span><h2>Les jeux déjà lancés avec Bloxia</h2></div><div class="lgrid" id="lgrid"></div></div></section>
+<div class="band" id="band"><div class="wrap"><p class="mono">Les genres qui cartonnent sur Roblox</p></div><div id="marqs"></div></div>
+
+<section class="sec" id="comment"><div class="wrap">
+  <div class="sec-head reveal"><span class="mono"><i data-i="zap"></i>Comment ça marche</span><h2>De ta phrase<br>à ton jeu publié.</h2></div>
+  <div class="story"><div class="scene"><canvas id="world2" aria-hidden="true"></canvas><div class="scene-ov" id="scene-ov">
+    <div class="ov on" data-ov="1"><span class="mono"><i data-i="pen"></i>Ta phrase</span><div class="typed"><span id="typed"></span><span class="caret"></span></div></div>
+    <div class="ov" data-ov="2"><span class="mono"><i data-i="map"></i>Map générée</span><div class="ov-row"><span><i data-i="cube"></i><b id="ov-blocks">0</b> blocs</span><span id="ov-genre"></span><span id="ov-theme"></span></div></div>
+    <div class="ov" data-ov="3"><span class="mono"><i data-i="code"></i><span id="ov-script"></span></span><div class="code" id="ov-code"></div></div>
+    <div class="ov" data-ov="4"><span class="mono"><i data-i="store"></i>Ta boutique</span><div class="ov-row" id="ov-shop"></div></div>
+  </div></div>
+  <div class="steps">
+    <div class="step on" data-step="1"><span class="num">1</span><h3 style="font-size:clamp(28px,3.4vw,44px)">Tu écris ta phrase.</h3><p>Comme si tu l'expliquais à un pote. Bloxia comprend le type de jeu, le thème et ce qui le rend unique.</p></div>
+    <div class="step" data-step="2"><span class="num">2</span><h3 style="font-size:clamp(28px,3.4vw,44px)">Ta map se construit.</h3><p>Terrain, parcours, objets, points de sauvegarde. Optimisée pour le mobile, là où jouent la plupart des joueurs.</p></div>
+    <div class="step" data-step="3"><span class="num">3</span><h3 style="font-size:clamp(28px,3.4vw,44px)">Tu colles dans Studio.</h3><p>Les prompts pour l'Assistant Roblox Studio et les scripts Luau, dans le bon ordre, commentés en français.</p><ul><li><i data-i="check"></i>Copier, coller, tester</li><li><i data-i="check"></i>Une explication à chaque étape</li></ul></div>
+    <div class="step" data-step="4"><span class="num">4</span><h3 style="font-size:clamp(28px,3.4vw,44px)">Tu publies. Tu vends.</h3><p>Gamepasses et prix en Robux, miniatures, titre optimisé et 3 vidéos à poster pour tes premiers joueurs.</p><div><a class="btn" href="funnel.html" data-cta="how"><span class="lbl">Créer mon jeu</span><i data-i="arrow-right"></i></a></div></div>
+  </div></div></div></section>
+
+<section class="sec" style="padding-top:0"><div class="wrap">
+  <div class="sec-head reveal"><span class="mono"><i data-i="target"></i>Pourquoi Bloxia</span><h2>Une map seule<br>ne rapporte rien.</h2>
+    <p class="lead">Générer une map, n'importe quel outil sait le faire. Ce qui fait gagner des Robux, c'est tout ce qu'il y a autour.</p></div>
+  <div class="cmp">
+    <div class="card reveal"><div class="head"><span class="ico-tile off"><i data-i="map"></i></span><h3>Un générateur de map</h3></div><p class="sub">Tu as un décor. Et maintenant ?</p>
+      <ul><li><i data-i="check"></i>Une map 3D</li><li class="no"><i data-i="x"></i>Les prompts pour Roblox Studio</li><li class="no"><i data-i="x"></i>Les scripts (checkpoints, boutique…)</li><li class="no"><i data-i="x"></i>Quoi vendre, et à quel prix</li><li class="no"><i data-i="x"></i>Icône, miniatures, description</li><li class="no"><i data-i="x"></i>Comment trouver tes premiers joueurs</li></ul></div>
+    <div class="card us reveal d1"><div class="head"><span class="ico-tile"><i data-i="cube"></i></span><h3>Bloxia</h3></div><p class="sub">Tu as un jeu prêt à publier. Et à vendre.</p>
+      <ul><li><i data-i="check"></i>Une map 3D, depuis ta phrase</li><li><i data-i="check"></i>Les prompts Studio, à copier-coller</li><li><i data-i="check"></i>Les scripts Luau, commentés en français</li><li><i data-i="check"></i>Gamepasses et prix en Robux</li><li><i data-i="check"></i>Icône, miniatures, titre optimisé</li><li><i data-i="check"></i>Ton plan de lancement TikTok / Shorts</li></ul></div>
+  </div></div></section>
+
+<section class="sec" id="offre" style="padding-top:0"><div class="wrap">
+  <div class="sec-head reveal"><span class="mono"><i data-i="download"></i>Ce que tu reçois</span><h2>Tout pour publier <span class="grad" id="offer-name">ton jeu</span><br>ce week-end.</h2>
+    <p class="lead">Pas une formation. Pas des heures de vidéos. Des fichiers prêts à coller dans Roblox Studio.</p></div>
+  <div class="offer">
+    <div class="card pack-card reveal"><div class="pack-vis"><canvas id="world4" aria-label="Aperçu 3D du pack"></canvas><span class="badge"><i data-i="unlock"></i>Pack complet</span></div>
+      <div class="pack-body"><h3 id="offer-title" style="font-size:28px">Meadow Rush</h3><p class="idea" id="offer-idea"></p>
+        <div class="free"><b>Gratuit</b><span>pour générer ta map et découvrir ton pack</span></div>
+        <a class="btn btn-block" href="funnel.html" data-cta="offer"><span class="lbl">Générer mon jeu gratuitement</span><i data-i="arrow-right"></i></a>
+        <div class="ok"><i data-i="shield"></i>Remboursé sous 14 jours si la map ou les scripts ne marchent pas</div></div></div>
+    <div class="deliv">
+      <div class="card dl reveal"><span class="n">4</span><div><h3>Prompts Roblox Studio</h3><p>Copie, colle : ta map se construit dans Studio, étape par étape.</p></div><i data-i="terminal"></i></div>
+      <div class="card dl reveal d1"><span class="n">3</span><div><h3>Scripts Luau prêts à l'emploi</h3><p>Gameplay, sauvegarde, boutique. Commentés en français, rien à coder.</p></div><i data-i="code"></i></div>
+      <div class="card dl reveal"><span class="n">4</span><div><h3>Achats à vendre, prix compris</h3><p>Quoi vendre, combien de Robux, et à quel moment le proposer.</p></div><i data-i="coins"></i></div>
+      <div class="card dl reveal d1"><span class="n">4</span><div><h3>Visuels qui font cliquer</h3><p>Le brief de ton icône et de tes 3 miniatures, et un titre optimisé.</p></div><i data-i="image"></i></div>
+      <div class="card dl reveal"><span class="n">3</span><div><h3>Vidéos TikTok à tourner</h3><p>Trois idées de vidéos prêtes à filmer pour tes premiers joueurs.</p></div><i data-i="video"></i></div>
+      <div class="card dl reveal d1"><span class="n">1</span><div><h3>Plan de la semaine 2</h3><p>Ce qu'il faut ajouter pour que tes joueurs reviennent.</p></div><i data-i="calendar"></i></div>
+    </div></div></div></section>
+
+<section style="padding-bottom:40px"><div class="wrap"><div class="card guar reveal"><div class="seal"><i data-i="shield"></i></div>
+  <div><h3 style="font-size:clamp(24px,3vw,34px)">Ta map ne marche pas dans Studio ? On te rembourse.</h3><p>Tu as <span data-days>14</span> jours pour tester ton pack. Si la map ne s'importe pas ou que les scripts ne fonctionnent pas, écris-nous : remboursement intégral.</p></div></div></div></section>
+
+<section class="sec" id="faq"><div class="wrap"><div class="sec-head reveal"><span class="mono"><i data-i="search"></i>FAQ</span><h2>Questions fréquentes</h2></div>
+<div class="faq reveal">
+<details><summary>Bloxia, c'est quoi exactement ?<i data-i="chevron-down"></i></summary><p>Tu écris ton idée de jeu en une phrase. Bloxia te prépare tout ce qu'il faut pour la publier sur Roblox : une map, les prompts à coller dans Roblox Studio, les scripts, les achats à vendre avec leurs prix, et un plan pour trouver tes premiers joueurs.</p></details>
+<details><summary>Je n'ai jamais ouvert Roblox Studio. C'est pour moi ?<i data-i="chevron-down"></i></summary><p>Oui. Tu n'écris pas une ligne de code : chaque étape se fait en copier-coller, avec une explication. Il te faut un ordinateur (Windows ou Mac) avec Roblox Studio, qui est gratuit.</p></details>
+<details><summary>En combien de temps mon jeu peut être en ligne ?<i data-i="chevron-down"></i></summary><p>L'aperçu de ta map prend 30 secondes. Pour un jeu publié avec sa boutique, compte un week-end si tu débutes, quelques heures si tu connais déjà Studio.</p></details>
+<details><summary>Roblox a déjà son propre outil IA. Pourquoi Bloxia ?<i data-i="chevron-down"></i></summary><p>L'outil de Roblox crée du contenu dans Studio. Bloxia te dit quoi construire, dans quel ordre, quoi vendre et à quel prix, et comment faire venir des joueurs. Nos prompts sont d'ailleurs faits pour l'Assistant de Roblox Studio : les deux vont ensemble.</p></details>
+<details><summary>Est-ce que je vais gagner des Robux ?<i data-i="chevron-down"></i></summary><p>Personne ne peut te le promettre, et on ne le fera pas. Beaucoup de jeux ne rapportent rien au début. Bloxia te donne ce qui manque à la plupart des débutants : une boutique bien pensée et un plan pour tes premiers joueurs.</p></details>
+<details><summary>Comment je récupère l'argent gagné ?<i data-i="chevron-down"></i></summary><p>Les Robux gagnés vont sur ton compte Roblox. Tu peux ensuite les convertir en argent réel avec le programme DevEx de Roblox, à partir de 30 000 Robux gagnés et à condition d'avoir au moins 13 ans. Bloxia ne prend aucune commission.</p></details>
+<details><summary>Pack ou abonnement Créateur : lequel choisir ?<i data-i="chevron-down"></i></summary><p>Tu choisis à la fin, une fois ton jeu généré. Le Pack suffit pour publier un jeu. L'abonnement Créateur est fait pour créer plusieurs jeux et les faire évoluer chaque semaine, avec le coach pour t'aider quand ça bloque.</p></details>
+<details><summary>J'ai moins de 18 ans, je peux acheter ?<i data-i="chevron-down"></i></summary><p>Oui, avec un parent : c'est lui qui fait le paiement, ou qui te donne son accord.</p></details>
+<details><summary>Et si ça ne marche pas ?<i data-i="chevron-down"></i></summary><p>Si ta map ne s'importe pas ou si un script ne fonctionne pas, écris-nous dans les 14 jours : on règle le problème avec toi, ou on te rembourse intégralement.</p></details>
+<details><summary>Comment j'arrête l'abonnement ?<i data-i="chevron-down"></i></summary><p>Depuis ton compte Whop, en un clic, quand tu veux. Tu gardes l'accès jusqu'à la fin du mois déjà payé.</p></details>
+</div></div></section>
+
+<section class="final" id="final"><div class="backdrop" data-backdrop="2"></div><div class="final-veil"></div>
+  <div class="final-world"><canvas id="world3" aria-hidden="true"></canvas></div>
+  <div class="wrap"><h2 id="final-h">Tout le monde a une idée de jeu Roblox.<br><span class="grad">Toi, tu vas la publier.</span></h2>
+    <form class="prompt" id="final-form" autocomplete="off" style="width:min(640px,100%)"><div class="prompt-head"><span class="mono"><i data-i="pen"></i>Ton idée, en une phrase</span></div>
+      <textarea id="final-input" rows="2" maxlength="180" placeholder="Un tycoon de pizzeria sur une île tropicale" aria-label="Ton idée, en une phrase"></textarea>
+      <button class="btn btn-block" type="submit" data-cta="final"><span class="lbl">Créer mon jeu</span><i data-i="arrow-right"></i></button></form>
+    <div class="assure"><span><i data-i="check"></i>Gratuit</span><span><i data-i="check"></i>Sans carte bancaire</span><span><i data-i="shield"></i>Remboursé si ça ne marche pas</span></div></div></section>
+</main>
+
+<footer data-site-footer></footer>
+<div class="sticky-cta" id="sticky"><a class="btn" href="funnel.html" data-cta="sticky"><span class="lbl">Créer mon jeu gratuitement</span><i data-i="arrow-right"></i></a></div>
+<script src="/assets/js/config.js"></script><script src="/assets/js/engine.js"></script><script src="/assets/js/common.js"></script><script src="/assets/js/lp.js"></script>
+</body></html>
