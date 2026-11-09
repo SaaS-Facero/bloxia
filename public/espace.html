@@ -1,9 +1,32 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bloxia — Espace client</title><link rel="stylesheet" href="style.css"></head><body>
-<main class="stage" style="justify-content:flex-start"><div class="pack" id="p">Chargement…</div></main>
-<script src="icons.js"></script><script>
-const q=new URLSearchParams(location.search);
-const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-fetch(`/api/pack?id=${q.get('id')}&token=${q.get('token')}`).then(async r=>{const p=document.getElementById('p');if(!r.ok){p.innerHTML='<h2>Accès refusé</h2><p>Paiement non confirmé.</p>';return}
-const d=await r.json(),L=(t,a)=>`<h3>${t}</h3><ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
-p.innerHTML=`<h2>${esc(d.titre)}</h2>${L('Prompts',d.prompts)}<h3>Scripts Luau</h3>${d.scripts.map(s=>`<b>${esc(s.nom)}</b><pre>${esc(s.code)}</pre>`).join('')}${L('Achats à créer',d.achats)}${L('Briefs visuels',d.briefs)}${L('Vidéos',d.videos)}${L('Plan semaine 2',d.semaine2)}`});
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bloxia · Mon espace</title><meta name="theme-color" content="#05060b">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css"><link rel="stylesheet" href="/assets/css/funnel.css">
+<style>.sp-top{display:flex;justify-content:space-between;align-items:center;width:min(760px,100% - 28px);margin:0 auto;padding:22px 0}.sp{width:min(760px,100% - 28px);margin:0 auto;padding:20px 0 80px;display:flex;flex-direction:column;gap:16px}
+.sp-narrow{width:min(460px,100%);margin:0 auto}.sp h3{display:flex;gap:10px;align-items:center;font-size:20px;margin-top:10px}.sp h3 .gl{width:34px;height:34px}.sp ul{list-style:none;display:flex;flex-direction:column;gap:8px}.sp li{padding:12px 14px;border-radius:12px;background:rgba(10,12,20,.78);border:1px solid var(--line-2);color:var(--ink-2)}
+.sp .code{font-size:12.500px;white-space:pre-wrap}.sp-copy{align-self:flex-start}</style></head>
+<body class="fx"><div class="fx-sky"></div><div class="fx-vig"></div>
+<div class="sp-top"><a class="logo" href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fa6ff"/><stop offset="1" stop-color="#9b6bff"/></linearGradient></defs><path d="M16 3l11 6.3-11 6.3L5 9.3z" fill="#dfe5ff"/><path d="M5 9.3l11 6.3v12.6L5 21.9z" fill="url(#lg2)"/><path d="M27 9.3l-11 6.3v12.6l11-6.3z" fill="#3b2a8f"/></svg><span>Bloxia</span></a><button class="btn btn-ghost btn-sm" id="out" hidden>Se déconnecter</button></div>
+<main class="sp" id="app"></main>
+<script src="/assets/js/config.js"></script><script src="/assets/js/common.js"></script><script src="/assets/js/glyphs.js"></script><script>
+(function(){
+const $=s=>document.querySelector(s),app=$('#app'),ic=BX.icon,esc=BX.esc,K='bloxia.session';
+const q=new URLSearchParams(location.search);let ses=null;try{ses=JSON.parse(localStorage.getItem(K))}catch{}
+if(q.get('id')&&q.get('token')){ses={id:q.get('id'),token:q.get('token')};try{localStorage.setItem(K,JSON.stringify(ses))}catch{}history.replaceState(null,'','/espace.html')}
+$('#out').onclick=()=>{try{localStorage.removeItem(K)}catch{}location.reload()};
+function login(msg){$('#out').hidden=true;app.innerHTML=`<div class="sp-narrow fx-step"><div class="fx-acc">${GL('key')}</div><h1 class="fx-title" style="text-align:center">ton <b>espace</b></h1><p class="fx-help" style="text-align:center">${msg||'Connecte-toi pour retrouver ton pack.'}</p>
+<form class="fx-form" id="f" novalidate><label class="fx-lab" for="em">E-mail</label><div class="fx-inp">${ic('mail')}<input id="em" type="email" autocomplete="email" placeholder="toi@mail.com"></div><label class="fx-lab" for="pw">Mot de passe</label><div class="fx-inp">${ic('lock')}<input id="pw" type="password" autocomplete="current-password" placeholder="Ton mot de passe"></div><p class="fx-err" id="err" role="alert"></p><button class="btn btn-gold btn-block" id="ok"><span class="lbl">Me connecter</span>${ic('arrow-right')}</button></form>
+<p class="fx-foot" style="margin-top:14px">Pas encore de compte ? <a class="fx-link" href="/funnel.html">Créer mon jeu</a></p></div>`;
+const f=$('#f');f.onsubmit=async e=>{e.preventDefault();const err=$('#err');err.textContent='';$('#ok').disabled=true;try{const r=await fetch('/api/login',{method:'POST',body:JSON.stringify({email:$('#em').value.trim(),password:$('#pw').value})});const j=await r.json();if(!r.ok){err.textContent='E-mail ou mot de passe incorrect.';$('#ok').disabled=false;return}ses={id:j.id,token:j.token};try{localStorage.setItem(K,JSON.stringify(ses))}catch{}load()}catch{err.textContent='Connexion impossible. Réessaie.';$('#ok').disabled=false}};$('#em').focus()}
+async function load(){if(!ses)return login();$('#out').hidden=false;app.innerHTML='<p class="fx-help">Chargement de ton pack…</p>';let r;try{r=await fetch(`/api/pack?id=${encodeURIComponent(ses.id)}&token=${encodeURIComponent(ses.token)}`)}catch{app.innerHTML='<p class="fx-err">Connexion impossible.</p>';return}
+if(r.status===402){app.innerHTML=`<div class="sp-narrow fx-step"><div class="fx-acc">${GL('chest')}</div><h1 class="fx-title" style="text-align:center">ton pack <b>t'attend</b></h1><p class="fx-help" style="text-align:center">Ton compte est prêt, mais ton pack n'est pas encore débloqué.</p><a class="btn btn-gold btn-block" href="/funnel.html"><span class="lbl">Débloquer mon pack</span>${ic('arrow-right')}</a></div>`;return}
+if(!r.ok)return login('Ta session a expiré. Reconnecte-toi.');const d=await r.json();
+const L=(g,t,a)=>`<h3>${GL(g)}${t}</h3><ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+app.innerHTML=`<div class="fx-step"><div class="fx-kick" style="justify-content:flex-start">${ic('unlock')}Pack débloqué</div><h1 class="fx-title">${esc(d.titre)}</h1>
+<h3>${GL('terminal')}Prompts Roblox Studio</h3>${d.prompts.map((p,i)=>`<div class="fx-pk"><div class="fx-pkh">${ic('terminal')}Prompt ${i+1}<span>À COLLER</span></div><div class="fx-pkb"><div class="code">${esc(p)}</div><button class="fx-copy sp-copy" data-c="${i}">${ic('copy')}<span>Copier</span></button></div></div>`).join('')}
+<h3>${GL('code')}Scripts Luau</h3>${d.scripts.map(s=>`<div class="fx-pk"><div class="fx-pkh">${ic('code')}${esc(s.nom)}</div><div class="fx-pkb"><div class="code">${esc(s.code)}</div></div></div>`).join('')}
+${L('coin','Achats à créer',d.achats)}${L('image','Briefs visuels',d.briefs)}${L('video','Vidéos à tourner',d.videos)}${L('calendar','Plan de la semaine 2',d.semaine2)}</div>`;
+document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(d.prompts[+b.dataset.c]).catch(()=>{});b.querySelector('span').textContent='Copié'})}
+load()})();
 </script></body></html>

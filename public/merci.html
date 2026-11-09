@@ -1,8 +1,15 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bloxia — Merci</title><link rel="stylesheet" href="style.css"></head><body>
-<main class="stage"><h2 id="t">Confirmation du paiement…</h2><p id="s" style="color:#9fb0d0">Nous attendons la validation de Whop.</p><a class="btn gold" id="go" style="display:none" href="#">Ouvrir mon espace client</a></main>
-<script src="icons.js"></script><script>
-const q=new URLSearchParams(location.search),id=q.get('id'),token=q.get('token');
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bloxia · Merci</title><meta name="theme-color" content="#05060b">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css"><link rel="stylesheet" href="/assets/css/funnel.css">
+<style>.m{width:min(460px,100% - 28px);margin:0 auto;min-height:100svh;display:flex;flex-direction:column;justify-content:center;gap:18px;text-align:center}.spin{width:44px;height:44px;margin:0 auto;border-radius:50%;border:4px solid rgba(255,255,255,.15);border-top-color:var(--gold);animation:spin 1s linear infinite}</style></head>
+<body class="fx"><div class="fx-sky"></div><div class="fx-vig"></div>
+<main class="m fx-step"><div class="fx-acc" id="g"></div><h1 class="fx-title" id="t">on <b>valide</b> ton paiement</h1><p class="fx-help" id="s">Ça prend quelques secondes.</p><div class="spin" id="sp"></div><a class="btn btn-gold btn-block" id="go" style="display:none" href="/espace.html"><span class="lbl">Ouvrir mon pack</span></a></main>
+<script src="/assets/js/config.js"></script><script src="/assets/js/common.js"></script><script src="/assets/js/glyphs.js"></script><script>
+const q=new URLSearchParams(location.search),id=q.get('id'),token=q.get('token'),$=s=>document.querySelector(s);$('#g').innerHTML=GL('chest');
+try{if(id&&token)localStorage.setItem('bloxia.session',JSON.stringify({id,token}))}catch{}
 (async()=>{if(q.get('dev'))await fetch('/api/dev-pay',{method:'POST',body:JSON.stringify({id,token})});
-for(let n=0;n<40;n++){const r=await fetch(`/api/status?id=${id}&token=${token}`).then(r=>r.json());if(r.paid){t.textContent='Paiement confirmé';s.textContent='Ton pack est prêt.';go.href=`espace.html?id=${id}&token=${token}`;go.style.display='';return}await new Promise(r=>setTimeout(r,2000))}
-t.textContent='Toujours en attente';s.textContent='Recharge la page dans un instant. Le webhook peut tarder.'})();
+for(let n=0;n<40;n++){const r=await fetch(`/api/status?id=${id}&token=${token}`).then(r=>r.json()).catch(()=>({}));if(r.paid){$('#g').innerHTML=GL('trophy');$('#t').innerHTML='pack <b>débloqué</b>';$('#s').textContent='Merci ! Tout est prêt dans ton espace.';$('#sp').remove();$('#go').style.display='';BX.set({done:true});return}await new Promise(r=>setTimeout(r,2000))}
+$('#t').innerHTML='encore <b>un instant</b>';$('#s').textContent='La confirmation tarde. Recharge la page dans une minute, ou ouvre ton espace.';$('#sp').remove();$('#go').style.display=''})();
 </script></body></html>
