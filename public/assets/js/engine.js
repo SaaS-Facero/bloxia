@@ -128,6 +128,7 @@
       this.doneCb = opt.done || null; this.doneFired = false;
       if (opt.animate === false) this.snapReveal(1); else { this.prog = 0; this.target = 1; this.rate = 1 / ((opt.duration || 2200) / 1000); }
     }
+    revealTo(p, sec) { this.target = p; this.rate = Math.max(.02, (p - this.prog) / Math.max(.1, sec)); }
     reveal(p) { if (p < this.prog) this.prog = p; this.target = p; this.rate = .6; }
     snapReveal(p) { this.prog = this.target = p; for (const b of this.blocks) b.t0 = b.r <= p ? -1e9 : -1; }
     frame(t) {
@@ -145,6 +146,7 @@
       const P = (rx, ry, z) => [cx + (rx - ry) * tw / 2, cy + (rx + ry) * th / 2 - z * bh];
       const g = x.createRadialGradient(cx, cy + th, 0, cx, cy + th, tw * N * .5); g.addColorStop(0, this.theme.glow + '55'); g.addColorStop(1, this.theme.glow + '00');
       x.fillStyle = g; x.beginPath(); x.ellipse(cx, cy + th, tw * N * .55, th * N * .5, 0, 0, 7); x.fill();
+      if (this.o.ghost) { x.lineWidth = Math.max(1, d * .7); x.strokeStyle = this.theme.glow + '66'; for (const b of this.surface) { if (b.t0 !== -1 || this.map.has(b.x + ',' + b.y + ',' + (b.z + 1))) continue; const ox = b.x - N / 2 + .5, oy = b.y - N / 2 + .5, rx = ox * ca - oy * sa, ry = ox * sa + oy * ca; x.beginPath(); [[-.5, -.5], [.5, -.5], [.5, .5], [-.5, .5]].forEach(([dx, dy], i) => { const q = P(rx + dx * ca - dy * sa, ry + dx * sa + dy * ca, b.z + 1); i ? x.lineTo(...q) : x.moveTo(...q); }); x.closePath(); x.stroke(); } }
       const tt = t / 1000, items = [];
       for (const b of this.surface) { if (b.t0 === -1) continue; const a = Math.min(1, (t - b.t0) / 520); if (a <= 0) continue;
         const ox = b.x - N / 2 + .5, oy = b.y - N / 2 + .5, rx = ox * ca - oy * sa, ry = ox * sa + oy * ca; items.push([rx + ry + b.z, b, rx, ry, a]); }
