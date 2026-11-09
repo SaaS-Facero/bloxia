@@ -20,7 +20,7 @@
 <details><summary>Le paiement est-il sécurisé ?</summary><p>Oui, via Whop. Nous ne voyons jamais ta carte.</p></details></section>
 </main><footer>© Bloxia · Non affilié à Roblox Corporation.</footer>
 <script src="icons.js"></script><script src="world.js"></script><script>
-const w=World.mount(document.getElementById('bg'),{progress:0,cy:.55,cx:.68});w.setProgress(1);
+const w=World.mount(document.getElementById('bg'),{progress:0,cy:.55,cx:.74,zoom:.8});w.setProgress(1);
 const idea=document.getElementById('idea'),cta=document.getElementById('cta');
 const N={glace:'Glace',lave:'Lave',foret:'Forêt',ville:'Ville',desert:'Désert',espace:'Espace',def:''};
 idea.oninput=()=>{w.set(idea.value);const t=N[w.theme()];cta.innerHTML=(t?`Construire · ${t} `:'Construire mon jeu ')+ic('arrow')};

@@ -24,7 +24,7 @@ window.World={mount(cv,o={}){
   cur=[mix(cur[0],th.sky[0],.06),mix(cur[1],th.sky[1],.06)];const g=x.createLinearGradient(0,0,0,Ht);g.addColorStop(0,cur[0]);g.addColorStop(1,cur[1]);x.fillStyle=g;x.fillRect(0,0,W,Ht);
   if(part.length<70)part.push({x:Math.random()*W,y:Math.random()*Ht,s:Math.random()*2+.5,v:Math.random()*.4+.1});
   x.fillStyle=th.acc;x.globalAlpha=.5;part.forEach(p=>{p.y-=p.v*d;if(p.y<0)p.y=Ht;x.fillRect(p.x,p.y,p.s*d,p.s*d)});x.globalAlpha=1;
-  const tw=Math.min(W,Ht*1.5)/N*.95*(o.zoom||1),th2=tw/2,bh=tw*.55,cx=W*(o.cx??.5),cy=Ht*(o.cy??.42),ang=t/9000;
+  const tw=Math.min(W,Ht*1.5)/N*.95*(o.zoom||1),th2=tw/2,bh=tw*.3,cx=W*(o.cx??.5),cy=Ht*(o.cy??.42),ang=t/9000;
   const cs=[];for(let i=0;i<N;i++)for(let j=0;j<N;j++)cs.push([i,j]);
   // rotation lente : on projette avec angle, tri par profondeur
   const pr=(i,j)=>{const a=i-N/2,b=j-N/2,ca=Math.cos(ang),sa=Math.sin(ang);return[a*ca-b*sa,a*sa+b*ca]};
