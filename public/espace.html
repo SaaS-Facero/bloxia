@@ -1,0 +1,9 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bloxia — Espace client</title><link rel="stylesheet" href="style.css"></head><body>
+<main class="stage" style="justify-content:flex-start"><div class="pack" id="p">Chargement…</div></main>
+<script src="icons.js"></script><script>
+const q=new URLSearchParams(location.search);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+fetch(`/api/pack?id=${q.get('id')}&token=${q.get('token')}`).then(async r=>{const p=document.getElementById('p');if(!r.ok){p.innerHTML='<h2>Accès refusé</h2><p>Paiement non confirmé.</p>';return}
+const d=await r.json(),L=(t,a)=>`<h3>${t}</h3><ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+p.innerHTML=`<h2>${esc(d.titre)}</h2>${L('Prompts',d.prompts)}<h3>Scripts Luau</h3>${d.scripts.map(s=>`<b>${esc(s.nom)}</b><pre>${esc(s.code)}</pre>`).join('')}${L('Achats à créer',d.achats)}${L('Briefs visuels',d.briefs)}${L('Vidéos',d.videos)}${L('Plan semaine 2',d.semaine2)}`});
+</script></body></html>

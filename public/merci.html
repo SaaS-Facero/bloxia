@@ -1,0 +1,8 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bloxia — Merci</title><link rel="stylesheet" href="style.css"></head><body>
+<main class="stage"><h2 id="t">Confirmation du paiement…</h2><p id="s" style="color:#9fb0d0">Nous attendons la validation de Whop.</p><a class="btn gold" id="go" style="display:none" href="#">Ouvrir mon espace client</a></main>
+<script src="icons.js"></script><script>
+const q=new URLSearchParams(location.search),id=q.get('id'),token=q.get('token');
+(async()=>{if(q.get('dev'))await fetch('/api/dev-pay',{method:'POST',body:JSON.stringify({id,token})});
+for(let n=0;n<40;n++){const r=await fetch(`/api/status?id=${id}&token=${token}`).then(r=>r.json());if(r.paid){t.textContent='Paiement confirmé';s.textContent='Ton pack est prêt.';go.href=`espace.html?id=${id}&token=${token}`;go.style.display='';return}await new Promise(r=>setTimeout(r,2000))}
+t.textContent='Toujours en attente';s.textContent='Recharge la page dans un instant. Le webhook peut tarder.'})();
+</script></body></html>
