@@ -1,0 +1,1 @@
+{"buildCommand":"node scripts/bg.js","outputDirectory":"public","installCommand":"echo skip"}

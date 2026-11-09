@@ -1,1 +1,12 @@
-{"name":"bloxia","version":"1.0.0","private":true,"scripts":{"start":"node server/index.js"},"engines":{"node":">=18"}}
+{
+ "name": "bloxia",
+ "version": "1.0.0",
+ "private": true,
+ "scripts": {
+  "start": "node scripts/bg.js && node server/index.js",
+  "build": "node scripts/bg.js"
+ },
+ "engines": {
+  "node": ">=18"
+ }
+}

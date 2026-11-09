@@ -25,7 +25,7 @@ const idea=document.getElementById('idea'),cta=document.getElementById('cta');
 const N={glace:'Glace',lave:'Lave',foret:'Forêt',ville:'Ville',desert:'Désert',espace:'Espace',def:''};
 idea.oninput=()=>{w.set(idea.value);const t=N[w.theme()];cta.innerHTML=(t?`Construire · ${t} `:'Construire mon jeu ')+ic('arrow')};
 document.getElementById('f').onsubmit=e=>{e.preventDefault();try{sessionStorage.setItem('bx_idea',idea.value)}catch{}location.href='funnel.html'};
-fetch('/api/bg').then(r=>r.json()).then(l=>{if(!l.length)return;const box=document.createElement('div');box.className='slides';
+fetch('/bg.json').then(r=>r.json()).then(l=>{if(!l.length)return;const box=document.createElement('div');box.className='slides';
  box.innerHTML=l.map(u=>`<div style="background-image:url('${u}')"></div>`).join('');document.body.prepend(box);document.getElementById('bg').style.opacity='.35';
  const d=box.children;let k=0;const go=()=>{[...d].forEach((e,n)=>{e.classList.toggle('on',n===k);});k=(k+1)%d.length};go();if(d.length>1)setInterval(go,7000)}).catch(()=>{});
 const nav=document.getElementById('nav');addEventListener('scroll',()=>nav.classList.toggle('s',scrollY>40));
