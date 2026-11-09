@@ -210,33 +210,62 @@
         <button class="btn btn-gold btn-block" id="ok"><span class="lbl">Débloquer mon pack</span>${ic('lock')}</button>`; },
       after: st => { const a = an(), w = new E.World(st.querySelector('#rc'), { autoRotate: true, interactive: true, scale: 1.1 }); extra.push(w); w.set(E.generate(a, phrase()).blocks, a.theme, { duration: 1800 }); const p = E.makePack(a, phrase());
         st.querySelector('#cp').onclick = e => { navigator.clipboard && navigator.clipboard.writeText(p.prompts[0].text).catch(() => {}); e.currentTarget.querySelector('span').textContent = 'Copié'; sfx.pick(); }; st.querySelector('#ok').onclick = () => { gain(50); go(LAST); }; } },
-    { say: () => 'Choisis ta formule. Ton offre de bienvenue expire bientôt.',
-      html: () => `<div class="fx-offer" id="ofb"><span class="fx-ofl"><span class="fx-ofg">${GL('gift')}</span><span><small>Offre de bienvenue</small><b>−30 % sur ton 1er mois</b></span></span><span class="fx-oft"><small id="ofs">Expire dans</small><b id="oft">10:00</b></span><i class="fx-ofbar" id="ofbar"></i></div>
-        ${title('débloque', esc(an().title))}<p class="fx-help">Ta map est sauvegardée. Choisis comment tu veux continuer :</p>
+    { say: () => 'Choisis ta formule. L\'annuel commence par 3 jours gratuits.',
+      html: () => `<div class="fx-offer" id="ofb"><span class="fx-ofl"><span class="fx-ofg">${PA.ticket()}</span><span><small>Offre de bienvenue</small><b>−30 % sur ta première période</b></span></span><span class="fx-oft"><small id="ofs">Expire dans</small><b id="oft">10:00</b></span><i class="fx-ofbar" id="ofbar"></i></div>
+        <div class="pr-head">${title('débloque', esc(an().title))}<p class="fx-help">Ta map est sauvegardée. Choisis la formule qui colle à ton objectif.</p></div>
+        <div class="pr-cycle" role="radiogroup" aria-label="Période de facturation"><i class="pr-thumb"></i>
+          <button type="button" role="radio" data-cycle="month">Mensuel</button>
+          <button type="button" role="radio" data-cycle="year">Annuel <em>−40 %</em></button></div>
+        <p class="pr-trial" id="prtrial">${PA.fi('clock')}<span><b>3 jours d'essai gratuit</b> sur l'annuel. 0 € aujourd'hui.</span></p>
         <div class="fx-plans" id="plans"><p class="fx-help">Chargement des formules…</p></div>
-        <div class="fx-gar">${ic('shield')}Remboursé sous ${BLOXIA_CONFIG.guaranteeDays} jours si la map ou les scripts ne marchent pas</div><p class="fx-foot">Sans engagement, résiliable en un clic · Paiement sécurisé par Whop</p>`,
+        <div class="pr-trust"><span>${PA.fi('shield')}Paiement sécurisé par Whop</span><span>${PA.fi('cancel')}Résiliable en un clic</span><span>${PA.fi('card')}Aucun débit pendant l'essai</span></div>
+        <div class="pr-sec"><h2 class="pr-h2">Compare les formules</h2><div class="pr-table" id="prtable"></div></div>
+        <div class="pr-guar">${PA.seal(BLOXIA_CONFIG.guaranteeDays)}<div><h3>Satisfait ou remboursé</h3><p>Si ta map ne s'importe pas ou si un script ne marche pas, écris-nous dans les ${BLOXIA_CONFIG.guaranteeDays} jours : on règle le problème avec toi, ou on te rembourse intégralement.</p></div></div>
+        <div class="pr-sec"><h2 class="pr-h2">Questions sur le paiement</h2><div class="pr-faq">
+          <details><summary>Comment marche l'essai gratuit ?<span>${ic('chevron-down')}</span></summary><p>En annuel, tu ne paies rien pendant 3 jours. Tu as accès à tout. Si tu annules avant la fin de l'essai, tu n'es pas débité. Sinon, l'année est facturée au 4e jour.</p></details>
+          <details><summary>Je peux annuler quand je veux ?<span>${ic('chevron-down')}</span></summary><p>Oui, depuis ton compte Whop, en un clic. Tu gardes l'accès jusqu'à la fin de la période déjà payée.</p></details>
+          <details><summary>Je peux changer de formule ?<span>${ic('chevron-down')}</span></summary><p>Oui, à tout moment. Le changement prend effet à la prochaine période.</p></details>
+          <details><summary>J'ai moins de 18 ans, je peux m'abonner ?<span>${ic('chevron-down')}</span></summary><p>Oui, avec un parent : c'est lui qui fait le paiement, ou qui te donne son accord.</p></details>
+        </div></div>`,
       after: st => {
         if (!S.a._id) { toast('Crée ton compte pour récupérer ton pack', true); setTimeout(() => go(10), 600); return; } sync();
-        const eur = n => n.toFixed(2).replace('.', ',') + ' €', day = n => eur(Math.round(n / 30 * 100) / 100);
-        let O = null, endAt = 0, iv = 0, expired = false;
-        const draw = () => {
-          const d = O.discount, list = O.plans.slice();
-          st.querySelector('#plans').innerHTML = list.map((p, k) => { const first = Math.round(p.price * (1 - d) * 100) / 100;
-            return `<div class="fx-plan ${p.featured ? 'feat' : ''}" style="--d:${k * 90}ms">${p.featured ? `<span class="fx-rib">${ic('star')}Recommandé</span>` : ''}
-              <div class="fx-ph"><span class="fx-pg">${GL(p.glyph)}</span><b>${p.name}</b></div>
-              <div class="fx-pd">${expired ? '' : `<s>${day(p.price)}</s>`}<b>${day(expired ? p.price : first)}</b><span>/ jour</span></div>
-              <p class="fx-pm">${expired ? `${eur(p.price)} par mois` : `${eur(first)} le 1er mois, puis ${eur(p.price)} par mois`}</p>
-              <ul>${p.features.map(f => `<li>${ic('check')}${esc(f)}</li>`).join('')}</ul>
-              <button class="btn ${p.featured ? 'btn-gold' : 'btn-ghost'} btn-block" data-plan="${p.id}"><span class="lbl">Choisir ${p.name}</span>${ic('arrow-right')}</button></div>`; }).join('');
-          BX.hydrate(st);
+        const eur = (n, z) => (z && n === 0 ? '0' : n.toFixed(2).replace('.', ',')) + ' €', r2 = n => Math.round(n * 100) / 100;
+        const COL = { starter: '#5b9bff', essentiel: '#ffc53d', business: '#b388ff' };
+        let O = null, endAt = 0, iv = 0, expired = false, cycle = 'year';
+        try { cycle = localStorage.getItem('bloxia.cycle') || 'year'; } catch {}
+        const calc = p => { const d = expired ? 0 : O.discount, yr = cycle === 'year', full = yr ? p.annual : p.price, first = r2(full * (1 - d)), days = yr ? 365 : 30;
+          return { yr, full, first, perDay: r2(first / days), strike: yr ? r2(p.price / 30) : (d ? r2(p.price / 30) : 0), save: r2(p.price * 12 - first) }; };
+        const card = (p, k) => { const c = calc(p);
+          const bill = c.yr ? `<div class="pr-zero"><b>0 €</b><span>aujourd'hui</span></div><p class="pr-bill">puis ${eur(c.first)} ${expired ? 'par an' : 'la 1re année'} après 3 jours d'essai${expired ? '' : `, ensuite ${eur(c.full)} par an`}</p>`
+                             : `<p class="pr-bill">${expired ? `${eur(c.full)} par mois` : `${eur(c.first)} le 1er mois, puis ${eur(c.full)} par mois`}</p>`;
+          return `<article class="fx-plan pr-card ${p.featured ? 'feat' : ''}" data-id="${p.id}" style="--pc:${COL[p.id]};--d:${k * 90}ms"><span class="pr-glare"></span>
+            ${p.featured ? `<span class="fx-rib">${ic('star')}Recommandé</span>` : ''}
+            <header class="pr-top"><span class="pr-emb">${PA.emblem(p.id)}</span><div><span class="pr-tag">${esc(p.tag)}</span><h3>${p.name}</h3></div></header>
+            <p class="pr-purpose">${esc(p.purpose)}</p>
+            <div class="pr-spec"><small>Sa spécialité</small><b>${esc(p.specialty)}</b></div>
+            <div class="pr-price">${c.strike ? `<s>${eur(c.strike)}</s>` : ''}<b data-v="${c.perDay}">${eur(c.perDay)}</b><span>/ jour</span></div>
+            ${bill}${c.yr ? `<p class="pr-save">${PA.fi('yes')}Tu économises ${eur(c.save)} par an</p>` : ''}
+            <button class="btn ${p.featured ? 'btn-gold' : 'pr-btn'} btn-block" data-plan="${p.id}"><span class="lbl">${c.yr ? 'Essayer gratuitement' : esc(p.cta)}</span>${ic('arrow-right')}</button>
+            <p class="pr-micro">${c.yr ? 'Annulable avant la fin de l\'essai, sans frais' : 'Sans engagement, résiliable en un clic'}</p>
+            <ul class="pr-feats">${p.plus ? `<li class="pr-plus">${PA.fi('plus')}<span>${esc(p.plus)}</span></li>` : ''}${p.features.map(([i, t]) => `<li>${PA.fi(i)}<span>${esc(t)}</span></li>`).join('')}</ul></article>`; };
+        const table = () => { const rows = [['Jeux générés par mois', ['1', '5', 'Illimité']], ['Prompts Roblox Studio et scripts Luau', [1, 1, 1]], ['Boutique avec prix conseillés', [1, 1, 1]], ['Plan de lancement', [1, 1, 1]], ['Idées de vidéos TikTok', [0, 1, 1]], ['Packs mis à jour chaque semaine', [0, 1, 1]], ['Places pour ton équipe', ['1', '1', '3']], ['Coaching en visio', [0, 0, 'Mensuel']], ['Support', ['Standard', 'Prioritaire', 'Dédié 24 h']]];
+          const cell = (v, id) => `<td style="--pc:${COL[id]}">${v === 1 ? PA.fi('yes') : v === 0 ? PA.fi('no') : `<b>${v}</b>`}</td>`;
+          st.querySelector('#prtable').innerHTML = `<table><thead><tr><th></th>${O.plans.map(p => `<th class="${p.featured ? 'feat' : ''}" style="--pc:${COL[p.id]}"><span class="pr-temb">${PA.emblem(p.id)}</span>${p.name}</th>`).join('')}</tr></thead><tbody>${rows.map(([l, v]) => `<tr><th>${l}</th>${v.map((x, i) => cell(x, O.plans[i].id)).join('')}</tr>`).join('')}</tbody></table>`; };
+        const tilt = el => { el.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; el.style.transform = `perspective(900px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) translateY(-4px)`; el.style.setProperty('--gx', (x + .5) * 100 + '%'); el.style.setProperty('--gy', (y + .5) * 100 + '%'); }); el.addEventListener('pointerleave', () => { el.style.transform = ''; }); };
+        const roll = el => { const to = +el.dataset.v, t0 = performance.now(), from = to * 1.6; const f = t => { const p = Math.min(1, (t - t0) / 650), e = 1 - Math.pow(1 - p, 3); el.textContent = eur(r2(from + (to - from) * e)); if (p < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); };
+        const draw = (animate) => {
+          st.querySelector('.pr-cycle').dataset.on = cycle; $$('.pr-cycle button', st).forEach(b => b.setAttribute('aria-checked', b.dataset.cycle === cycle)); st.querySelector('#prtrial').classList.toggle('on', cycle === 'year');
+          st.querySelector('#plans').innerHTML = O.plans.map(card).join(''); BX.hydrate(st);
+          $$('.pr-card', st).forEach(tilt); if (animate) $$('.pr-price b', st).forEach(roll);
           $$('[data-plan]', st).forEach(btn => btn.onclick = async () => { const r0 = btn.getBoundingClientRect(); burst(r0.left + r0.width / 2, r0.top + r0.height / 2); $$('[data-plan]', st).forEach(x => x.disabled = true); BX.set({ done: true });
-            try { const r = await fetch('/api/checkout', { method: 'POST', body: JSON.stringify({ id: S.a._id, token: S.a._t, plan: btn.dataset.plan }) }).then(r => r.json()); if (r.url) location.href = r.url; else throw 0; }
+            try { const r = await fetch('/api/checkout', { method: 'POST', body: JSON.stringify({ id: S.a._id, token: S.a._t, plan: btn.dataset.plan, cycle }) }).then(r => r.json()); if (r.url) location.href = r.url; else throw 0; }
             catch { $$('[data-plan]', st).forEach(x => x.disabled = false); BX.set({ done: false }); toast('Paiement indisponible, réessaie', true); } });
         };
+        $$('.pr-cycle button', st).forEach(b => b.onclick = () => { if (cycle === b.dataset.cycle) return; cycle = b.dataset.cycle; try { localStorage.setItem('bloxia.cycle', cycle); } catch {} sfx.pick(); draw(true); });
         const timer = () => { const left = Math.max(0, endAt - Date.now()), m = Math.floor(left / 60000), sc = Math.floor(left / 1000) % 60, el = st.querySelector('#oft'); if (!el) return clearInterval(iv);
-          el.textContent = String(m).padStart(2, '0') + ':' + String(sc).padStart(2, '0'); st.querySelector('#ofbar').style.width = (left / 600000 * 100) + '%'; st.querySelector('#ofb').classList.toggle('hot', left < 60000);
-          if (left <= 0 && !expired) { expired = true; clearInterval(iv); const ob = st.querySelector('#ofb'); ob.classList.add('expired'); ob.querySelector('.fx-ofl b').textContent = 'Offre de bienvenue expirée'; st.querySelector('#ofs').textContent = 'Terminée'; draw(); } };
-        fetch(`/api/offer?id=${encodeURIComponent(S.a._id)}&token=${encodeURIComponent(S.a._t)}`).then(r => r.json()).then(o => { O = o; endAt = Date.now() + o.remaining; expired = o.remaining <= 0; draw(); timer(); if (!expired) iv = setInterval(timer, 250); else timer(); })
+          el.textContent = String(m).padStart(2, '0') + ':' + String(sc).padStart(2, '0'); st.querySelector('#ofbar').style.width = (left / 600000 * 100) + '%'; st.querySelector('#ofb').classList.toggle('hot', left < 60000 && left > 0);
+          if (left <= 0 && !expired) { expired = true; clearInterval(iv); const ob = st.querySelector('#ofb'); ob.classList.add('expired'); ob.querySelector('.fx-ofl b').textContent = 'Offre de bienvenue expirée'; st.querySelector('#ofs').textContent = 'Terminée'; draw(false); } };
+        fetch(`/api/offer?id=${encodeURIComponent(S.a._id)}&token=${encodeURIComponent(S.a._t)}`).then(r => r.json()).then(o => { O = o; endAt = Date.now() + o.remaining; expired = o.remaining <= 0; draw(true); table(); timer(); if (!expired) iv = setInterval(timer, 250); else timer(); })
           .catch(() => { st.querySelector('#plans').innerHTML = '<p class="fx-err">Impossible de charger les formules. Recharge la page.</p>'; });
       } }
   ];
