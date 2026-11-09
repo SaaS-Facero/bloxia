@@ -64,7 +64,7 @@
   function burst(x, y, cols) { cols = cols || ['#ffc53d', '#5b9bff', '#2bd68f', '#ff6fa8', '#ffffff']; for (let k = 0; k < 16; k++) { const e = document.createElement('i'), a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 90; e.className = 'fx-bit'; e.style.cssText = `left:${x}px;top:${y}px;background:${cols[k % cols.length]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d - 30}px;--r:${Math.random() * 360}deg;--s:${.6 + Math.random() * .8}`; document.body.appendChild(e); setTimeout(() => e.remove(), 900); } }
   function drawer() { $('#fx-items').innerHTML = S.items.length ? S.items.map(k => `<div class="fx-li"><span class="fx-gt">${GL(ITEMS[k][0])}</span><div><b>${ITEMS[k][1]}</b><small>Débloqué</small></div></div>`).join('') : '<p class="fx-empty">Rien pour l\'instant. Réponds aux questions pour débloquer des objets.</p>'; }
   function hud() {
-    const on = S.i >= 1; $('#fx-hud').hidden = !on; $('#fx-guide').hidden = !on; $('#fx-minibox').hidden = !on || S.i === GEN; $('#fx-stage').className = 'fx-stage' + (S.i === 0 ? ' s0' : '');
+    const on = S.i >= 1; $('#fx-hud').hidden = !on; $('#fx-guide').hidden = !on; $('#fx-minibox').hidden = !on || S.i === GEN || S.i === LAST; $('#fx-stage').className = 'fx-stage' + (S.i === 0 ? ' s0' : '');
     $('#fx-pbar').style.width = Math.min(100, S.i / LAST * 100) + '%'; $('#fx-back').style.visibility = (S.i > 1 && S.i < GEN) ? 'visible' : 'hidden';
     const n = Math.round(S.i / LAST * 5); $('#fx-stars').innerHTML = [0, 1, 2, 3, 4].map(k => ic('star', k < n ? 'on' : '')).join('');
     const g = G(); root.style.setProperty('--gc', g.c); $('#fx-av').innerHTML = AV.svg(g.id); $('#fx-gname').textContent = g.name;
@@ -151,7 +151,7 @@
         em.value ? pw.focus() : em.focus();
       } },
     { say: () => 'Je lance la construction. Regarde bien.', html: () => `<div class="fx-kick">${ic('hammer')}Génération en direct</div>${title('je construis', 'ton monde')}
-      <div class="fx-gen scanning" id="gx"><div class="fx-gfloor"></div><canvas id="gc"></canvas><div class="fx-scan"></div><div class="fx-vgn"></div>
+      <div class="fx-gen scanning" id="gx"><div class="fx-rays"></div><div class="fx-gfloor"></div><canvas id="gc"></canvas><div class="fx-speed"></div><div class="fx-ring" id="grg"></div><div class="fx-cd" id="gcd"></div><div class="fx-pban" id="gpb"><small></small><b></b></div><div class="fx-scan"></div><div class="fx-vgn"></div>
         <div class="fx-phase"><b id="gpn">1/5</b><span id="gpt">Initialisation</span></div>
         <div class="fx-gstats"><span>${ic('cube')}<b id="gs1">0</b> blocs</span><span>${ic('flag')}<b id="gs2">0</b> objets</span><span>${ic('code')}<b id="gs3">0</b> lignes</span></div>
         <div class="fx-term" id="gterm"><div class="fx-termh"><i></i><i></i><i></i><span>GameManager.server.lua</span></div><pre id="gtx"></pre></div>
@@ -161,18 +161,23 @@
       <div class="fx-check">${['Terrain posé', 'Décors et objets', 'Économie du jeu', 'Scripts Luau', 'Finitions et optimisation mobile'].map(t => `<div>${ic('check-circle')}${t}</div>`).join('')}</div>`,
       after: st => {
         const a = an(), pk = E.makePack(a, phrase()), blocks = E.generate(a, phrase()).blocks, gx = st.querySelector('#gx');
-        const w = new E.World(st.querySelector('#gc'), { autoRotate: true, speed: .5, scale: 2.7, offsetY: .04, ghost: true }); extra.push(w);
+        const w = new E.World(st.querySelector('#gc'), { autoRotate: true, speed: .5, scale: 2.7, offsetY: .04, ghost: true, dust: true }); extra.push(w);
         w.set(blocks, a.theme, { animate: false }); w.snapReveal(0);
         const alive = () => S.i === GEN && document.body.contains(gx), sleep = ms => new Promise(r => setTimeout(r, ms));
         const ease = t => 1 - Math.pow(1 - t, 3), io = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         const tween = (to, ms, f = ease) => new Promise(res => { const o = w.o, from = {}; for (const k in to) from[k] = o[k]; const t0 = performance.now(); const step = t => { if (!alive()) return res(); const p = Math.min(1, (t - t0) / ms), e = f(p); for (const k in to) o[k] = from[k] + (to[k] - from[k]) * e; p < 1 ? requestAnimationFrame(step) : res(); }; requestAnimationFrame(step); });
         const rows = $$('.fx-check div', st), T0 = performance.now(), TOTAL = 16500, glowN = Math.max(6, Math.round(blocks.filter(b => b.z >= 1).length / 4));
         let lines = 0;
-        const phase = (n, t) => { st.querySelector('#gpn').textContent = n + '/5'; const pt = st.querySelector('#gpt'); pt.textContent = t; pt.classList.remove('swap'); void pt.offsetWidth; pt.classList.add('swap'); rows.forEach((r, k) => r.classList.toggle('on', k < n - 1)); tone(300 + n * 90, .25, 'triangle', .04); };
+        const banner = (n, t) => { const pb = st.querySelector('#gpb'); pb.querySelector('small').textContent = 'Phase ' + n + ' sur 5'; pb.querySelector('b').textContent = t; pb.classList.remove('on'); void pb.offsetWidth; pb.classList.add('on'); gx.classList.remove('jolt'); void gx.offsetWidth; gx.classList.add('jolt'); };
+        const phase = (n, t) => { banner(n, t); st.querySelector('#gpn').textContent = n + '/5'; const pt = st.querySelector('#gpt'); pt.textContent = t; pt.classList.remove('swap'); void pt.offsetWidth; pt.classList.add('swap'); rows.forEach((r, k) => r.classList.toggle('on', k < n - 1)); tone(300 + n * 90, .25, 'triangle', .04); };
         const label = (txt, icn) => { const box = st.querySelector('#glab'); const e = document.createElement('span'); e.className = 'fx-lbl'; e.innerHTML = ic(icn) + txt; e.style.left = (14 + Math.random() * 62) + '%'; e.style.top = (16 + Math.random() * 50) + '%'; box.appendChild(e); setTimeout(() => e.classList.add('out'), 1900); setTimeout(() => e.remove(), 2400); sfx.pick(); };
         const tick = setInterval(() => { if (!alive()) return clearInterval(tick); const p = w.prog; st.querySelector('#gs1').textContent = Math.round(blocks.length * p); st.querySelector('#gs2').textContent = Math.round(glowN * Math.max(0, (p - .45) / .55)); st.querySelector('#gs3').textContent = lines; st.querySelector('#gb').style.width = Math.min(100, (performance.now() - T0) / TOTAL * 100) + '%'; if (w.prog < w.target) tone(140 + Math.random() * 160, .025, 'square', .015); }, 110);
         const typeCode = async () => { const pre = st.querySelector('#gtx'), src = pk.script.concat(['', '-- Boutique', 'local MarketplaceService = game:GetService("MarketplaceService")']); for (const l of src) { if (!alive()) return; const ln = document.createElement('div'); pre.appendChild(ln); for (let k = 0; k <= l.length; k += 3) { ln.textContent = l.slice(0, k); await sleep(11); } ln.innerHTML = hl(l) || '&nbsp;'; lines++; pre.scrollTop = pre.scrollHeight; } };
         (async () => {
+          // 0. compte à rebours
+          guideSay('Accroche-toi, on lance la construction !'); const cd = st.querySelector('#gcd');
+          for (const k of ['3', '2', '1']) { if (!alive()) return; cd.textContent = k; cd.classList.remove('on'); void cd.offsetWidth; cd.classList.add('on'); tone(k === '1' ? 880 : 520, .18, 'square', .06); w.o.scale += .15; await sleep(720); }
+          cd.textContent = 'GO'; cd.classList.remove('on'); void cd.offsetWidth; cd.classList.add('on', 'go'); sfx.unlock(); await sleep(500); if (!alive()) return;
           // 1. initialisation : plan holographique, caméra collée au sol
           phase(1, 'Initialisation'); guideSay('Je scanne le terrain et je trace le plan de ta map.');
           await tween({ scale: 1.9, speed: 1.4 }, 2200, io); if (!alive()) return;
@@ -187,7 +192,8 @@
           tween({ scale: 1.05, offsetX: -.12, offsetY: .1, speed: 1.2 }, 2800, io); label('Boutique · 4 articles', 'store'); const tc = typeCode(); await sleep(1400); label('Gamepass', 'coins'); await sleep(1400); await tc; if (!alive()) return;
           // 5. final : dézoom, vrille, flash, titre
           phase(5, 'Finitions'); gx.classList.remove('scanning', 'coding'); w.o.ghost = false; guideSay('Dernières finitions… et voilà !');
-          await tween({ scale: 1.45, offsetX: 0, offsetY: .08, speed: 7 }, 900, t => t * t); await tween({ scale: .98, speed: .5 }, 1300); if (!alive()) return;
+          gx.classList.add('warp'); await tween({ scale: 1.45, offsetX: 0, offsetY: .08, speed: 7 }, 900, t => t * t); await tween({ scale: .98, speed: .5 }, 1300); gx.classList.remove('warp'); if (!alive()) return;
+          st.querySelector('#grg').classList.add('on');
           rows.forEach(r => r.classList.add('on')); st.querySelector('#gb').style.width = '100%';
           gx.classList.add('shake'); st.querySelector('#gfl').classList.add('on'); const stp = st.querySelector('#gst'); stp.querySelector('b').textContent = a.title; stp.classList.add('on');
           const r = gx.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2); setTimeout(() => burst(r.left + r.width * .3, r.top + r.height * .4), 180); setTimeout(() => burst(r.left + r.width * .7, r.top + r.height * .45), 320); sfx.lvl();
@@ -204,10 +210,35 @@
         <button class="btn btn-gold btn-block" id="ok"><span class="lbl">Débloquer mon pack</span>${ic('lock')}</button>`; },
       after: st => { const a = an(), w = new E.World(st.querySelector('#rc'), { autoRotate: true, interactive: true, scale: 1.1 }); extra.push(w); w.set(E.generate(a, phrase()).blocks, a.theme, { duration: 1800 }); const p = E.makePack(a, phrase());
         st.querySelector('#cp').onclick = e => { navigator.clipboard && navigator.clipboard.writeText(p.prompts[0].text).catch(() => {}); e.currentTarget.querySelector('span').textContent = 'Copié'; sfx.pick(); }; st.querySelector('#ok').onclick = () => { gain(50); go(LAST); }; } },
-    { say: () => 'Dernière étape : récupère ton pack complet.', html: () => { const a = an(); return `<div class="fx-kick">${ic('gift')}Ton pack est prêt</div>${title(esc(a.title.split(' ')[0]), esc(a.title.split(' ').slice(1).join(' ')))}
-        <div class="fx-list">${[['terminal', '4 prompts Roblox Studio', 'Ta map se construit, étape par étape'], ['code', '3 scripts Luau', 'Gameplay, sauvegarde, boutique'], ['coin', '4 achats à vendre', 'Quoi vendre et à quel prix'], ['image', 'Brief icône et miniatures', 'Des visuels qui font cliquer'], ['video', '3 vidéos TikTok', 'Pour tes premiers joueurs'], ['calendar', 'Plan de la semaine 2', 'Pour que tes joueurs reviennent']].map(([i, t, s], k) => `<div class="fx-li" style="--d:${k * 60}ms"><span class="fx-gt">${GL(i)}</span><div><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>
-        <button class="btn btn-gold btn-block" id="pay"><span class="lbl">Construire ${esc(a.title)}</span>${ic('arrow-right')}</button><div class="fx-gar">${ic('shield')}Remboursé sous ${BLOXIA_CONFIG.guaranteeDays} jours si la map ou les scripts ne marchent pas</div><p class="fx-foot">Paiement sécurisé par Whop</p>`; },
-      after: st => { if (!S.a._id) { toast('Crée ton compte pour récupérer ton pack', true); setTimeout(() => go(10), 600); return; } sync(); st.querySelector('#pay').onclick = async e => { const b = e.currentTarget; b.disabled = true; BX.set({ done: true }); try { const r = await fetch('/api/checkout', { method: 'POST', body: JSON.stringify({ id: S.a._id, token: S.a._t }) }).then(r => r.json()); if (r.url) location.href = r.url; else throw 0; } catch { b.disabled = false; BX.set({ done: false }); toast('Paiement indisponible, réessaie', true); } }; } }
+    { say: () => 'Choisis ta formule. Ton offre de bienvenue expire bientôt.',
+      html: () => `<div class="fx-offer" id="ofb"><span class="fx-ofl"><span class="fx-ofg">${GL('gift')}</span><span><small>Offre de bienvenue</small><b>−30 % sur ton 1er mois</b></span></span><span class="fx-oft"><small id="ofs">Expire dans</small><b id="oft">10:00</b></span><i class="fx-ofbar" id="ofbar"></i></div>
+        ${title('débloque', esc(an().title))}<p class="fx-help">Ta map est sauvegardée. Choisis comment tu veux continuer :</p>
+        <div class="fx-plans" id="plans"><p class="fx-help">Chargement des formules…</p></div>
+        <div class="fx-gar">${ic('shield')}Remboursé sous ${BLOXIA_CONFIG.guaranteeDays} jours si la map ou les scripts ne marchent pas</div><p class="fx-foot">Sans engagement, résiliable en un clic · Paiement sécurisé par Whop</p>`,
+      after: st => {
+        if (!S.a._id) { toast('Crée ton compte pour récupérer ton pack', true); setTimeout(() => go(10), 600); return; } sync();
+        const eur = n => n.toFixed(2).replace('.', ',') + ' €', day = n => eur(Math.round(n / 30 * 100) / 100);
+        let O = null, endAt = 0, iv = 0, expired = false;
+        const draw = () => {
+          const d = O.discount, list = O.plans.slice();
+          st.querySelector('#plans').innerHTML = list.map((p, k) => { const first = Math.round(p.price * (1 - d) * 100) / 100;
+            return `<div class="fx-plan ${p.featured ? 'feat' : ''}" style="--d:${k * 90}ms">${p.featured ? `<span class="fx-rib">${ic('star')}Recommandé</span>` : ''}
+              <div class="fx-ph"><span class="fx-pg">${GL(p.glyph)}</span><b>${p.name}</b></div>
+              <div class="fx-pd">${expired ? '' : `<s>${day(p.price)}</s>`}<b>${day(expired ? p.price : first)}</b><span>/ jour</span></div>
+              <p class="fx-pm">${expired ? `${eur(p.price)} par mois` : `${eur(first)} le 1er mois, puis ${eur(p.price)} par mois`}</p>
+              <ul>${p.features.map(f => `<li>${ic('check')}${esc(f)}</li>`).join('')}</ul>
+              <button class="btn ${p.featured ? 'btn-gold' : 'btn-ghost'} btn-block" data-plan="${p.id}"><span class="lbl">Choisir ${p.name}</span>${ic('arrow-right')}</button></div>`; }).join('');
+          BX.hydrate(st);
+          $$('[data-plan]', st).forEach(btn => btn.onclick = async () => { const r0 = btn.getBoundingClientRect(); burst(r0.left + r0.width / 2, r0.top + r0.height / 2); $$('[data-plan]', st).forEach(x => x.disabled = true); BX.set({ done: true });
+            try { const r = await fetch('/api/checkout', { method: 'POST', body: JSON.stringify({ id: S.a._id, token: S.a._t, plan: btn.dataset.plan }) }).then(r => r.json()); if (r.url) location.href = r.url; else throw 0; }
+            catch { $$('[data-plan]', st).forEach(x => x.disabled = false); BX.set({ done: false }); toast('Paiement indisponible, réessaie', true); } });
+        };
+        const timer = () => { const left = Math.max(0, endAt - Date.now()), m = Math.floor(left / 60000), sc = Math.floor(left / 1000) % 60, el = st.querySelector('#oft'); if (!el) return clearInterval(iv);
+          el.textContent = String(m).padStart(2, '0') + ':' + String(sc).padStart(2, '0'); st.querySelector('#ofbar').style.width = (left / 600000 * 100) + '%'; st.querySelector('#ofb').classList.toggle('hot', left < 60000);
+          if (left <= 0 && !expired) { expired = true; clearInterval(iv); const ob = st.querySelector('#ofb'); ob.classList.add('expired'); ob.querySelector('.fx-ofl b').textContent = 'Offre de bienvenue expirée'; st.querySelector('#ofs').textContent = 'Terminée'; draw(); } };
+        fetch(`/api/offer?id=${encodeURIComponent(S.a._id)}&token=${encodeURIComponent(S.a._t)}`).then(r => r.json()).then(o => { O = o; endAt = Date.now() + o.remaining; expired = o.remaining <= 0; draw(); timer(); if (!expired) iv = setInterval(timer, 250); else timer(); })
+          .catch(() => { st.querySelector('#plans').innerHTML = '<p class="fx-err">Impossible de charger les formules. Recharge la page.</p>'; });
+      } }
   ];
 
   // ---------- navigation, sauvegarde ----------
@@ -220,7 +251,7 @@
     st.after && st.after(stage.firstChild); save();
   }
   // reprise
-  try { const sv = JSON.parse(localStorage.getItem(KEY)); if (sv && sv.i > 0 && sv.i < 14) { S.a = sv.a || {}; S.blocs = sv.blocs || 0; S.items = sv.items || []; S.i = sv.i >= GEN ? RES : sv.i; if (S.i >= GEN && !S.a._id) S.i = 10; } } catch {}
+  try { const sv = JSON.parse(localStorage.getItem(KEY)); if (sv && sv.i > 0 && sv.i < 14) { S.a = sv.a || {}; S.blocs = sv.blocs || 0; S.items = sv.items || []; S.i = sv.i >= GEN ? (sv.i === LAST ? LAST : RES) : sv.i; if (S.i >= GEN && !S.a._id) S.i = 10; } } catch {}
   if (!S.a.phrase && prof.idea) S.a.phrase = prof.idea;
   shown = S.blocs; $('#fx-blocs span').textContent = S.blocs; $('#fx-lvl').textContent = 1 + Math.floor(S.blocs / 200); if (S.items.length) { $('#fx-bagn').hidden = false; $('#fx-bagn').textContent = S.items.length; } drawer();
   $('#fx-text').textContent = '';

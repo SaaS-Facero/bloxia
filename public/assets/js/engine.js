@@ -123,14 +123,14 @@
       this.theme = THEMES[theme] || this.theme;
       const sorted = blocks.slice().sort((a, b) => a.z - b.z || (a.x + a.y) - (b.x + b.y) || a.x - b.x || a.y - b.y);
       this.blocks = sorted; this.map = new Map(sorted.map(b => [b.x + ',' + b.y + ',' + b.z, b]));
-      const n = sorted.length; sorted.forEach((b, i) => { b.r = i / n; b.rgb = rgb(b.c); b.t0 = -1; b.ph = Math.random() * 6.28; });
+      const n = sorted.length; sorted.forEach((b, i) => { b.r = i / n; b.rgb = rgb(b.c); b.t0 = -1; b.ph = Math.random() * 6.28; b.landed = false; }); this.dust = [];
       this.surface = sorted.filter(b => [[0, 0, 1], [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0]].some(([dx, dy, dz]) => !this.map.has((b.x + dx) + ',' + (b.y + dy) + ',' + (b.z + dz))));
       this.doneCb = opt.done || null; this.doneFired = false;
       if (opt.animate === false) this.snapReveal(1); else { this.prog = 0; this.target = 1; this.rate = 1 / ((opt.duration || 2200) / 1000); }
     }
     revealTo(p, sec) { this.target = p; this.rate = Math.max(.02, (p - this.prog) / Math.max(.1, sec)); }
     reveal(p) { if (p < this.prog) this.prog = p; this.target = p; this.rate = .6; }
-    snapReveal(p) { this.prog = this.target = p; for (const b of this.blocks) b.t0 = b.r <= p ? -1e9 : -1; }
+    snapReveal(p) { this.prog = this.target = p; for (const b of this.blocks) { b.t0 = b.r <= p ? -1e9 : -1; b.landed = b.r <= p; } }
     frame(t) {
       const dt = Math.min(.05, (t - this.t) / 1000); this.t = t; const x = this.x, W = this.cv.width, H = this.cv.height, d = this.d;
       // progression de construction
@@ -157,6 +157,7 @@
         const fall = (1 - a) * (1 - a) * 9, z0 = b.z + fall; let f = 1;
         if (b.type === 'liq') f = .9 + Math.sin(tt * 1.6 + b.x * .8 + b.y * .6) * .1; else if (b.type === 'glow') f = 1.02 + Math.sin(tt * 2.2 + b.ph) * .1;
         const fill = k => `rgb(${Math.min(255, b.rgb[0] * f * k) | 0},${Math.min(255, b.rgb[1] * f * k) | 0},${Math.min(255, b.rgb[2] * f * k) | 0})`;
+        if (a >= 1 && !b.landed) { b.landed = true; if (this.o.dust && this.dust.length < 260) { const [sx, sy] = P(rx, ry, b.z + 1); for (let k = 0; k < 3; k++) this.dust.push({ x: sx, y: sy, vx: (Math.random() - .5) * 2.4 * d, vy: -(1 + Math.random() * 2) * d, l: 1, c: b.c }); } }
         x.globalAlpha = a;
         const C = off.map(([dx, dy]) => [rx + dx * ca - dy * sa, ry + dx * sa + dy * ca]);
         for (let i = 0; i < 4; i++) { const [nx, ny] = nrm[i]; if (this.map.has((b.x + nx) + ',' + (b.y + ny) + ',' + b.z)) continue;
@@ -166,6 +167,7 @@
         if (!this.map.has(b.x + ',' + b.y + ',' + (b.z + 1))) { const p = C.map(c => P(c[0], c[1], z0 + 1));
           x.fillStyle = fill(1); x.beginPath(); x.moveTo(...p[0]); for (let i = 1; i < 4; i++) x.lineTo(...p[i]); x.closePath(); x.fill(); x.stroke(); }
       }
+      if (this.dust && this.dust.length) { for (const q of this.dust) { q.x += q.vx; q.y += q.vy; q.vy += .12 * d; q.l -= dt * 1.6; if (q.l <= 0) continue; x.globalAlpha = Math.max(0, q.l); x.fillStyle = q.c; const sz = 3.2 * d * q.l + d; x.fillRect(q.x - sz / 2, q.y - sz / 2, sz, sz); } this.dust = this.dust.filter(q => q.l > 0); }
       x.globalAlpha = 1;
     }
   }
