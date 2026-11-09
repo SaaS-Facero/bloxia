@@ -1,41 +1,24 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bloxia — Construis ton monde</title><link rel="stylesheet" href="style.css"></head><body>
-<canvas id="bg"></canvas><div class="veil"></div>
-<div class="hud"><b>Blox<span style="color:#fbbf24">ia</span></b><div class="bar"><i id="pb"></i></div><span class="lvl" id="lvl">Niv. 1 · 0 XP</span><button id="snd" aria-label="Son"></button></div>
-<div class="toast" id="toast"></div>
-<main id="stage" class="stage"></main>
-<div class="guide"><div class="avatar"><i data-i="rocket"></i></div><div class="bubble" id="say"></div></div>
-<div class="inv" id="inv"></div>
-<script src="icons.js"></script><script src="world.js"></script><script>
-const $=s=>document.querySelector(s),A={},ITEMS=[['tool','Pioche'],['file','Plan'],['key','Clé'],['coin','Pièce'],['star','Étoile'],['rocket','Fusée']];
-const w=World.mount($('#bg'),{progress:0,cy:.3,cx:.5,zoom:.7});let xp=0,i=0,snd=true,ctx;
-const PF=()=>{try{return JSON.parse(localStorage.getItem('bloxia.profile'))||{}}catch{return{}}},SP=o=>{try{localStorage.setItem('bloxia.profile',JSON.stringify(Object.assign(PF(),o)))}catch{}};let idea=PF().idea||'';
-if(idea)w.set(idea);
-const beep=(f=520,d=.12)=>{if(!snd)return;try{ctx=ctx||new AudioContext();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=f;o.type='square';g.gain.value=.04;o.connect(g);g.connect(ctx.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+d);o.stop(ctx.currentTime+d)}catch{}};
-$('#snd').innerHTML=ic('sound');$('#snd').onclick=()=>{snd=!snd;$('#snd').innerHTML=ic(snd?'sound':'mute')};
-$('#inv').innerHTML=ITEMS.map(([n])=>`<div class="slot">${ic(n)}</div>`).join('');paintIcons();
-const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)};
-const say=t=>{const e=$('#say');e.textContent='';let k=0;clearInterval(say.t);say.t=setInterval(()=>{e.textContent=t.slice(0,++k);if(k>=t.length)clearInterval(say.t)},18)};
-const choice=(k,list)=>list.map(([ic_,l])=>`<button class="opt" data-k="${k}" data-v="${l}" onclick="pick(this.dataset.k,this.dataset.v)">${ic(ic_)}${l}</button>`).join('');
-const S=[
-{g:"Salut ! Je suis ton guide. On construit ton monde en 2 minutes.",h:()=>`<h2>Prêt à créer ton jeu Roblox ?</h2><button class="btn gold" onclick="next()">Démarrer ${ic('play')}</button>`},
-{g:"Comment tu t'appelles ?",h:()=>`<h2>Ton prénom</h2><input class="in" id="v" placeholder="Prénom" maxlength="30"><button class="btn" onclick="txt('name')">Continuer</button>`},
-{g:()=>`Enchanté ${A.name} ! Quel âge as-tu ?`,h:()=>`<h2>Ton âge</h2><div class="opts">${choice('age',[['user','Moins de 13'],['user','13–17'],['user','18–24'],['user','25+']])}</div>`},
-{g:"Connais-tu Roblox Studio ?",h:()=>`<h2>Ton niveau sur Studio</h2><div class="opts">${choice('xp',[['tool','Jamais ouvert'],['cube','Je bidouille'],['code','Je script déjà']])}</div>`},
-{g:"Quel type de jeu te fait envie ?",h:()=>`<h2>Type de jeu</h2><div class="opts">${choice('type',[['coin','Tycoon'],['rocket','Obby'],['game','Simulator'],['snow','Survie'],['city','RP / Ville']])}</div>`},
-{g:"Quel est ton objectif principal ?",h:()=>`<h2>Ton objectif</h2><div class="opts">${choice('goal',[['coin','Gagner de l\'argent'],['star','Devenir connu'],['game','Pour le fun']])}</div>`},
-{g:"Combien de temps par semaine ?",h:()=>`<h2>Ton temps dispo</h2><div class="opts">${choice('time',[['clock','1–3 h'],['clock','4–8 h'],['clock','10 h +']])}</div>`},
-{g:"Petite question : qu'est-ce qui fait qu'un joueur revient ?",h:()=>`<h2>Pourquoi un joueur revient-il ?</h2><div class="opts">${choice('quiz',[['star','La progression'],['msg','Le chat'],['gift','Les récompenses'],['bolt','Tout ça']])}</div>`},
-{g:"Décris ton jeu en une phrase. Regarde le monde réagir.",h:()=>`<h2>Ton idée en une phrase</h2><input class="in" id="v" value="${idea.replace(/"/g,'')}" placeholder="Ex : tycoon de glace avec pingouins" maxlength="140" oninput="w.set(this.value)"><button class="btn gold" onclick="txt('phrase')">Générer ${ic('bolt')}</button>`},
-{g:"Construction en cours…",h:()=>`<h2>Génération du monde</h2><div class="bigbar"><i id="gb"></i></div><p id="gt" style="color:#9fb0d0"></p>`,run:gen},
-{g:()=>`Terminé ! Voici ta map, ${A.name}.`,h:()=>`<h2>Ta map est prête</h2><p style="color:#9fb0d0;max-width:520px">Thème détecté : <b>${w.theme()}</b>. Il manque les scripts, prompts et le plan pour la publier.</p><button class="btn" onclick="next()">Débloquer mon pack ${ic('lock')}</button>`},
-{g:"Où envoie-t-on ton pack ?",h:()=>`<h2>Ton e-mail</h2><input class="in" id="v" type="email" placeholder="toi@mail.com"><button class="btn" onclick="mail()">Continuer</button>`},
-{g:"Dernière étape : récupère ton pack complet.",h:()=>{const l=({Tycoon:'tycoon',Obby:'obby',Simulator:'simulator',Survie:'survie','RP / Ville':'RP'})[A.type]||'jeu';return`<h2>Ton pack ${l} est prêt</h2><div class="card" style="text-align:left;max-width:460px">${['4 prompts','3 scripts Luau','4 achats à créer','Briefs visuels','Idées de vidéos','Plan semaine 2'].map(x=>`<div>${ic('check')} ${x}</div>`).join('')}</div><button class="btn gold" id="pay" onclick="pay()">Construire mon ${l} ${ic('arrow')}</button><small style="color:#9fb0d0">Paiement sécurisé par Whop</small>`}}];
-function render(){const s=S[i];$('#stage').innerHTML='<div class="panel">'+s.h()+'</div>';paintIcons($('#stage'));say(typeof s.g==='function'?s.g():s.g);$('#pb').style.width=(i/(S.length-1)*100)+'%';w.setProgress(.15+i/(S.length-1)*.85);s.run&&s.run();const v=$('#v');v&&v.focus()}
-function next(){SP({name:A.name,step:i+1,done:i+1>=S.length-1});beep(660);xp+=100;$('#lvl').textContent=`Niv. ${1+Math.floor(xp/300)} · ${xp} XP`;const it=ITEMS[Math.floor(i/2)-1];if(i>=2&&i%2===0&&it){document.querySelectorAll('.slot')[Math.floor(i/2)-1]?.classList.add('on');toast('Objet débloqué : '+it[1]);beep(880,.25)}i++;render()}
-function pick(k,v){A[k]=v;next()}
-function txt(k){const v=$('#v').value.trim();if(!v){$('#v').focus();return}A[k]=v;if(k==='phrase')w.set(v);next()}
-function gen(){const m=['Terrain…','Décors…','Économie…','Scripts…','Finitions…'];let p=0;const t=setInterval(()=>{p+=2;$('#gb').style.width=p+'%';$('#gt').textContent=m[Math.min(4,p/20|0)];w.setProgress(.5+p/200);if(p>=100){clearInterval(t);w.setProgress(1);next()}},90)}
-async function mail(){const v=$('#v').value.trim();if(!/^\S+@\S+\.\S+$/.test(v)){$('#v').focus();return}A.email=v;const r=await fetch('/api/lead',{method:'POST',body:JSON.stringify({name:A.name,email:v,answers:A})}).then(r=>r.json());try{localStorage.setItem('bx',JSON.stringify(r))}catch{}Object.assign(A,{_id:r.id,_t:r.token});next()}
-async function pay(){$('#pay').disabled=true;const r=await fetch('/api/checkout',{method:'POST',body:JSON.stringify({id:A._id,token:A._t})}).then(r=>r.json());if(r.url)location.href=r.url;else{$('#pay').disabled=false;toast('Erreur paiement')}}
-render();
-</script></body></html>
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bloxia · Construis ton jeu</title><meta name="theme-color" content="#05060b">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css"><link rel="stylesheet" href="/assets/css/funnel.css"></head>
+<body class="fx">
+<div class="fx-sky"></div><canvas id="fx-bg" aria-hidden="true"></canvas><div class="fx-vig"></div>
+<header class="fx-hud" id="fx-hud" hidden>
+  <button class="fx-b" id="fx-back" aria-label="Retour"><i data-i="arrow-left"></i></button>
+  <div class="fx-prog" role="progressbar" aria-label="Progression"><i id="fx-pbar"></i></div>
+  <button class="fx-b" id="fx-snd" aria-label="Voix du guide"></button>
+  <button class="fx-b fx-bag" id="fx-bag" aria-label="Inventaire"><i data-i="briefcase"></i><em id="fx-bagn" hidden>0</em></button>
+  <div class="fx-score"><b id="fx-blocs"><i data-i="cube"></i><span>0</span></b><span class="fx-stars" id="fx-stars"></span></div>
+  <div class="fx-lvl" id="fx-lvl" title="Niveau">1</div>
+</header>
+<div class="fx-guide" id="fx-guide" hidden><div class="fx-av" id="fx-av"></div>
+  <div class="fx-say"><div class="fx-sayh"><b id="fx-gname"></b><span class="fx-wave" id="fx-wave"><i></i><i></i><i></i><i></i></span></div><p id="fx-text"></p></div></div>
+<main class="fx-stage" id="fx-stage"></main>
+<div class="fx-mini" id="fx-minibox" hidden><canvas id="fx-mini" aria-hidden="true"></canvas><span class="fx-n">N</span><span class="fx-dot"></span></div>
+<aside class="fx-drawer" id="fx-drawer" aria-label="Inventaire"><div class="fx-dh"><b>Ton inventaire</b><button class="fx-b" id="fx-dclose" aria-label="Fermer"><i data-i="x"></i></button></div><div id="fx-items"></div></aside>
+<div class="fx-toast" id="fx-toast" role="status"></div>
+<script src="/assets/js/config.js"></script><script src="/assets/js/engine.js"></script><script src="/assets/js/common.js"></script><script src="/assets/js/avatars.js"></script><script src="/assets/js/funnel.js"></script>
+</body></html>

@@ -100,11 +100,11 @@
       this.cv = cv; this.x = cv.getContext('2d'); this.o = Object.assign({ autoRotate: true, interactive: false, offsetX: 0, offsetY: 0, scale: 1, speed: 1 }, o);
       this.blocks = []; this.theme = THEMES.grass; this.ang = .6; this.vel = 0; this.dragging = false; this.last = 0; this.idle = 0;
       this.prog = 0; this.target = 0; this.rate = .5; this.visible = true; this.doneCb = null; this.t = performance.now();
-      new ResizeObserver(() => this.fit()).observe(cv); this.fit();
-      if ('IntersectionObserver' in window) new IntersectionObserver(e => { this.visible = e[0].isIntersecting; }).observe(cv);
+      this.ro = new ResizeObserver(() => { this.fit(); if (this.paused) this.frame(performance.now()); }); this.ro.observe(cv); this.fit();
+      if ('IntersectionObserver' in window) { this.io = new IntersectionObserver(e => { this.visible = e[0].isIntersecting; }); this.io.observe(cv); }
       document.addEventListener('visibilitychange', () => { this.hidden = document.hidden; });
       if (this.o.interactive) this.bind();
-      const loop = t => { requestAnimationFrame(loop); if (this.visible && !this.hidden) this.frame(t); }; requestAnimationFrame(loop);
+      const loop = t => { if (this.dead) return; requestAnimationFrame(loop); if (this.visible && !this.hidden && !this.paused) this.frame(t); }; requestAnimationFrame(loop);
     }
     fit() { const d = Math.min(devicePixelRatio || 1, 2); this.cv.width = Math.max(2, this.cv.clientWidth * d); this.cv.height = Math.max(2, this.cv.clientHeight * d); this.d = d; }
     bind() {
@@ -115,6 +115,8 @@
       const up = () => { this.dragging = false; this.idle = performance.now(); c.style.cursor = 'grab'; };
       c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
     }
+    still(ang) { if (ang != null) this.ang = ang; this.snapReveal(1); this.paused = false; this.frame(performance.now()); this.paused = true; }
+    destroy() { this.dead = true; this.ro && this.ro.disconnect(); this.io && this.io.disconnect(); }
     configure(o) { Object.assign(this.o, o); }
     spin(on) { this.o.autoRotate = on; }
     set(blocks, theme, opt = {}) {
