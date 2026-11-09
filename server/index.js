@@ -62,6 +62,11 @@ const server = http.createServer(async (req, res) => {
       if (!l || l.token !== u.searchParams.get('token') || !l.paid) return send(res, 402, { error: 'unpaid' });
       return send(res, 200, pack(l));
     }
+    if (req.method === 'GET' && p === '/api/bg') {
+      const dir = path.join(PUB, 'img'); let l = [];
+      try { l = fs.readdirSync(dir).filter(f => /\.(jpe?g|png|webp)$/i.test(f)).sort().map(f => '/img/' + f); } catch {}
+      return send(res, 200, l);
+    }
     // statique, whitelist public/
     let f = path.normalize(path.join(PUB, p === '/' ? 'index.html' : p));
     if (!f.startsWith(PUB + path.sep) || !fs.existsSync(f) || !fs.statSync(f).isFile()) { res.writeHead(404); return res.end('404'); }
