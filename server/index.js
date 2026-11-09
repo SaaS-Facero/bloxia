@@ -2,7 +2,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
 try { fs.readFileSync(path.join(ROOT, '.env'), 'utf8').split('\n').forEach(l => { const m = l.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/); if (m && m[2] && !process.env[m[1]]) process.env[m[1]] = m[2]; }); } catch {}
-const handle = require('../lib/core'), PORT = +process.env.PORT || 8790, PUB = path.join(ROOT, 'public');
+const handle = require('../lib/core'), PORT = +process.env.PORT || 3000, PUB = path.join(ROOT, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.json': 'application/json' };
 http.createServer(async (req, res) => {
   const u = new URL(req.url, `http://localhost:${PORT}`), p = u.pathname;

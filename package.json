@@ -4,7 +4,8 @@
  "private": true,
  "scripts": {
   "start": "node scripts/bg.js && node server/index.js",
-  "build": "node scripts/bg.js"
+  "build": "node scripts/bg.js",
+  "dev": "node scripts/bg.js && node server/index.js"
  },
  "engines": {
   "node": ">=18"

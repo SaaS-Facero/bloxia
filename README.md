@@ -1,5 +1,5 @@
 # Bloxia
-Local : `npm start` → http://localhost:8790 (paiement simulé sans clés Whop).
+Local : `npm start` → http://localhost:3000 (paiement simulé sans clés Whop).
 
 ## Déploiement Vercel
 1. Importer le repo (pas de framework, laisser les réglages de `vercel.json`).
