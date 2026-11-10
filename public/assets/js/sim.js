@@ -28,22 +28,28 @@
     $('#sim-vo').textContent = fmt(c.v); $('#sim-po').textContent = fmt(c.p) + ' R$';
     tween($('#sim-year'), 'year', c.eurYear, 0, ' €');
     tween($('#sim-day'), 'day', c.eurDay, c.eurDay < 10 ? 2 : 0, ' €');
-    tween($('#sim-rob'), 'rob', c.robMonth, 0, ' R$');
-    $('#sim-month').textContent = fmt(c.eurMonth, c.eurMonth < 100 ? 2 : 0) + ' €';
+        $('#sim-month').textContent = fmt(c.eurMonth, c.eurMonth < 100 ? 2 : 0) + ' €';
     $('#sim-buy').textContent = fmt(Math.max(1, Math.round(c.v * CONV))) + ' achat' + (c.v * CONV >= 1.5 ? 's' : '') + ' / jour';
-    $('#sim-dx').textContent = c.robMonth >= 30000 ? 'Retrait DevEx possible chaque mois' : 'DevEx dès 30 000 R$ cumulés';
+    $('#sim-dx').textContent = c.robMonth >= 30000 ? 'retrait DevEx possible chaque mois' : 'retrait DevEx dès 30 000 R$ cumulés';
     for (const s of sec.querySelectorAll('.sim-v')) s.style.setProperty('--fill', (+s.value / (+s.max)) * 100 + '%');
   }
 
-  // ventes simulées qui tombent dans la liste et dans la notification
-  const list = $('#sim-list'), note = $('#sim-note');
+  // ventes simulées : liste dans le téléphone + notifications push qui tombent par-dessus
+  const list = $('#sim-list'), push = $('#sim-push');
+  const ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z" fill="#fff"/><path d="M12 7.2l4.2 2.4v4.8L12 16.8l-4.2-2.4V9.6z" fill="#0b0d18"/></svg>`;
+  const eur = r => r * DEVEX * EUR;
   function sale(first) {
-    const c = calc(), name = PASSES[Math.floor(Math.random() * PASSES.length)], gain = Math.round(c.p * SHARE);
+    const c = calc(), name = PASSES[Math.floor(Math.random() * PASSES.length)];
+    // une ligne = cumul de plusieurs ventes (≈ 1 h de ventes simulées)
+    const n = Math.max(1, Math.round(c.v * CONV / 24 * (0.6 + Math.random() * 0.8))), gainR = Math.round(n * c.p * SHARE), e = eur(gainR);
     const li = document.createElement('li'); li.className = 'sim-row new';
-    li.innerHTML = `<span class="sim-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z" fill="#fff"/><path d="M12 7.2l4.2 2.4v4.8L12 16.8l-4.2-2.4V9.6z" fill="#0b0d18"/></svg></span><span class="sim-nm"><b>Game Pass</b><small>${name}</small></span><span class="sim-am">+ ${fmt(gain)} R$</span>`;
+    li.innerHTML = `<span class="sim-ic">${ICON}</span><span class="sim-nm"><b>ROBLOX</b><small>${n > 1 ? n + ' × ' : ''}${name}</small></span><span class="sim-am">+ ${fmt(e, e < 10 ? 2 : 0)} €</span>`;
     list.prepend(li); requestAnimationFrame(() => requestAnimationFrame(() => li.classList.remove('new')));
-    [...list.children].forEach((e, k) => e.classList.toggle('hi', k === 0)); while (list.children.length > 6) list.lastElementChild.remove();
-    if (!first) { note.querySelector('b').textContent = 'Game Pass « ' + name + ' »'; note.querySelector('.sim-na').textContent = '+ ' + fmt(gain) + ' R$'; note.classList.remove('drop'); void note.offsetWidth; note.classList.add('drop'); }
+    [...list.children].forEach((x, k) => x.classList.toggle('hi', k === 0)); while (list.children.length > 6) list.lastElementChild.remove();
+    if (first && list.children.length < 6) return;
+    const pu = document.createElement('li'); pu.className = 'sim-pu';
+    pu.innerHTML = `<span class="sim-pl">${ICON}</span><span class="sim-pt"><small>ROBLOX · maintenant</small><b>${n > 1 ? n + ' achats' : 'Achat'} « ${name} »</b><em>+ ${fmt(gainR)} R$ · ≈ ${fmt(e, e < 10 ? 2 : 0)} €</em></span>`;
+    push.prepend(pu); [...push.children].forEach((x, k) => { x.style.setProperty('--k', k); if (k > 2) { x.classList.add('gone'); setTimeout(() => x.remove(), 500); } });
   }
   for (let k = 0; k < 6; k++) sale(true);
 
@@ -53,10 +59,10 @@
 
   vis.oninput = pri.oninput = render;
   // inclinaison légère du téléphone à la souris
-  const ph = $('.sim-phone');
+  const ph = $('.sim-tilt');
   if (matchMedia('(hover:hover)').matches && !matchMedia('(prefers-reduced-motion:reduce)').matches) {
-    root.addEventListener('pointermove', e => { const r = root.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; ph.style.transform = `rotateY(${x * 10}deg) rotateX(${-y * 8}deg)`; });
-    root.addEventListener('pointerleave', () => ph.style.transform = '');
+    root.addEventListener('pointermove', e => { const r = root.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; ph.style.setProperty('--mx', x * 8 + 'deg'); ph.style.setProperty('--my', -y * 6 + 'deg'); });
+    root.addEventListener('pointerleave', () => { ph.style.setProperty('--mx', '0deg'); ph.style.setProperty('--my', '0deg'); });
   }
   render();
 })();
