@@ -13,5 +13,7 @@
       `<path d="M26 32a24 22 0 0 1 48 0v4H26z" fill="#1f1b16"/><rect x="32" y="36" width="16" height="11" rx="3.500" fill="#0b0b10" stroke="#ffc53d" stroke-width="2"/><rect x="52" y="36" width="16" height="11" rx="3.500" fill="#0b0b10" stroke="#ffc53d" stroke-width="2"/><rect x="47" y="39" width="6" height="2.500" fill="#ffc53d"/>` +
       `<path d="M43 55q7 6 14 0" stroke="#1b1b24" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M44 58h12v6q-6 4-12 0z" fill="#1f1b16"/>`
   };
-  window.AV = { svg: (id, cls = '') => `<svg class="av ${cls}" viewBox="0 0 100 100" aria-hidden="true">${(G[id] || G.pixel)()}</svg>` };
+  // Guides illustrés (rendus 3D, fond transparent). Les anciens SVG restent en secours.
+  const IMG = { pixel: 1, nova: 1, rex: 1 };
+  window.AV = { svg: (id, cls = '') => IMG[id] ? `<img class="av av-img ${cls}" src="/assets/img/guides/${id}.png" width="200" height="200" alt="" decoding="async">` : `<svg class="av ${cls}" viewBox="0 0 100 100" aria-hidden="true">${(G[id] || G.pixel)()}</svg>` };
 })();

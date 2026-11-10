@@ -296,3 +296,11 @@ textarea.fx-in{min-height:112px}.fx-mic{position:absolute;right:10px;bottom:10px
 .pr-g2l{position:relative}.mas-g2{position:absolute;right:-26px;top:-34px;width:84px;height:84px;transform:scaleX(-1) rotate(-6deg);filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));pointer-events:none}
 @media(max-width:620px){.mas-g2{right:-6px;top:-40px;width:68px;height:68px}}
 @media(prefers-reduced-motion:reduce){.mas-walk,.mas-walk .mas-img,.mas-res .mas-img{animation:none}.mas-walk{left:12px}}
+
+/* guides illustrés */
+.fx-av .av-img{inset:auto;left:50%;top:-4%;width:150%;height:150%;max-width:none;transform:translateX(-50%);object-fit:contain}
+.fx-pcard .av-img{width:min(62%,340px);height:auto;bottom:4%;filter:drop-shadow(0 20px 30px rgba(0,0,0,.6)) drop-shadow(0 0 40px color-mix(in srgb,var(--gc) 45%,transparent))}
+.fx-pcard #pav{position:absolute;inset:0}
+.fx-pcard #pav .av-img{animation:bob2 4s ease-in-out infinite,gpop .55s cubic-bezier(.3,1.5,.5,1)}
+@keyframes gpop{from{transform:translateX(-50%) translateY(30px) scale(.7);opacity:0}}
+.fx-pcard .av-img{left:60%}@media(max-width:620px){.fx-pcard .av-img{left:62%;width:64%;bottom:14%}}
