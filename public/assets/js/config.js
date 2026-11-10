@@ -1,5 +1,5 @@
 window.BLOXIA_CONFIG = {
-  brand: 'Bloxia', supportEmail: 'contact@bloxia.fr',
+  brand: 'Bloxia', domain: 'getbloxia.com', supportEmail: 'contact@getbloxia.com',
   devexRate: 0.0038, creatorShare: 0.7, devexMin: 30000, guaranteeDays: 14,
   legal: { editor: '', legalForm: '', capital: '', siret: '', vat: '', address: '', director: '', host: '', mediator: '' },
   updatedAt: '9 novembre 2026',

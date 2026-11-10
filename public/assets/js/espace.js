@@ -180,7 +180,7 @@
     const pad = x => String(x).padStart(2, '0'), start = midnight(planStart()), url = location.origin + '/espace.html', L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Bloxia//Programme 14 jours//FR', 'CALSCALE:GREGORIAN'];
     const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
     D.plan.forEach(d => { const t = new Date(start + (d.j - 1) * DAY); t.setHours(18, 0, 0, 0); const s = `${t.getFullYear()}${pad(t.getMonth() + 1)}${pad(t.getDate())}T180000`;
-      L.push('BEGIN:VEVENT', `UID:bloxia-${ses.id}-j${d.j}@bloxia`, `DTSTAMP:${stamp}`, `DTSTART:${s}`, 'DURATION:PT45M', `SUMMARY:Bloxia · Jour ${d.j} : ${d.titre}`, `DESCRIPTION:${(d.objectif + ' ' + url).replace(/[,;]/g, ' ')}`, `URL:${url}`, 'BEGIN:VALARM', 'TRIGGER:-PT0M', 'ACTION:DISPLAY', `DESCRIPTION:Jour ${d.j} de ton programme Bloxia`, 'END:VALARM', 'END:VEVENT'); });
+      L.push('BEGIN:VEVENT', `UID:bloxia-${ses.id}-j${d.j}@getbloxia.com`, `DTSTAMP:${stamp}`, `DTSTART:${s}`, 'DURATION:PT45M', `SUMMARY:Bloxia · Jour ${d.j} : ${d.titre}`, `DESCRIPTION:${(d.objectif + ' ' + url).replace(/[,;]/g, ' ')}`, `URL:${url}`, 'BEGIN:VALARM', 'TRIGGER:-PT0M', 'ACTION:DISPLAY', `DESCRIPTION:Jour ${d.j} de ton programme Bloxia`, 'END:VALARM', 'END:VEVENT'); });
     L.push('END:VCALENDAR'); return new Blob([L.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
   }
 
