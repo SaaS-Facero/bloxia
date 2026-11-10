@@ -7,7 +7,7 @@
   if (q.get('id') && q.get('token')) { ses = { id: q.get('id'), token: q.get('token') }; try { localStorage.setItem(K, JSON.stringify(ses)); } catch {} history.replaceState(null, '', '/espace.html'); }
   const toast = t => { const e = $('#toast'); e.textContent = t; e.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('show'), 1800); };
   const copy = (txt, msg) => { (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast(msg || 'Copié'), () => toast('Copie impossible, sélectionne le texte')); };
-  $('#out').onclick = () => { try { localStorage.removeItem(K); } catch {} location.href = '/espace.html'; };
+  $('#out').onclick = () => { try { localStorage.removeItem(K); localStorage.removeItem('bloxia.profile'); Object.keys(localStorage).filter(x => x.startsWith('bloxia.espace.')).forEach(x => localStorage.removeItem(x)); } catch {} location.href = '/espace.html'; };
 
   // ---------- connexion ----------
   function login(msg) {
@@ -56,7 +56,7 @@
   }
 
   // ---------- sections ----------
-  const card = (id, n, title, sub, body, open) => `<div class="card ${done.has(id) ? 'done' : ''} ${open ? 'open' : ''}" data-card="${id}"><div class="ch"><span class="num">${n}</span><div class="ct"><b>${title}</b>${sub ? `<span>${sub}</span>` : ''}</div>${checkBtn(id)}<button class="toggle" aria-label="Afficher">${ic('chevron-down')}</button></div><div class="cb">${body}</div></div>`;
+  const card = (id, n, title, sub, body, open) => `<div class="card ${done.has(id) ? 'done' : ''} ${open ? 'open' : ''}" data-card="${id}"><div class="ch"><span class="num">${n}</span><div class="ct"><b>${esc(title)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</div>${checkBtn(id)}<button class="toggle" aria-label="Afficher">${ic('chevron-down')}</button></div><div class="cb">${body}</div></div>`;
   const R = {
     start: () => `<div class="sh"><div><h1>Démarrer</h1><p>Prépare Roblox Studio. Compte 15 minutes.</p></div></div>
       ${D.start.map((s, i) => card('st' + i, i + 1, s.t, '', `<p>${esc(s.d)}</p>`, i === 0)).join('')}`,
