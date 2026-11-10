@@ -319,6 +319,8 @@
         const roll = el => { const to = +el.dataset.v, t0 = performance.now(), from = to * 1.6; const f = t => { const p = Math.min(1, (t - t0) / 650), e = 1 - Math.pow(1 - p, 3); el.textContent = eur(r2(from + (to - from) * e)); if (p < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); };
         const draw = (animate) => {
           st.querySelector('.pr-cycle').dataset.on = cycle; $$('.pr-cycle button', st).forEach(b => b.setAttribute('aria-checked', b.dataset.cycle === cycle)); st.querySelector('#prtrial').classList.toggle('on', cycle === 'year');
+          // L'offre −30 % ne vaut que pour le mensuel : on masque la bannière minuteur en annuel (évite 2 promos concurrentes).
+          const ofb = st.querySelector('#ofb'); if (ofb) ofb.style.display = cycle === 'year' ? 'none' : '';
           st.querySelector('#plans').innerHTML = O.plans.map(card).join('');
           st.querySelector('#prendsub').textContent = cycle === 'year' ? '3 jours d\'essai gratuit, 0 € aujourd\'hui. Annulable avant la fin de l\'essai.' : 'Sans engagement, résiliable en un clic.';
           st.querySelector('#prmini').innerHTML = O.plans.map(p => { const c = calc(p); return `<div class="pr-mc ${p.featured ? 'feat' : ''}" style="--pc:${COL[p.id]}"><span class="pr-mce">${PA.emblem(p.id)}</span><div class="pr-mct"><b>${p.name}</b><span>${c.strike ? `<s>${eur(c.strike)}</s>` : ''}<strong>${eur(c.perDay)}</strong> / jour</span><small>${c.yr ? '0 € aujourd\'hui' : (expired ? eur(c.full) + ' / mois' : eur(c.first) + ' le 1er mois')}</small></div><button class="btn ${p.featured ? 'btn-gold' : 'pr-btn'}" data-plan="${p.id}"><span class="lbl">${c.yr ? 'J\'essaie' : 'Je choisis'}</span>${ic('arrow-right')}</button></div>`; }).join('');

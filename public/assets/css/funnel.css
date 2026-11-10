@@ -304,3 +304,12 @@ textarea.fx-in{min-height:112px}.fx-mic{position:absolute;right:10px;bottom:10px
 .fx-pcard #pav .av-img{animation:bob2 4s ease-in-out infinite,gpop .55s cubic-bezier(.3,1.5,.5,1)}
 @keyframes gpop{from{transform:translateX(-50%) translateY(30px) scale(.7);opacity:0}}
 .fx-pcard .av-img{left:60%}@media(max-width:620px){.fx-pcard .av-img{left:62%;width:64%;bottom:14%}}
+/* === UX prix : lisibilité mobile du tableau + bannière non collante === */
+@media(max-width:620px){
+  .fx-offer{position:static;top:auto}
+  .pr-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .pr-table table{min-width:430px}
+  .pr-table th:first-child,.pr-table td:first-child{position:sticky;left:0;background:#0b0d16;z-index:2;text-align:left}
+  .pr-table thead th{position:sticky;top:56px;background:#0b0d16;z-index:3}
+  .pr-table thead th:first-child{z-index:4}
+}
