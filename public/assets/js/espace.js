@@ -28,8 +28,10 @@
   // ---------- progression ----------
   let D = null, done = new Set();
   const PK = () => 'bloxia.progress.' + ses.id;
-  const loadProg = () => { try { done = new Set(JSON.parse(localStorage.getItem(PK())) || []); } catch { done = new Set(); } };
-  const saveProg = () => { try { localStorage.setItem(PK(), JSON.stringify([...done])); } catch {} };
+  const loadProg = () => { let local = []; try { local = JSON.parse(localStorage.getItem(PK())) || []; } catch {} done = new Set([...((D.progress && D.progress.done) || []), ...local]); };
+  let syncT = 0;
+  const pushProg = () => fetch('/api/progress', { method: 'POST', body: JSON.stringify({ id: ses.id, token: ses.token, done: [...done] }) }).then(r => r.json()).then(j => { if (j && j.start && D.progress) D.progress.start = D.progress.start || j.start; }).catch(() => {});
+  const saveProg = () => { try { localStorage.setItem(PK(), JSON.stringify([...done])); } catch {} clearTimeout(syncT); syncT = setTimeout(pushProg, 800); };
   const SECTIONS = [
     ['start', 'Démarrer', 'rocket', () => D.start.map((_, i) => 'st' + i)],
     ['prompts', 'Prompts Studio', 'terminal', () => D.prompts.map(p => p.id)],
@@ -38,7 +40,7 @@
     ['visuals', 'Visuels', 'image', () => ['vicon', 'vt0', 'vt1', 'vt2']],
     ['listing', 'Fiche du jeu', 'file', () => D.checklist.map((_, i) => 'ck' + i)],
     ['videos', 'Vidéos TikTok', 'video', () => D.tiktok.map((_, i) => 'tk' + i)],
-    ['plan', 'Plan 14 jours', 'calendar', () => D.plan.map((_, i) => 'd' + i)]
+    ['plan', 'Programme', 'calendar', () => D.plan.flatMap(d => d.etapes.map((_, i) => stepId(d.j, i)))]
   ];
   const allIds = () => SECTIONS.flatMap(s => s[3]());
   function refreshProgress() {
@@ -50,7 +52,7 @@
   function bindChecks(root) {
     $$('[data-done]', root).forEach(b => b.onclick = e => { e.stopPropagation(); const id = b.dataset.done; done.has(id) ? done.delete(id) : done.add(id); saveProg();
       const on = done.has(id); b.classList.toggle('on', on); const sp = b.querySelector('span'); if (sp) sp.textContent = on ? 'Fait' : (b.dataset.label || 'Fait');
-      const card = b.closest('.card'); if (card) card.classList.toggle('done', on); refreshProgress(); if (on) toast('Étape validée'); });
+      const card = b.closest('.card'); if (card) card.classList.toggle('done', on); refreshProgress(); if (on) { markActivity(); saveProg(); sfx.check(); toast('Étape validée'); } });
   }
 
   // ---------- sections ----------
@@ -78,8 +80,7 @@
       <div class="card"><div class="ch"><div class="ct"><b>Réglages</b></div></div><ol class="steps">${D.listing.settings.map(t => `<li><span>${esc(t)}</span></li>`).join('')}</ol></div>`,
     videos: () => `<div class="sh"><div><h1>Vidéos TikTok</h1><p>3 vidéos courtes pour tes premiers joueurs.</p></div></div>
       ${D.tiktok.map((v, i) => card('tk' + i, i + 1, esc(v.titre), 'Accroche : ' + esc(v.hook), `<ul class="ver">${v.plans.map(p => `<li>${ic('video')}${esc(p)}</li>`).join('')}</ul><div class="code" style="margin-top:10px">${esc(v.legende + '\n' + v.tags)}</div><div class="row"><button class="btn" data-copy="tk${i}">${ic('copy')}Copier la légende</button></div>`, i === 0)).join('')}`,
-    plan: () => `<div class="sh"><div><h1>Plan 14 jours</h1><p>Une tâche par jour, de la création à la première mise à jour.</p></div></div>
-      <div class="days">${D.plan.map((d, i) => dayBtn('d' + i, d.j, d.t)).join('')}</div><p class="note">${esc(D.devex)}</p>`
+    plan: () => planHTML()
   };
   function specialBlock(s) {
     return `<ol class="steps" style="padding:0 0 10px">${(s.installation || []).map(t => `<li><span>${esc(t)}</span></li>`).join('')}</ol>
@@ -93,7 +94,94 @@
     return '';
   }
   function dayBtn(id, label, text) { return `<button class="day ${done.has(id) ? 'on' : ''}" data-day="${id}"><span class="box">${ic('check')}</span><div>${label ? `<b>${esc(label)}</b>` : ''}<span>${esc(text)}</span></div></button>`; }
-  const COPY = () => { const m = {}; D.prompts.forEach((p, i) => m['p' + i] = p.texte); D.scripts.forEach((s, i) => m['s' + i] = s.code); m.vicon = D.visuals.icon.prompt; D.visuals.thumbs.forEach((t, i) => m['vt' + i] = t.prompt); D.listing.titles.forEach((t, i) => m['ti' + i] = t); m.desc = D.listing.description; D.tiktok.forEach((v, i) => m['tk' + i] = v.legende + '\n' + v.tags); return m; };
+  const COPY = () => { const m = {}; D.plan.forEach(d => { if (d.prompt) m['dp' + d.j] = d.prompt; }); D.prompts.forEach((p, i) => m['p' + i] = p.texte); D.scripts.forEach((s, i) => m['s' + i] = s.code); m.vicon = D.visuals.icon.prompt; D.visuals.thumbs.forEach((t, i) => m['vt' + i] = t.prompt); D.listing.titles.forEach((t, i) => m['ti' + i] = t); m.desc = D.listing.description; D.tiktok.forEach((v, i) => m['tk' + i] = v.legende + '\n' + v.tags); return m; };
+
+  // ---------- sons (discrets, désactivables) ----------
+  let actx = null, soundOn = true; try { soundOn = localStorage.getItem('bloxia.espace.snd') !== '0'; } catch {}
+  function tone(f, d, type, v, delay) { try { actx = actx || new AudioContext(); const t = actx.currentTime + (delay || 0), o = actx.createOscillator(), g = actx.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v || .06, t + .012); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d + .02); } catch {} }
+  const sfx = {
+    tap: () => soundOn && (tone(660, .09, 'sine', .05), tone(880, .12, 'sine', .04, .06)),
+    back: () => soundOn && tone(520, .1, 'sine', .04),
+    check: () => soundOn && (tone(740, .1, 'triangle', .06), tone(1110, .16, 'triangle', .05, .07)),
+    win: () => soundOn && [523, 659, 784, 1046].forEach((f, i) => tone(f, .22, 'triangle', .06, i * .09)),
+    unlock: () => soundOn && (tone(440, .12, 'sine', .05), tone(660, .12, 'sine', .05, .08), tone(990, .2, 'sine', .05, .16))
+  };
+  function soundBtn() { const b = $('#sndbtn'); if (!b) return; b.innerHTML = ic(soundOn ? 'volume' : 'volume-off'); b.onclick = () => { soundOn = !soundOn; try { localStorage.setItem('bloxia.espace.snd', soundOn ? '1' : '0'); } catch {} soundBtn(); sfx.tap(); }; }
+
+  // ---------- programme 14 jours ----------
+  const DAY = 86400000;
+  const dateKey = d => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+  const midnight = t => { const x = new Date(t); x.setHours(0, 0, 0, 0); return x.getTime(); };
+  const planStart = () => (D.progress && D.progress.start) || Date.now();
+  const todayN = () => Math.min(14, Math.floor((midnight(Date.now()) - midnight(planStart())) / DAY) + 1);
+  const stepId = (n, i) => `d${n}-${i}`;
+  const dayDone = d => d.etapes.every((_, i) => done.has(stepId(d.j, i)));
+  const dayCount = d => d.etapes.filter((_, i) => done.has(stepId(d.j, i))).length;
+  function streak() {
+    let n = 0, t = midnight(Date.now());
+    if (!done.has('a:' + dateKey(t))) t -= DAY;
+    while (done.has('a:' + dateKey(t))) { n++; t -= DAY; }
+    return n;
+  }
+  function markActivity() { done.add('a:' + dateKey(Date.now())); }
+  let planDay = null;
+  function nextUnlockText() {
+    const n = todayN(); if (n >= 14) return '';
+    const ms = midnight(Date.now()) + DAY - Date.now(), h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60;
+    return `Jour ${n + 1} dans ${h} h ${String(m).padStart(2, '0')}`;
+  }
+  function ring(p) { const r = 26, c = 2 * Math.PI * r; return `<svg class="ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="${r}" fill="none" stroke="#eceef2" stroke-width="6"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--acc)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - p)}" transform="rotate(-90 32 32)"/></svg>`; }
+  function badges() {
+    const st = streak(), pub = D.plan[6] && dayDone(D.plan[6]), all = D.plan.every(dayDone);
+    const B = [['flame', '3 jours de suite', st >= 3], ['rocket', 'Jeu publié', pub], ['calendar', '7 jours de suite', st >= 7], ['trophy', 'Programme terminé', all]];
+    return `<div class="badges">${B.map(([i, t, ok]) => `<span class="badge ${ok ? 'on' : ''}">${ic(ok ? i : 'lock')}${t}</span>`).join('')}</div>`;
+  }
+  function retention() {
+    const n = todayN(), doneSteps = D.plan.reduce((a, d) => a + dayCount(d), 0), pub = D.plan[6] && dayDone(D.plan[6]);
+    if (!pub && n <= 7) return `<b>Ton jeu sera en ligne le jour 7.</b> Plus que ${Math.max(0, 7 - n)} jour${7 - n > 1 ? 's' : ''} : tu as déjà validé ${doneSteps} étape${doneSteps > 1 ? 's' : ''}, ne t'arrête pas en si bon chemin.`;
+    if (pub && n < 14) return `<b>Ton jeu est en ligne.</b> Les jeux qui grandissent sont ceux qui sont mis à jour chaque semaine : chaque jour du programme te rapproche de ta première mise à jour.`;
+    if (n >= 14 && D.plan.every(dayDone)) return `<b>Bravo, programme terminé.</b> La suite : une mise à jour par semaine, ou un nouveau jeu à générer avec ton abonnement.`;
+    return `<b>Chaque jour compte.</b> 30 à 60 minutes par jour suffisent pour faire avancer ${esc(D.titre)}.`;
+  }
+  function planHTML() {
+    const n = todayN(), st = streak(), total = D.plan.reduce((a, d) => a + d.etapes.length, 0), ok = D.plan.reduce((a, d) => a + dayCount(d), 0);
+    if (planDay == null || planDay > n) planDay = Math.min(n, (D.plan.find(d => d.j <= n && !dayDone(d)) || D.plan[n - 1]).j);
+    const d = D.plan[planDay - 1], cnt = dayCount(d), complete = dayDone(d), next = D.plan[planDay];
+    return `<div class="sh"><div><h1>Programme 14 jours</h1><p>Un jour, une page. Un nouveau jour se débloque chaque matin.</p></div><button class="btn" id="ics">${ic('calendar')}Ajouter les rappels à mon agenda</button></div>
+      <div class="phead" data-tour="phead"><div class="pring">${ring(ok / total)}<div><b>Jour ${n}</b><span>sur 14</span></div></div>
+        <div class="pinfo"><div class="pstat"><span class="flame ${st ? 'on' : ''}">${ic('flame')}</span><div><b>${st} jour${st > 1 ? 's' : ''}</b><span>de suite</span></div></div>
+        <div class="pstat"><span>${ic('check-circle')}</span><div><b>${ok}/${total}</b><span>étapes validées</span></div></div>
+        ${n < 14 ? `<div class="pstat"><span>${ic('clock')}</span><div><b id="cdown">${nextUnlockText()}</b><span>prochain déblocage</span></div></div>` : ''}</div></div>
+      <p class="pmsg">${retention()}</p>${badges()}
+      <div class="strip" data-tour="strip">${D.plan.map(x => { const lock = x.j > n, dn = dayDone(x); return `<button class="dtile ${x.j === planDay ? 'sel' : ''} ${dn ? 'done' : ''} ${lock ? 'lock' : ''} ${x.j === n ? 'today' : ''}" data-pd="${x.j}" ${lock ? 'aria-disabled="true"' : ''}><small>Jour</small><b>${x.j}</b><span>${lock ? ic('lock') : dn ? ic('check') : x.j === n ? 'Auj.' : `${dayCount(x)}/${x.etapes.length}`}</span></button>`; }).join('')}</div>
+      <article class="dpage ${complete ? 'complete' : ''}" data-tour="dpage"><header><span class="dnum">Jour ${d.j}</span><h2>${esc(d.titre)}</h2><div class="dmeta"><span class="tag">${ic('clock')}${esc(d.duree)}</span><span class="tag acc">${cnt}/${d.etapes.length} étapes</span></div></header>
+        <p class="dobj">${esc(d.objectif)}</p><p class="dwhy">${esc(d.pourquoi)}</p>
+        <div class="dsteps">${d.etapes.map((e, i) => { const id = stepId(d.j, i); return `<button class="dstep ${done.has(id) ? 'on' : ''}" data-step="${id}"><span class="box">${ic('check')}</span><span>${esc(e)}</span></button>`; }).join('')}</div>
+        ${d.prompt ? `<div class="dprompt"><div class="dph"><b>${ic('terminal')}Le prompt du jour</b><button class="btn acc" data-copy="dp${d.j}">${ic('copy')}Copier</button></div><div class="code">${esc(d.prompt)}</div></div>` : ''}
+        <div class="dtip">${ic('bulb')}<div><b>L'astuce du jour</b><span>${esc(d.astuce)}</span></div></div>
+        <details class="dhelp"><summary>${ic('shield')}Si tu bloques<span>${ic('chevron-down')}</span></summary><ul>${d.blocage.map(x => `<li>${esc(x)}</li>`).join('')}</ul><p class="note" style="margin-top:8px">Toujours bloqué ? Écris-nous à ${esc(BLOXIA_CONFIG.supportEmail)}, on te répond en français.</p></details>
+        <div class="dwin ${complete ? 'show' : ''}">${ic('trophy')}<div><b>Jour ${d.j} terminé</b><span>${esc(d.victoire)}</span></div></div>
+        <div class="dnext">${next ? `<div class="dnl">${next.j > n ? ic('lock') : ic('arrow-right')}<div><small>${next.j > n ? 'Se débloque demain' : 'Jour suivant'}</small><b>Jour ${next.j} · ${esc(next.titre)}</b><span>${esc(d.demain)}</span></div></div>${next.j <= n ? `<button class="btn acc" data-pd="${next.j}">Je passe au jour ${next.j}${ic('arrow-right')}</button>` : ''}` : `<div class="dnl">${ic('rocket')}<div><small>Et après ?</small><b>Ton rythme de créateur</b><span>${esc(d.demain)}</span></div></div>`}</div>
+      </article><p class="note">${esc(D.devex)}</p>`;
+  }
+  function bindPlan(main) {
+    $$('[data-pd]', main).forEach(b => b.onclick = () => { const j = +b.dataset.pd; if (j > todayN()) { toast('Ce jour se débloque plus tard. Reviens demain !'); sfx.back(); return; } planDay = j; sfx.tap(); show('plan'); });
+    $$('[data-step]', main).forEach(b => b.onclick = () => {
+      const id = b.dataset.step, d = D.plan[planDay - 1], wasDone = dayDone(d);
+      done.has(id) ? done.delete(id) : (done.add(id), markActivity()); b.classList.toggle('on', done.has(id)); saveProg(); refreshProgress();
+      if (!wasDone && dayDone(d)) { sfx.win(); burst(b); show('plan'); toast(`Jour ${d.j} terminé`); } else if (done.has(id)) { sfx.check(); show('plan'); } else show('plan');
+    });
+    const ics = $('#ics', main); if (ics) ics.onclick = () => { download('bloxia-programme-14-jours.ics', calendar()); sfx.tap(); };
+    clearInterval(bindPlan.t); bindPlan.t = setInterval(() => { const c = $('#cdown'); if (!c) return clearInterval(bindPlan.t); c.textContent = nextUnlockText(); if (todayN() !== +($('.dtile.today b') || {}).textContent) { sfx.unlock(); show('plan'); } }, 30000);
+  }
+  function burst(el) { const r = el.getBoundingClientRect(), cols = ['#4f6bed', '#16a34a', '#f59e0b', '#ec4899']; for (let k = 0; k < 18; k++) { const e = document.createElement('i'), a = Math.random() * Math.PI * 2, dd = 40 + Math.random() * 80; e.className = 'bit'; e.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;background:${cols[k % 4]};--dx:${Math.cos(a) * dd}px;--dy:${Math.sin(a) * dd - 30}px`; document.body.appendChild(e); setTimeout(() => e.remove(), 900); } }
+  function calendar() {
+    const pad = x => String(x).padStart(2, '0'), start = midnight(planStart()), url = location.origin + '/espace.html', L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Bloxia//Programme 14 jours//FR', 'CALSCALE:GREGORIAN'];
+    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+    D.plan.forEach(d => { const t = new Date(start + (d.j - 1) * DAY); t.setHours(18, 0, 0, 0); const s = `${t.getFullYear()}${pad(t.getMonth() + 1)}${pad(t.getDate())}T180000`;
+      L.push('BEGIN:VEVENT', `UID:bloxia-${ses.id}-j${d.j}@bloxia`, `DTSTAMP:${stamp}`, `DTSTART:${s}`, 'DURATION:PT45M', `SUMMARY:Bloxia · Jour ${d.j} : ${d.titre}`, `DESCRIPTION:${(d.objectif + ' ' + url).replace(/[,;]/g, ' ')}`, `URL:${url}`, 'BEGIN:VALARM', 'TRIGGER:-PT0M', 'ACTION:DISPLAY', `DESCRIPTION:Jour ${d.j} de ton programme Bloxia`, 'END:VALARM', 'END:VEVENT'); });
+    L.push('END:VCALENDAR'); return new Blob([L.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+  }
 
   let current = 'start';
   function show(k) {
@@ -104,7 +192,7 @@
     $$('.card .ch', main).forEach(h => h.onclick = () => h.parentElement.classList.toggle('open'));
     $$('[data-day]', main).forEach(b => b.onclick = () => { const id = b.dataset.day; done.has(id) ? done.delete(id) : done.add(id); saveProg(); b.classList.toggle('on', done.has(id)); refreshProgress(); });
     const z = $('#zip'); if (z) z.onclick = () => download(`${D.titre.replace(/\s+/g, '-')}-scripts.zip`, zip(D));
-    bindChecks(main); window.scrollTo({ top: 0 });
+    bindChecks(main); if (k === 'plan') bindPlan(main); window.scrollTo({ top: 0 });
     try { sessionStorage.setItem('bloxia.sec', k); } catch {}
   }
 
@@ -139,7 +227,8 @@
     { sel: '.meta', sec: 'scripts', t: 'Où mettre chaque script', p: 'Le type et l\'emplacement exact sont indiqués ici. Respecte bien le nom du script.' },
     { sel: '#zip', sec: 'scripts', t: 'Tout télécharger', p: 'Récupère tous les scripts d\'un coup, avec un fichier qui explique où placer chacun.' },
     { sel: '[data-tour="shop"]', sec: 'shop', t: 'Ta boutique', p: 'Les 4 achats à créer sur Roblox, leur prix conseillé et le bon moment pour les proposer.' },
-    { sel: '.nav [data-s="plan"]', sec: 'plan', t: 'Le plan 14 jours', p: 'Une tâche par jour, de la création à ta première mise à jour. Suis-le et tu ne seras jamais perdu.' },
+    { sel: '[data-tour="phead"]', sec: 'plan', t: 'Ton programme 14 jours', p: 'Un nouveau jour se débloque chaque matin. Ici, tu vois ton jour, ta série de jours d\'affilée et le prochain déblocage.' },
+    { sel: '[data-tour="strip"]', sec: 'plan', t: 'Un jour, une page', p: 'Chaque jour a sa page : objectif, étapes à cocher, astuce et aide si tu bloques. Reviens chaque jour pour garder ta série.' },
     { sel: '#tourbtn', t: 'Revoir ce guide', p: 'Tu peux relancer ce guide à tout moment avec ce bouton. Bonne création !' }
   ];
   let ti = 0, zoomed = null, before = 'start';
@@ -171,9 +260,9 @@
   }
   function tour() { before = current; $('#tour').hidden = false; step(0); document.addEventListener('keydown', keys); }
   function endTour() { $('#tour').hidden = true; if (zoomed) zoomed.classList.remove('zoom'); zoomed = null; try { localStorage.setItem('bloxia.tour', '1'); } catch {} document.removeEventListener('keydown', keys); show(before === 'start' ? 'start' : before); }
-  function keys(e) { if (e.key === 'Escape') endTour(); if (e.key === 'ArrowRight') next(); if (e.key === 'ArrowLeft') step(ti - 1); }
-  function next() { ti === TOUR.length - 1 ? endTour() : step(ti + 1); }
-  $('#tnext').onclick = next; $('#tprev').onclick = () => step(ti - 1); $('#tskip').onclick = endTour; $('#tourbtn').onclick = tour;
+  function keys(e) { if (e.key === 'Escape') endTour(); if (e.key === 'ArrowRight') next(); if (e.key === 'ArrowLeft') { sfx.back(); step(ti - 1); } }
+  function next() { if (ti === TOUR.length - 1) { sfx.win(); endTour(); } else { sfx.tap(); step(ti + 1); } }
+  $('#tnext').onclick = next; $('#tprev').onclick = () => { sfx.back(); step(ti - 1); }; $('#tskip').onclick = () => { sfx.back(); endTour(); }; $('#tourbtn').onclick = tour;
   addEventListener('resize', () => { if (!$('#tour').hidden) step(ti); });
 
   // ---------- chargement ----------
@@ -183,7 +272,7 @@
     let r; try { r = await fetch(`/api/pack?id=${encodeURIComponent(ses.id)}&token=${encodeURIComponent(ses.token)}`); } catch { app.innerHTML = '<p class="err" style="grid-column:1/-1">Connexion impossible.</p>'; return; }
     if (r.status === 402) { app.innerHTML = `<div class="auth"><h1>Ton pack t'attend</h1><p>Ton compte est prêt, mais ton pack n'est pas encore débloqué.</p><a class="primary" style="justify-content:center;height:42px;text-decoration:none;display:flex" href="/funnel.html">Je débloque mon pack</a></div>`; return; }
     if (!r.ok) return login('Ta session a expiré. Reconnecte-toi.');
-    D = await r.json(); loadProg();
+    D = await r.json(); D.progress = D.progress || { done: [], start: null }; loadProg(); soundBtn(); $('#sndbtn').hidden = false; if (!D.progress.start) pushProg();
     $('#game').hidden = false; $('#gname').textContent = D.titre; $('#gmeta').textContent = `${D.genre} · ${D.theme}`; $('#prog').hidden = false; $('#tourbtn').hidden = false;
     app.innerHTML = `<nav class="nav" aria-label="Sections">${SECTIONS.map(([k, n, i]) => `<button data-s="${k}">${ic(i)}<span>${n}</span><em></em></button>`).join('')}</nav><main class="main" id="main"></main>`;
     BX.hydrate(document); $$('.nav button').forEach(b => b.onclick = () => show(b.dataset.s));
