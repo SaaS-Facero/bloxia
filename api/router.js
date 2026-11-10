@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   const path = rt != null ? '/api/' + rt.replace(/^\/+/, '') : u.pathname;
   try {
     const r = await handle({ method: req.method, path, q: u.searchParams, raw: Buffer.concat(chunks).toString(), headers: req.headers });
-    if (!r) { res.statusCode = 404; return res.end('{}'); }
+    if (!r) { res.statusCode = 404; return res.end(JSON.stringify({ error: 'not found', path })); }
     res.statusCode = r.code; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(r.json));
   } catch { res.statusCode = 500; res.end('{"error":"server"}'); }
 };
