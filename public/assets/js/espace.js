@@ -63,7 +63,7 @@
       ${D.prompts.map((p, i) => card(p.id, i + 1, esc(p.titre), esc(p.but), `<div class="code" data-tour="prompt">${esc(p.texte)}</div><div class="row"><button class="btn acc" data-copy="p${i}">${ic('copy')}Copier le prompt</button></div><ul class="ver">${p.verif.map(v => `<li>${ic('check-circle')}${esc(v)}</li>`).join('')}</ul>`, i === 0)).join('')}`,
     scripts: () => `<div class="sh"><div><h1>Scripts Luau</h1><p>Crée chaque script au bon endroit, puis colle le code.</p></div><button class="btn acc" id="zip" data-tour="zip">${ic('download')}Tout télécharger</button></div>
       <div class="hint">${ic('bulb')}<span>Dans l'Explorer : clic droit sur le dossier indiqué, « Insert Object », choisis le type (Script, LocalScript ou ModuleScript), renomme-le exactement, puis colle le code.</span></div>
-      ${D.scripts.map((s, i) => card(s.id, i + 1, esc(s.nom), esc(s.role), `<div class="meta"><span class="tag acc">${s.type}</span><span class="tag"><span class="path">${esc(s.ou)}</span></span></div><div class="code lua">${esc(s.code)}</div><div class="row"><button class="btn acc" data-copy="s${i}">${ic('copy')}Copier</button><button class="btn" data-dl="${i}">${ic('download')}${esc(s.nom)}.lua</button></div>`, i === 0)).join('')}`,
+      ${D.scripts.map((s, i) => card(s.id, i + 1, esc(s.nom) + (s.special ? ' <span class="tag gold">Sur mesure</span>' : ''), esc(s.role), `${s.special ? specialBlock(s) : ''}<div class="meta"><span class="tag acc">${s.type}</span><span class="tag"><span class="path">${esc(s.ou)}</span></span></div><div class="code lua">${esc(s.code)}</div><div class="row"><button class="btn acc" data-copy="s${i}">${ic('copy')}Copier</button><button class="btn" data-dl="${i}">${ic('download')}${esc(s.nom)}.lua</button></div>`, i === 0)).join('')}`,
     shop: () => `<div class="sh"><div><h1>Boutique</h1><p>4 achats à créer, avec les prix conseillés.</p></div></div>
       <div class="card" data-tour="shop"><table><thead><tr><th>Achat</th><th>Type</th><th>Prix</th><th>Quand le proposer</th><th></th></tr></thead><tbody>${D.shop.map(s => `<tr><td><b>${esc(s.name)}</b><br><span class="note" style="margin:0">${esc(s.effect)}</span></td><td>${s.type}</td><td class="price">R$ ${s.price}</td><td>${esc(s.when)}</td><td>${checkBtn('sh' + s.key, 'Créé')}</td></tr>`).join('')}</tbody></table></div>
       <div class="card"><div class="ch"><div class="ct"><b>Comment les créer</b></div></div><ol class="steps">${D.shopSteps.map(t => `<li><span>${esc(t)}</span></li>`).join('')}</ol></div>`,
@@ -81,13 +81,24 @@
     plan: () => `<div class="sh"><div><h1>Plan 14 jours</h1><p>Une tâche par jour, de la création à la première mise à jour.</p></div></div>
       <div class="days">${D.plan.map((d, i) => dayBtn('d' + i, d.j, d.t)).join('')}</div><p class="note">${esc(D.devex)}</p>`
   };
+  function specialBlock(s) {
+    return `<ol class="steps" style="padding:0 0 10px">${(s.installation || []).map(t => `<li><span>${esc(t)}</span></li>`).join('')}</ol>
+      ${(s.options || []).length ? `<div class="opts"><b>Options de personnalisation</b><span>Modifie-les en haut du script, dans le bloc CONFIG.</span><table><thead><tr><th>Réglage</th><th>Par défaut</th><th>Effet</th></tr></thead><tbody>${s.options.map(o => `<tr><td class="path">${esc(o.cle)}</td><td class="path">${esc(o.defaut)}</td><td>${esc(o.effet)}</td></tr>`).join('')}</tbody></table></div>` : ''}`;
+  }
+  function customBanner() {
+    const c = D.custom || {};
+    if (c.status === 'running' || genState === 'running') return `<div class="gen">${'<span class="spin"></span>'}<div><b>Ton sur-mesure se prépare</b><span>Nos prompts détaillés et ta mécanique spéciale sont en cours d'écriture pour « ${esc(D.idee)} ». Ça prend quelques minutes : commence par « Démarrer » en attendant.</span></div></div>`;
+    if (c.status === 'ready' && current === 'prompts' && c.resume) return `<div class="gen ok">${ic('check-circle')}<div><b>Prompts écrits sur mesure pour ton idée</b><span>${esc(c.resume)}</span></div></div>`;
+    if (c.status === 'failed' && current === 'prompts') return `<div class="gen warn">${ic('bulb')}<div><b>Le sur-mesure n'a pas pu être généré</b><span>Tu as nos prompts standards, qui marchent aussi. Écris-nous si tu veux qu'on relance.</span></div></div>`;
+    return '';
+  }
   function dayBtn(id, label, text) { return `<button class="day ${done.has(id) ? 'on' : ''}" data-day="${id}"><span class="box">${ic('check')}</span><div>${label ? `<b>${esc(label)}</b>` : ''}<span>${esc(text)}</span></div></button>`; }
   const COPY = () => { const m = {}; D.prompts.forEach((p, i) => m['p' + i] = p.texte); D.scripts.forEach((s, i) => m['s' + i] = s.code); m.vicon = D.visuals.icon.prompt; D.visuals.thumbs.forEach((t, i) => m['vt' + i] = t.prompt); D.listing.titles.forEach((t, i) => m['ti' + i] = t); m.desc = D.listing.description; D.tiktok.forEach((v, i) => m['tk' + i] = v.legende + '\n' + v.tags); return m; };
 
   let current = 'start';
   function show(k) {
     current = k; $$('.nav button').forEach(b => b.classList.toggle('on', b.dataset.s === k));
-    const main = $('#main'); main.innerHTML = `<section class="sec on" data-sec="${k}">${R[k]()}</section>`; BX.hydrate(main);
+    const main = $('#main'); main.innerHTML = `${customBanner()}<section class="sec on" data-sec="${k}">${R[k]()}</section>`; BX.hydrate(main);
     const C = COPY(); $$('[data-copy]', main).forEach(b => b.onclick = e => { e.stopPropagation(); copy(C[b.dataset.copy]); });
     $$('[data-dl]', main).forEach(b => b.onclick = e => { e.stopPropagation(); const s = D.scripts[+b.dataset.dl]; download(s.nom + '.lua', s.code); });
     $$('.card .ch', main).forEach(h => h.onclick = () => h.parentElement.classList.toggle('open'));
@@ -178,8 +189,23 @@
     BX.hydrate(document); $$('.nav button').forEach(b => b.onclick = () => show(b.dataset.s));
     let start = 'start'; try { start = sessionStorage.getItem('bloxia.sec') || 'start'; } catch {}
     show(R[start] ? start : 'start'); refreshProgress();
+    startGeneration();
     let seen = false; try { seen = localStorage.getItem('bloxia.tour') === '1'; } catch {}
     if (!seen) setTimeout(tour, 500);
+  }
+  // ---------- sur-mesure (génération longue, côté serveur) ----------
+  let genState = null, pollT = 0;
+  async function refreshPack() {
+    const r = await fetch(`/api/pack?id=${encodeURIComponent(ses.id)}&token=${encodeURIComponent(ses.token)}`); if (!r.ok) return;
+    const nd = await r.json(); const was = D.custom && D.custom.status; D = nd;
+    if (D.custom.status !== 'running' && genState !== 'running') { clearInterval(pollT); if (was !== D.custom.status && D.custom.status === 'ready') toast('Ton sur-mesure est prêt'); show(current); refreshProgress(); }
+  }
+  function startGeneration() {
+    const st = D.custom && D.custom.status;
+    if (st === 'ready' || st === 'failed' || st === 'disabled') return;
+    genState = 'running'; if (st !== 'running') show(current);
+    fetch('/api/generate', { method: 'POST', body: JSON.stringify({ id: ses.id, token: ses.token }) }).then(r => r.json()).then(j => { genState = j.status; refreshPack(); }).catch(() => { genState = null; });
+    clearInterval(pollT); pollT = setInterval(refreshPack, 15000);
   }
   load();
 })();

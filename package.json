@@ -9,5 +9,9 @@
  },
  "engines": {
   "node": ">=18"
+ },
+ "dependencies": {
+  "@anthropic-ai/sdk": "^1.7.0",
+  "luaparse": "^0.3.1"
  }
 }
