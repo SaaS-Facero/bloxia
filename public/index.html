@@ -41,6 +41,34 @@
   <a class="scroll-down" href="#pack" aria-label="Descendre"><i data-i="arrow-down"></i></a>
 </section>
 
+<section class="sec sim-sec" id="simulateur"><div class="wrap sim-wrap">
+  <div class="sim-copy reveal">
+    <span class="mono"><i data-i="chart"></i>Simulateur de revenus</span>
+    <h2>Et si ton jeu<br><span class="grad">marchait ?</span></h2>
+    <p class="sim-lead">Règle les curseurs : le téléphone calcule ce que ton jeu pourrait rapporter avec des Game Pass, au taux officiel DevEx de Roblox.</p>
+    <div class="sim-ctrl">
+      <label><span>Visiteurs par jour<b id="sim-vo"></b></span><input class="sim-v" id="sim-v" type="range" min="0" max="14" value="4" aria-label="Visiteurs par jour"></label>
+      <label><span>Prix de ton Game Pass<b id="sim-po"></b></span><input class="sim-v" id="sim-p" type="range" min="0" max="8" value="3" aria-label="Prix du Game Pass en Robux"></label>
+    </div>
+    <ul class="sim-hyp"><li>1 % des visiteurs achètent un Game Pass</li><li>Tu touches 70 % du prix, Roblox garde 30 %</li><li>DevEx : 0,0038 $ par Robux gagné, ≈ 0,87 € le dollar</li></ul>
+    <p class="sim-warn"><b>Simulation, rien n'est garanti.</b> La plupart des jeux ne rapportent rien au début : tout dépend de ta map, de ta boutique et de tes mises à jour. Le programme DevEx est réservé aux 13 ans et plus.</p>
+    <a class="btn" href="funnel.html" data-cta="sim"><span class="lbl">Je crée mon jeu</span><i data-i="arrow-right"></i></a>
+  </div>
+  <div class="sim-stage" id="sim">
+    <div class="sim-phone">
+      <div class="sim-scr">
+        <div class="sim-bar"><span>9:41</span><i class="sim-isl"></i><span class="sim-sig"><i></i><i></i><i></i><i></i></span></div>
+        <div class="sim-note" id="sim-note"><span class="sim-nl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z" fill="#fff"/><path d="M12 7.2l4.2 2.4v4.8L12 16.8l-4.2-2.4V9.6z" fill="#0b0d18"/></svg></span><span class="sim-nt"><small>ROBLOX · maintenant</small><b>Game Pass « VIP »</b></span><span class="sim-na">+ 69 R$</span></div>
+        <span class="sim-chip">Simulation · 12 mois</span>
+        <div class="sim-big"><small>Estimation · revenus Game Pass</small><b id="sim-year">0 €</b><span class="sim-tag" id="sim-buy"></span></div>
+        <div class="sim-tiles"><div><small>Moyenne / jour</small><b id="sim-day">0 €</b></div><div><small>Robux / mois</small><b id="sim-rob">0 R$</b></div></div>
+        <div class="sim-lst"><small>Dernières ventes simulées</small><ul id="sim-list"></ul></div>
+      </div>
+    </div>
+    <div class="sim-float"><img src="/assets/img/mascot/pointe.png" width="200" height="200" alt=""><span><small>Estimation par mois</small><b id="sim-month">0 €</b><em id="sim-dx"></em></span></div>
+    <p class="sim-cap">Illustration · chiffres calculés à partir de tes réglages</p>
+  </div>
+</div></section>
 <section class="sec" id="pack"><div class="wrap">
   <div class="sec-head reveal"><span class="mono"><i data-i="layers"></i>Ton pack, en direct</span>
     <h2>Pas juste une map.<br>Tout ce qu'il faut pour <span class="grad" id="pack-name">la publier</span>.</h2></div>
@@ -124,5 +152,5 @@
 
 <footer data-site-footer></footer>
 <div class="sticky-cta" id="sticky"><a class="btn" href="funnel.html" data-cta="sticky"><span class="lbl">Je crée mon jeu gratuitement</span><i data-i="arrow-right"></i></a></div>
-<script src="/assets/js/config.js"></script><script src="/assets/js/engine.js"></script><script src="/assets/js/common.js"></script><script src="/assets/js/lp.js"></script>
+<script src="/assets/js/config.js"></script><script src="/assets/js/engine.js"></script><script src="/assets/js/common.js"></script><script src="/assets/js/lp.js"></script><script src="/assets/js/sim.js"></script>
 </body></html>
