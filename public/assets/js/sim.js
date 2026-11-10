@@ -8,7 +8,7 @@
   const vis = $('#sim-v'), pri = $('#sim-p');
   const PASSES = ['VIP', 'Double argent', 'Vitesse x2', 'Pet légendaire', 'Auto-collecte', 'Skin doré', 'Zone secrète', 'Pack de départ'];
   const fmt = (n, d = 0) => n.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
-  const VSTEPS = [20, 50, 100, 200, 300, 500, 800, 1000, 2000, 3000, 5000, 8000, 10000, 20000, 50000];
+  const VSTEPS = [20, 50, 100, 200, 300, 500, 800, 1000, 2000, 3000, 5000, 8000, 10000];
   const PSTEPS = [25, 49, 75, 99, 149, 199, 299, 399, 499];
   const st = { shown: { year: 0, day: 0, rob: 0 } };
 

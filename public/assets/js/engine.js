@@ -6,7 +6,7 @@
     snow:   { fr: 'Glace',   en: 'Frozen',  icon: 'snowflake', ground: '#dfeaf7', rock: '#a9c3de', liquid: '#6fb7ff', deco: '#ffffff', trunk: '#7a8aa0', sky: ['#14305a', '#050a14'], glow: '#7fc4ff' },
     city:   { fr: 'Ville',   en: 'Neon',    icon: 'building',  ground: '#3b4256', rock: '#262b3a', liquid: '#2a3350', deco: '#ffd166', trunk: '#262b3a', sky: ['#1b1550', '#070712'], glow: '#8f6bff' },
     space:  { fr: 'Espace',  en: 'Cosmic',  icon: 'planet',    ground: '#6b6f85', rock: '#454a63', liquid: '#7a5cff', deco: '#9be7ff', trunk: '#454a63', sky: ['#1a1246', '#03030a'], glow: '#9b7bff' },
-    horror: { fr: 'Horreur', en: 'Haunted', icon: 'ghost',     ground: '#34402f', rock: '#222a22', liquid: '#3a5a3a', deco: '#c7d0a0', trunk: '#3a3a33', sky: ['#142018', '#030504'], glow: '#7bd88a' },
+    horror: { fr: 'Manoir hanté', en: 'Haunted', icon: 'ghost',     ground: '#34402f', rock: '#222a22', liquid: '#3a5a3a', deco: '#c7d0a0', trunk: '#3a3a33', sky: ['#142018', '#030504'], glow: '#7bd88a' },
     island: { fr: 'Île',     en: 'Island',  icon: 'palm',      ground: '#f0d9a0', rock: '#c9a96b', liquid: '#2fb4d9', deco: '#3fbf6a', trunk: '#8a5a2b', sky: ['#0e6a9a', '#08243a'], glow: '#47d1ff' },
     jungle: { fr: 'Jungle',  en: 'Jungle',  icon: 'tree',      ground: '#3f8f4a', rock: '#2a6a35', liquid: '#2a8aa8', deco: '#ffcf4a', trunk: '#6b4a2b', sky: ['#0f4a2a', '#04120a'], glow: '#47e08a' },
     candy:  { fr: 'Bonbons', en: 'Candy',   icon: 'candy',     ground: '#ff9ccf', rock: '#e870b0', liquid: '#b78cff', deco: '#fff1a8', trunk: '#ffffff', sky: ['#6a1f5e', '#14061a'], glow: '#ff7ad1' },
