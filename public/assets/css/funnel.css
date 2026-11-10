@@ -261,9 +261,9 @@ textarea.fx-in{min-height:112px}.fx-mic{position:absolute;right:10px;bottom:10px
 .ide-stats[hidden]{display:none}
 
 /* ===== écran tendance ===== */
-.tr-stack{position:relative;height:450px;margin:6px 0 4px}
+.tr-stack{position:relative;height:495px;margin:6px 0 4px}
 .tr-card{position:absolute;left:0;right:0;border-radius:20px;overflow:hidden;background:#0d1020;border:1px solid rgba(255,255,255,.16);box-shadow:0 24px 50px -20px rgba(0,0,0,.85);animation:trin .7s cubic-bezier(.2,1.2,.4,1) both}
-.tr-a{top:0;transform:rotate(-3deg);width:92%;animation-delay:.1s}.tr-b{top:160px;left:8%;transform:rotate(2.5deg);animation-delay:.3s;background:#140d14}.tr-c{top:305px;left:3%;width:90%;transform:rotate(-1.5deg);animation-delay:.5s;background:#0d1415}
+.tr-a{top:0;transform:rotate(-3deg);width:92%;animation-delay:.1s}.tr-b{top:195px;left:8%;transform:rotate(2.5deg);animation-delay:.3s;background:#140d14}.tr-c{top:350px;left:3%;width:90%;transform:rotate(-1.5deg);animation-delay:.5s;background:#0d1415}
 @keyframes trin{from{opacity:0;transform:translateY(40px) rotate(0) scale(.9)}}
 .tr-card:hover{z-index:3}
 .tr-chrome{display:flex;align-items:center;gap:8px;height:34px;padding:0 14px;background:#161a2e;border-bottom:1px solid rgba(255,255,255,.08);font:600 12px var(--mono);color:#9aa3bb}.tr-chrome i{width:9px;height:9px;border-radius:50%;background:#ff5f57}.tr-chrome i:nth-child(2){background:#febc2e}.tr-chrome i:nth-child(3){background:#28c840}.tr-chrome i+span{margin-left:6px}
