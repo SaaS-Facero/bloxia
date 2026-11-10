@@ -112,7 +112,26 @@
           $$('.fx-pick', st).forEach(b => { b.classList.toggle('sel', b.dataset.id === id); b.style.setProperty('--gc', GUIDES.find(x => x.id === b.dataset.id).c); }); root.style.setProperty('--gc', g.c);
           if (w) { w.destroy(); extra = extra.filter(x => x !== w); } w = thumb(st.querySelector('#pc canvas'), g.genre, g.theme, .9, false); w.paused = false; sfx.pick(); };
         $$('.fx-pick', st).forEach(b => b.onclick = () => show(b.dataset.id)); show(S.a.guide || 'pixel');
-        st.querySelector('#go0').onclick = () => { gain(0); S.snd && tone(660, .1); go(1); };
+        st.querySelector('#go0').onclick = () => { gain(0); S.snd && tone(660, .1); trend(); };
+        // Écran « tendance » : chiffres officiels de Roblox, illustrations maison, aucune promesse de gains.
+        function trend() {
+          const sec = st; sec.classList.add('out');
+          setTimeout(() => {
+            sec.classList.remove('out');
+            sec.innerHTML = `<div class="fx-kick">${ic('chart')}Tout le monde en parle</div>${title('le business', 'tendance', 'du moment.')}
+              <div class="tr-stack">
+                <div class="tr-card tr-a"><div class="tr-chrome"><i></i><i></i><i></i><span>Roblox · résultats officiels 2025</span></div><div class="tr-body"><span class="tr-gl">${GL('coin')}</span><div><b class="tr-big" id="trn">0</b><span>versés aux créateurs Roblox entre janvier et septembre 2025, déjà plus que sur toute l'année 2024.</span><small>Source : Roblox, résultats du 3e trimestre 2025</small></div></div></div>
+                <div class="tr-card tr-b"><div class="tr-chrome red"><span class="tr-pill">${ic('play')}Vidéos</span><span>« Je crée un jeu Roblox »</span></div><div class="tr-body"><span class="tr-gl">${GL('video')}</span><div><b>Le sujet qui explose</b><span>Sur TikTok et YouTube, de plus en plus de jeunes créateurs montrent comment ils lancent leur propre jeu.</span></div></div></div>
+                <div class="tr-card tr-c"><div class="tr-chrome dark"><span class="tr-pill">${ic('gamepad')}DevEx</span><span>Programme officiel Roblox</span></div><div class="tr-body"><span class="tr-gl">${GL('crown')}</span><div><b>Dès 13 ans</b><span>Les Robux gagnés avec ton jeu peuvent être convertis en vrai argent avec le programme DevEx de Roblox.</span></div></div></div>
+              </div>
+              <p class="tr-lead">TikTok, YouTube, Roblox : <b>c'est le moment de t'y mettre.</b></p>
+              <p class="tr-note">Rien n'est garanti : la plupart des jeux ne rapportent rien au début. Ceux qui marchent ont une bonne boutique, une belle vitrine et des mises à jour régulières. C'est exactement ce que tu vas recevoir.</p>
+              <button class="btn btn-gold btn-block" id="go1"><span class="lbl">Je continue</span>${ic('arrow-right')}</button>`;
+            BX.hydrate(sec);
+            const el = sec.querySelector('#trn'), t0 = performance.now(); const f = t => { const p = Math.min(1, (t - t0) / 1600), e = 1 - Math.pow(1 - p, 3); el.textContent = (e * 1).toFixed(2).replace('.', ',') + ' milliard $'; if (p < 1 && document.body.contains(el)) requestAnimationFrame(f); else el.textContent = '1 milliard $'; }; setTimeout(() => requestAnimationFrame(f), 350);
+            sec.querySelector('#go1').onclick = () => { sfx.pick(); go(1); };
+          }, 170);
+        }
       } },
     { say: () => 'On commence simple : c\'est quoi ton blaze de créateur ?', html: () => `${title('ton', 'blaze', '?')}${field('v', 'input', 'Ton blaze', S.a.name, 24)}<p class="fx-help">Pas d'idée ? Touche un blaze :</p><div class="fx-chips">${['BlockMaster', 'NightBuilder', 'PixelKing', 'Le Boss'].map(n => `<button class="fx-chip">${n}</button>`).join('')}</div><button class="btn btn-gold btn-block" id="ok" disabled><span class="lbl">C'est mon blaze</span></button>`,
       after: st => { const i = st.querySelector('#v'), ok = st.querySelector('#ok'), chk = () => ok.disabled = i.value.trim().length < 2; i.oninput = chk; chk(); mic(st.querySelector('.fx-field'), i); $$('.fx-chip', st).forEach(c => c.onclick = () => { i.value = c.textContent; chk(); sfx.pick(); }); const done = () => { if (ok.disabled) return; S.a.name = i.value.trim(); gain(50); go(2); }; ok.onclick = done; i.onkeydown = e => { if (e.key === 'Enter') done(); }; i.focus(); } },
