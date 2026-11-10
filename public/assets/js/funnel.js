@@ -98,7 +98,7 @@
   }
   let keyH = null; document.addEventListener('keydown', e => { if (keyH && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) keyH(e); });
   const title = (a, b, c) => `<h1 class="fx-title">${a} <b>${b}</b> ${c || ''}</h1>`;
-  const hl = line => line.replace(/(--.*$)|("[^"]*")|\b(local|function|end|if|then|for|do|return)\b|\b(\d+)\b|([<>&])/g, (m, c, s, k, n) => c ? `<span class="c">${esc(c)}</span>` : s ? `<span class="s">${esc(s)}</span>` : k ? `<span class="k">${k}</span>` : n ? `<span class="n">${n}</span>` : esc(m));
+  const hl = line => line.replace(/(--.*$)|("[^"]*")|\b(local|function|end|if|then|else|elseif|for|while|repeat|until|in|do|return|and|or|not|nil|true|false|break)\b|\b(\d+)\b|([<>&])/g, (m, c, s, k, n) => c ? `<span class="c">${esc(c)}</span>` : s ? `<span class="s">${esc(s)}</span>` : k ? `<span class="k">${k}</span>` : n ? `<span class="n">${n}</span>` : esc(m));
 
   // ---------- écrans ----------
   const STEPS = [
@@ -201,15 +201,56 @@
           await sleep(2600); if (!alive()) return; clearInterval(tick); gain(100, 12); go(RES);
         })();
       } },
-    { say: () => `${S.a.name}, voilà ta map. Et regarde ce que tu reçois avec.`, html: () => { const a = an(), p = E.makePack(a, phrase()), th = E.THEMES[a.theme], ge = E.GENRES[a.genre];
+    { say: () => `${S.a.name}, voilà ta map. Et regarde tout le code qui l'accompagne.`, html: () => { const a = an(), th = E.THEMES[a.theme], ge = E.GENRES[a.genre];
         return `<div class="fx-res"><canvas id="rc"></canvas><span class="fx-hint">${ic('move')}Glisse pour tourner la map</span></div>${title(esc(a.title.split(' ')[0]), esc(a.title.split(' ').slice(1).join(' ')))}
-        <div class="fx-rtags"><span class="fx-rtag">${ic(ge.icon)}${E.GENRES[a.genre].label}</span><span class="fx-rtag">${ic(th.icon)}${th.fr}</span><span class="fx-rtag">${ic('unlock')}2 éléments débloqués sur 5</span></div>
-        <div class="fx-pk"><div class="fx-pkh">${ic('terminal')}${p.prompts[0].title}<span>DÉBLOQUÉ</span></div><div class="fx-pkb"><div class="code" style="white-space:pre-wrap">${esc(p.prompts[0].text)}</div><button class="fx-copy" id="cp">${ic('copy')}<span>Copier le prompt</span></button></div></div>
-        <div class="fx-pk"><div class="fx-pkh">${ic('code')}${p.scriptName}<span class="lk">${ic('lock')}</span></div><div class="fx-pkb"><div class="code">${p.script.map(hl).join('\n')}</div><div class="fx-lw"><div class="code blur" style="margin-top:6px">${esc(p.fake)}</div><div class="fx-lockov">${ic('lock')}Le script complet est dans ton pack</div></div></div></div>
-        <div class="fx-pk"><div class="fx-pkh">${ic('coins')}Boutique<span class="lk">${ic('lock')}</span></div><div class="fx-pkb"><div class="fx-shop">${p.shop.map((s, i) => `<div class="fx-it"><div><b>${esc(s.name)}</b><small>${s.type}</small></div>${i ? '<span class="fx-price blur">R$ 000</span>' : `<span class="fx-price">${s.price}</span>`}</div>`).join('')}</div></div></div>
-        <button class="btn btn-gold btn-block" id="ok"><span class="lbl">Débloquer mon pack</span>${ic('lock')}</button>`; },
-      after: st => { const a = an(), w = new E.World(st.querySelector('#rc'), { autoRotate: true, interactive: true, scale: 1.1 }); extra.push(w); w.set(E.generate(a, phrase()).blocks, a.theme, { duration: 1800 }); const p = E.makePack(a, phrase());
-        st.querySelector('#cp').onclick = e => { navigator.clipboard && navigator.clipboard.writeText(p.prompts[0].text).catch(() => {}); e.currentTarget.querySelector('span').textContent = 'Copié'; sfx.pick(); }; st.querySelector('#ok').onclick = () => { gain(50); go(LAST); }; } },
+        <div class="fx-rtags"><span class="fx-rtag">${ic(ge.icon)}${E.GENRES[a.genre].label}</span><span class="fx-rtag">${ic(th.icon)}${th.fr}</span><span class="fx-rtag">${ic('check-circle')}Syntaxe vérifiée</span></div>
+        <div class="ide-stats" id="istats">${[['code', 'lignes de code', 'il'], ['file', 'fichiers prêts', 'if'], ['terminal', 'prompts Studio', 'ip'], ['zap', 'fonctions', 'ifn']].map(([i, l, id]) => `<div><span>${ic(i)}</span><b id="${id}">0</b><small>${l}</small></div>`).join('')}</div>
+        <div class="ide" id="ide"><div class="ide-bar"><i></i><i></i><i></i><span>Bloxia Studio · ${esc(a.title.toLowerCase().replace(/\s+/g, '-'))}.rbxl</span><em id="ilive"><span class="ide-dot"></span>Généré pour toi</em></div>
+          <div class="ide-body"><aside class="ide-tree" id="itree"><div class="ide-ph">Chargement…</div></aside>
+            <div class="ide-main"><div class="ide-tabs" id="itabs"></div><div class="ide-editor"><div class="ide-code" id="icode"></div><div class="ide-map" id="imap"></div></div></div>
+            <aside class="ide-side" id="iside"></aside></div>
+          <div class="ide-status" id="istatus"></div></div>
+        <button class="btn btn-gold btn-block" id="ok"><span class="lbl">Débloquer tout le code</span>${ic('lock')}</button>`; },
+      after: st => {
+        const a = an(), w = new E.World(st.querySelector('#rc'), { autoRotate: true, interactive: true, scale: 1.1 }); extra.push(w); w.set(E.generate(a, phrase()).blocks, a.theme, { duration: 1800 });
+        st.querySelector('#ok').onclick = () => { gain(50); go(LAST); };
+        const alive = () => S.i === RES && document.body.contains(st);
+        const count = (el, to) => { const t0 = performance.now(); const f = t => { const p = Math.min(1, (t - t0) / 1400), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(to * e).toLocaleString('fr-FR'); if (p < 1 && alive()) requestAnimationFrame(f); }; requestAnimationFrame(f); };
+        const TYPE_ICON = { Script: 'is', LocalScript: 'il', ModuleScript: 'im' };
+        const fileIcon = t => `<svg class="ide-fi ${TYPE_ICON[t] || 'is'}" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5h6.500L13 5v9.500H3z"/><path d="M9.500 1.5V5H13"/>${t === 'ModuleScript' ? '<path d="M5.500 9h5M5.500 11.500h3.500"/>' : t === 'LocalScript' ? '<path d="M6 8.500l-1.500 1.500L6 11.500M10 8.500l1.500 1.500L10 11.500"/>' : '<path d="M6.500 8.500l3 1.500-3 1.500z"/>'}</svg>`;
+        const fold = () => `<svg class="ide-fold" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4.500h4l1.500 1.500H14v7.500H2z"/></svg>`;
+        let P = null, cur = 0, typing = 0;
+        const fallbackHead = '-- Aperçu indisponible pour le moment.\n-- Ton pack complet t\'attend après le paiement.';
+        function tree() {
+          const groups = {}; P.files.forEach((f, i) => { (groups[f.ou] = groups[f.ou] || []).push([f, i]); });
+          st.querySelector('#itree').innerHTML = `<div class="ide-th">Explorer</div>` + Object.entries(groups).map(([g, fs]) => `<div class="ide-grp">${fold()}<span>${esc(g.split(' > ').pop())}</span></div>${fs.map(([f, i]) => `<button class="ide-file ${i === cur ? 'on' : ''}" data-f="${i}">${fileIcon(f.type)}<span>${esc(f.nom)}</span><em>${f.lines}</em></button>`).join('')}`).join('')
+            + `<div class="ide-grp">${fold()}<span>Sur mesure</span></div><div class="ide-file locked">${ic('lock')}<span>Mécanique spéciale</span><em>après paiement</em></div>`;
+          $$('.ide-file[data-f]', st).forEach(b => b.onclick = () => openFile(+b.dataset.f));
+        }
+        function tabs() { st.querySelector('#itabs').innerHTML = P.files.map((f, i) => `<button class="ide-tab ${i === cur ? 'on' : ''}" data-t="${i}">${fileIcon(f.type)}${esc(f.nom)}<span>.lua</span></button>`).join(''); $$('.ide-tab', st).forEach(b => b.onclick = () => openFile(+b.dataset.t)); const on = st.querySelector('.ide-tab.on'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+        function side(f) {
+          st.querySelector('#iside').innerHTML = `<div class="ide-th">Analyse</div><div class="ide-card"><small>Rôle</small><p>${esc(f.role)}</p></div>
+            <div class="ide-card"><small>Emplacement</small><p class="mono">${esc(f.ou)} › ${esc(f.nom)}</p></div>
+            <div class="ide-card"><small>Fonctions (${f.functions.length})</small>${f.functions.length ? `<ul>${f.functions.map(n => `<li>${ic('zap')}<span>${esc(n)}</span></li>`).join('')}</ul>` : '<p>Réglages et données</p>'}</div>
+            <div class="ide-card ok"><small>Contrôles</small><ul><li>${ic('check-circle')}Syntaxe valide</li><li>${ic('check-circle')}Commenté en français</li>${/DataStore|UpdateAsync/.test(f.head) || f.nom === 'DataManager' ? `<li>${ic('check-circle')}Sauvegarde avec réessais</li>` : ''}${f.nom === 'ShopServer' ? `<li>${ic('check-circle')}Achats accordés une seule fois</li>` : ''}${f.type === 'LocalScript' ? `<li>${ic('check-circle')}Adapté au mobile</li>` : ''}</ul></div>`;
+        }
+        function minimap(f) { const shown = f.head.split('\n').length; st.querySelector('#imap').innerHTML = f.widths.map((wd, i) => `<i style="width:${Math.max(4, wd / 80 * 100)}%" class="${i < shown ? 'v' : ''}"></i>`).join('') + '<span class="ide-view"></span>'; }
+        function status(f) { st.querySelector('#istatus').innerHTML = `<span>${ic('check-circle')}0 erreur</span><span>Luau</span><span>${f.type}</span><span>${f.lines} lignes</span><span class="r">${P.files.length} fichiers · ${P.totalLines.toLocaleString('fr-FR')} lignes au total</span>`; }
+        function openFile(i) {
+          cur = i; const f = P.files[i]; tree(); tabs(); side(f); minimap(f); status(f); BX.hydrate(st);
+          const box = st.querySelector('#icode'), lines = (f.head || fallbackHead).split('\n'), left = Math.max(0, f.lines - lines.length);
+          box.innerHTML = ''; cancelAnimationFrame(typing); let n = 0;
+          const add = () => { const chunk = Math.max(1, Math.round(lines.length / 22)); for (let k = 0; k < chunk && n < lines.length; k++, n++) box.insertAdjacentHTML('beforeend', `<div class="ln"><span>${n + 1}</span><code>${hl(lines[n]) || '&nbsp;'}</code></div>`);
+            if (n < lines.length && alive()) typing = requestAnimationFrame(add);
+            else if (left > 0) box.insertAdjacentHTML('beforeend', `<div class="ide-more"><div class="ide-ghost">${Array.from({ length: 6 }, (_, k) => `<div class="ln"><span>${n + k + 1}</span><code><i style="width:${30 + ((k * 37) % 55)}%"></i></code></div>`).join('')}</div><div class="ide-lock">${ic('lock')}<b>Encore ${left.toLocaleString('fr-FR')} lignes dans ce fichier</b><span>Débloque ton pack pour copier ou télécharger le script complet.</span></div></div>`); };
+          add();
+        }
+        fetch(`/api/preview?id=${encodeURIComponent(S.a._id || '')}&token=${encodeURIComponent(S.a._t || '')}`).then(r => { if (!r.ok) throw 0; return r.json(); }).then(d => {
+          if (!alive()) return; P = d;
+          count(st.querySelector('#il'), d.totalLines); count(st.querySelector('#if'), d.files.length); count(st.querySelector('#ip'), d.prompts.length); count(st.querySelector('#ifn'), d.functions);
+          const core = d.files.findIndex(f => /Core$/.test(f.nom)); openFile(core >= 0 ? core : 0);
+        }).catch(() => { if (!alive()) return; st.querySelector('#itree').innerHTML = '<div class="ide-ph">Aperçu indisponible. Ton pack complet reste prêt.</div>'; st.querySelector('#icode').innerHTML = `<div class="ln"><span>1</span><code>${esc(fallbackHead)}</code></div>`; });
+      } },
     { say: () => 'Choisis ta formule. L\'annuel commence par 3 jours gratuits.',
       html: () => `<div class="fx-offer" id="ofb"><span class="fx-ofl"><span class="fx-ofg">${PA.ticket()}</span><span><small>Offre de bienvenue</small><b>−30 % sur ta première période</b></span></span><span class="fx-oft"><small id="ofs">Expire dans</small><b id="oft">10:00</b></span><i class="fx-ofbar" id="ofbar"></i></div>
         <div class="pr-head">${title('débloque', esc(an().title))}<p class="fx-help">Ta map est sauvegardée. Choisis la formule qui colle à ton objectif.</p></div>
@@ -272,8 +313,11 @@
         const timer = () => { const left = Math.max(0, endAt - Date.now()), m = Math.floor(left / 60000), sc = Math.floor(left / 1000) % 60, el = st.querySelector('#oft'); if (!el) return clearInterval(iv);
           el.textContent = String(m).padStart(2, '0') + ':' + String(sc).padStart(2, '0'); st.querySelector('#ofbar').style.width = (left / 600000 * 100) + '%'; st.querySelector('#ofb').classList.toggle('hot', left < 60000 && left > 0);
           if (left <= 0 && !expired) { expired = true; clearInterval(iv); const ob = st.querySelector('#ofb'); ob.classList.add('expired'); ob.querySelector('.fx-ofl b').textContent = 'Offre de bienvenue expirée'; st.querySelector('#ofs').textContent = 'Terminée'; draw(false); } };
-        fetch(`/api/offer?id=${encodeURIComponent(S.a._id)}&token=${encodeURIComponent(S.a._t)}`).then(r => r.json()).then(o => { O = o; endAt = Date.now() + o.remaining; expired = o.remaining <= 0; draw(true); table(); timer(); if (!expired) iv = setInterval(timer, 250); else timer(); })
-          .catch(() => { st.querySelector('#plans').innerHTML = '<p class="fx-err">Impossible de charger les formules. Recharge la page.</p>'; });
+        // Minuteur : celui du serveur (lié au compte) ; à défaut, départ gardé sur l'appareil.
+        const localRemaining = ms => { let t0 = 0; try { t0 = +localStorage.getItem('bloxia.offerStart') || 0; if (!t0) { t0 = Date.now(); localStorage.setItem('bloxia.offerStart', t0); } } catch { t0 = Date.now(); } return Math.max(0, t0 + ms - Date.now()); };
+        const startWith = o => { O = o; const rem = o.local ? localRemaining(o.remaining) : o.remaining; endAt = Date.now() + rem; expired = rem <= 0; draw(true); table(); timer(); if (!expired) iv = setInterval(timer, 250); else timer(); };
+        fetch(`/api/offer?id=${encodeURIComponent(S.a._id)}&token=${encodeURIComponent(S.a._t)}`).then(r => { if (!r.ok) throw 0; return r.json(); }).then(startWith)
+          .catch(() => fetch('/api/plans').then(r => r.json()).then(startWith).catch(() => { st.querySelector('#plans').innerHTML = '<p class="fx-err">Impossible de charger les formules. Recharge la page.</p>'; }));
       } }
   ];
 
