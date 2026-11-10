@@ -271,7 +271,7 @@
         }).catch(() => { if (!alive()) return; st.querySelector('#istats').hidden = true; st.querySelector('#itree').innerHTML = '<div class="ide-ph">Aperçu indisponible. Ton pack complet reste prêt.</div>'; st.querySelector('#icode').innerHTML = `<div class="ln"><span>1</span><code>${esc(fallbackHead)}</code></div>`; });
       } },
     { say: () => 'Choisis ta formule. L\'annuel commence par 3 jours gratuits.',
-      html: () => `<div class="fx-offer" id="ofb"><span class="fx-ofl"><span class="fx-ofg">${PA.ticket()}</span><span><small>Offre de bienvenue</small><b>−30 % sur ta première période</b></span></span><span class="fx-oft"><small id="ofs">Expire dans</small><b id="oft">10:00</b></span><i class="fx-ofbar" id="ofbar"></i></div>
+      html: () => `<div class="fx-offer" id="ofb"><span class="fx-ofl"><span class="fx-ofg">${PA.ticket()}</span><span><small>Offre de bienvenue</small><b>−30 % sur ton 1er mois</b></span></span><span class="fx-oft"><small id="ofs">Expire dans</small><b id="oft">10:00</b></span><i class="fx-ofbar" id="ofbar"></i></div>
         <div class="pr-head">${title('débloque', esc(an().title))}<p class="fx-help">Ta map est sauvegardée. Choisis la formule qui colle à ton objectif.</p></div>
         <div class="pr-cycle" role="radiogroup" aria-label="Période de facturation"><i class="pr-thumb"></i>
           <button type="button" role="radio" data-cycle="month">Mensuel</button>
@@ -297,10 +297,10 @@
         const COL = { starter: '#5b9bff', essentiel: '#ffc53d', business: '#b388ff' };
         let O = null, endAt = 0, iv = 0, expired = false, cycle = 'year';
         try { cycle = localStorage.getItem('bloxia.cycle') || 'year'; } catch {}
-        const calc = p => { const d = expired ? 0 : O.discount, yr = cycle === 'year', full = yr ? p.annual : p.price, first = r2(full * (1 - d)), days = yr ? 365 : 30;
+        const calc = p => { const yr = cycle === 'year', d = expired || yr ? 0 : O.discount, full = yr ? p.annual : p.price, first = r2(full * (1 - d)), days = yr ? 365 : 30;
           return { yr, full, first, perDay: r2(first / days), strike: yr ? r2(p.price / 30) : (d ? r2(p.price / 30) : 0), save: r2(p.price * 12 - first) }; };
         const card = (p, k) => { const c = calc(p);
-          const bill = c.yr ? `<div class="pr-zero"><b>0 €</b><span>aujourd'hui</span></div><p class="pr-bill">puis ${eur(c.first)} ${expired ? 'par an' : 'la 1re année'} après 3 jours d'essai${expired ? '' : `, ensuite ${eur(c.full)} par an`}</p>`
+          const bill = c.yr ? `<div class="pr-zero"><b>0 €</b><span>aujourd'hui</span></div><p class="pr-bill">puis ${eur(c.full)} par an après 3 jours d'essai</p>`
                              : `<p class="pr-bill">${expired ? `${eur(c.full)} par mois` : `${eur(c.first)} le 1er mois, puis ${eur(c.full)} par mois`}</p>`;
           return `<article class="fx-plan pr-card ${p.featured ? 'feat' : ''}" data-id="${p.id}" style="--pc:${COL[p.id]};--d:${k * 90}ms"><span class="pr-glare"></span>
             ${p.featured ? `<span class="fx-rib">${ic('star')}Recommandé</span>` : ''}
