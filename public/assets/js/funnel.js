@@ -325,8 +325,8 @@
           BX.hydrate(st);
           $$('.pr-card', st).forEach(tilt); if (animate) $$('.pr-price b', st).forEach(roll);
           $$('[data-plan]', st).forEach(btn => btn.onclick = async () => { const r0 = btn.getBoundingClientRect(); burst(r0.left + r0.width / 2, r0.top + r0.height / 2); $$('[data-plan]', st).forEach(x => x.disabled = true); BX.set({ done: true });
-            try { const r = await fetch('/api/checkout', { method: 'POST', body: JSON.stringify({ id: S.a._id, token: S.a._t, plan: btn.dataset.plan, cycle }) }).then(r => r.json()); if (r.url) location.href = r.url; else throw 0; }
-            catch { $$('[data-plan]', st).forEach(x => x.disabled = false); BX.set({ done: false }); toast('Paiement indisponible, réessaie', true); } });
+            try { const r = await fetch('/api/checkout', { method: 'POST', body: JSON.stringify({ id: S.a._id, token: S.a._t, plan: btn.dataset.plan, cycle }) }).then(r => r.json()); if (r.url) location.href = r.url; else throw r; }
+            catch (e) { $$('[data-plan]', st).forEach(x => x.disabled = false); BX.set({ done: false }); const d = e && (e.detail || e.error) ? ` (${e.status || ''} ${String(e.detail || e.error).slice(0, 120)})` : ''; toast('Paiement indisponible, réessaie' + d, true); } });
         };
         $$('.pr-cycle button', st).forEach(b => b.onclick = () => { if (cycle === b.dataset.cycle) return; cycle = b.dataset.cycle; try { localStorage.setItem('bloxia.cycle', cycle); } catch {} sfx.pick(); draw(true); });
         const timer = () => { const left = Math.max(0, endAt - Date.now()), m = Math.floor(left / 60000), sc = Math.floor(left / 1000) % 60, el = st.querySelector('#oft'); if (!el) return clearInterval(iv);
