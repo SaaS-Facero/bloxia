@@ -273,3 +273,14 @@ textarea.fx-in{min-height:112px}.fx-mic{position:absolute;right:10px;bottom:10px
 .tr-lead{text-align:center;font-size:18px;font-weight:600}.tr-lead b{color:var(--gold)}.tr-note{text-align:center;color:var(--muted);font-size:12.500px;line-height:1.45;margin-top:-6px}
 .fx-step:has(.tr-stack) .fx-title,.fx-step:has(.tr-stack) .fx-kick{text-align:center;justify-content:center}
 @media(max-width:620px){.tr-stack{height:575px}.tr-a{width:96%}.tr-b{top:205px;left:4%}.tr-c{top:395px;width:96%;left:2%}.tr-body{padding:14px}.tr-gl{width:52px;height:52px}.tr-body b{font-size:19px}}
+
+/* écran tendance : cartes en flux (images réelles) */
+.tr-stack{height:auto!important;display:flex;flex-direction:column;align-items:stretch;padding:6px 4px 10px}
+.tr-stack .tr-card{position:relative;top:auto!important;left:auto!important;width:auto!important;margin:0}
+.tr-stack .tr-a{transform:rotate(-2.5deg);margin-right:7%!important}
+.tr-stack .tr-b{transform:rotate(2deg);margin:-26px 0 0 9%!important;z-index:2}
+.tr-stack .tr-c{transform:rotate(-1.5deg);margin:-22px 5% 0 2%!important;z-index:3}
+.tr-img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}.tr-img.top{object-position:top;aspect-ratio:16/8}
+.tr-chrome.gpt{background:#0f0f14}.tr-chrome.gpt .tr-pill{background:#fff;color:#0b0d18}
+.tr-chrome span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+@media(max-width:620px){.tr-stack .tr-b{margin-top:-16px!important}.tr-stack .tr-c{margin-top:-14px!important}}
