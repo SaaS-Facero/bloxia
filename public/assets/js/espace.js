@@ -15,8 +15,8 @@
     app.innerHTML = `<form class="auth" id="f" novalidate><h1>Mon espace</h1><p>${msg || 'Connecte-toi pour retrouver ton pack.'}</p>
       <label for="em">E-mail</label><input id="em" type="email" autocomplete="email" placeholder="toi@mail.com">
       <label for="pw">Mot de passe</label><input id="pw" type="password" autocomplete="current-password">
-      <p class="err" id="err" role="alert"></p><button class="primary" id="ok">Me connecter</button>
-      <p class="note">Pas encore de compte ? <a href="/funnel.html">Créer mon jeu</a></p></form>`;
+      <p class="err" id="err" role="alert"></p><button class="primary" id="ok">Je me connecte</button>
+      <p class="note">Pas encore de compte ? <a href="/funnel.html">Je crée mon jeu</a></p></form>`;
     $('#f').onsubmit = async e => { e.preventDefault(); $('#err').textContent = ''; $('#ok').disabled = true;
       try { const r = await fetch('/api/login', { method: 'POST', body: JSON.stringify({ email: $('#em').value.trim(), password: $('#pw').value }) }); const j = await r.json();
         if (!r.ok) { $('#err').textContent = 'E-mail ou mot de passe incorrect.'; $('#ok').disabled = false; return; }
@@ -181,7 +181,7 @@
     if (!ses) return login();
     $('#out').hidden = false; app.innerHTML = '<p class="note" style="grid-column:1/-1">Chargement de ton pack…</p>';
     let r; try { r = await fetch(`/api/pack?id=${encodeURIComponent(ses.id)}&token=${encodeURIComponent(ses.token)}`); } catch { app.innerHTML = '<p class="err" style="grid-column:1/-1">Connexion impossible.</p>'; return; }
-    if (r.status === 402) { app.innerHTML = `<div class="auth"><h1>Ton pack t'attend</h1><p>Ton compte est prêt, mais ton pack n'est pas encore débloqué.</p><a class="primary" style="justify-content:center;height:42px;text-decoration:none;display:flex" href="/funnel.html">Débloquer mon pack</a></div>`; return; }
+    if (r.status === 402) { app.innerHTML = `<div class="auth"><h1>Ton pack t'attend</h1><p>Ton compte est prêt, mais ton pack n'est pas encore débloqué.</p><a class="primary" style="justify-content:center;height:42px;text-decoration:none;display:flex" href="/funnel.html">Je débloque mon pack</a></div>`; return; }
     if (!r.ok) return login('Ta session a expiré. Reconnecte-toi.');
     D = await r.json(); loadProg();
     $('#game').hidden = false; $('#gname').textContent = D.titre; $('#gmeta').textContent = `${D.genre} · ${D.theme}`; $('#prog').hidden = false; $('#tourbtn').hidden = false;

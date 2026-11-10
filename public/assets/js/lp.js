@@ -24,16 +24,16 @@
   function updateCtas() {
     const title = S.generated ? S.an.title : null, name = prof.name || '';
     const L = {
-      nav: resume() ? `Reprendre, ${name}` : title ? `Récupérer ${title}` : 'Créer mon jeu',
-      pack: title ? `Récupérer le pack de ${title}` : 'Récupérer mon pack',
-      how: title ? `Construire ${title} pour de vrai` : 'Créer mon jeu',
-      offer: title ? `Continuer avec ${title}` : 'Générer mon jeu gratuitement',
-      final: title ? `Publier ${title}` : 'Créer mon jeu',
-      sticky: resume() ? `Reprendre, ${name}` : title ? `Continuer ${title}` : 'Créer mon jeu gratuitement',
-      resume: 'Reprendre'
+      nav: resume() ? `Je reprends, ${name}` : title ? `Je récupère ${title}` : 'Je crée mon jeu',
+      pack: title ? `Je récupère le pack de ${title}` : 'Je récupère mon pack',
+      how: title ? `Je construis ${title} pour de vrai` : 'Je crée mon jeu',
+      offer: title ? `Je continue avec ${title}` : 'Je génère mon jeu gratuitement',
+      final: title ? `Je publie ${title}` : 'Je crée mon jeu',
+      sticky: resume() ? `Je reprends, ${name}` : title ? `Je continue ${title}` : 'Je crée mon jeu gratuitement',
+      resume: 'Je reprends'
     };
     const v = hero.value.trim(), a = E.analyze(v);
-    L.hero = (S.generated && v === S.idea) ? `Continuer avec ${S.an.title}` : v.length >= 6 ? `Construire mon ${E.GENRES[a.genre].fr} · ${E.THEMES[a.theme].fr}` : 'Générer ma map';
+    L.hero = (S.generated && v === S.idea) ? `Je continue avec ${S.an.title}` : v.length >= 6 ? `Je construis mon ${E.GENRES[a.genre].fr} · ${E.THEMES[a.theme].fr}` : 'Je génère ma map';
     $$('[data-cta]').forEach(el => L[el.dataset.cta] && setLbl(el, L[el.dataset.cta]));
   }
   // ---------- panneaux (pack, histoire, titres) ----------
@@ -42,7 +42,7 @@
   let tabSel = 0;
   function renderPack() {
     const idea = S.idea, an = S.an, p = E.makePack(an, idea), th = E.THEMES[an.theme], ge = E.GENRES[an.genre], title = S.generated ? an.title : null, shown = an.title;
-    const lock = (txt, btn = 'Récupérer mon pack') => `<div class="over"><span>${txt}</span><a class="btn btn-sm" href="funnel.html" data-cta="pack"><span class="lbl">${btn}</span><i data-i="arrow-right"></i></a></div>`;
+    const lock = (txt, btn = 'Je récupère mon pack') => `<div class="over"><span>${txt}</span><a class="btn btn-sm" href="funnel.html" data-cta="pack"><span class="lbl">${btn}</span><i data-i="arrow-right"></i></a></div>`;
     const P = [
       `<span class="mono">Ton jeu</span><div class="big-title">${esc(shown)}</div>${idea ? `<p class="sub">« ${esc(idea)} »</p>` : ''}
        <div class="tiles"><div class="tile"><span class="mono">Type</span><b>${ic(ge.icon)}${ge.label}</b></div><div class="tile"><span class="mono">Thème</span><b>${ic(th.icon)}${th.fr}</b></div><div class="tile"><span class="mono">Blocs</span><b>${S.blocks || '…'}</b></div><div class="tile"><span class="mono">À vendre</span><b>${p.shop.length} articles</b></div></div>
