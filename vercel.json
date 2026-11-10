@@ -1,1 +1,1 @@
-{"buildCommand": "node scripts/bg.js", "outputDirectory": "public", "functions": {"api/[...route].js": {"maxDuration": 300}}}
+{"buildCommand": "node scripts/bg.js", "outputDirectory": "public", "functions": {"api/router.js": {"maxDuration": 300}}, "rewrites": [{"source": "/api/:path*", "destination": "/api/router?__route=:path*"}]}
