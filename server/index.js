@@ -8,7 +8,7 @@ http.createServer(async (req, res) => {
   const u = new URL(req.url, `http://localhost:${PORT}`), p = u.pathname;
   try {
     if (p.startsWith('/api/')) {
-      const c = []; for await (const d of req) c.push(d);
+      const c = []; let sz = 0; for await (const d of req) { sz += d.length; if (sz > 65536) { res.writeHead(413); return res.end('{"error":"too_large"}'); } c.push(d); }
       const r = await handle({ method: req.method, path: p, q: u.searchParams, raw: Buffer.concat(c).toString(), headers: req.headers });
       res.writeHead(r ? r.code : 404, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify(r ? r.json : {}));
     }
