@@ -200,3 +200,5 @@ transition:width .5s var(--ease),height .5s var(--ease),padding .5s var(--ease),
 @media(max-width:420px){.sim-float{bottom:84px}.sim-cap{margin-top:34px}}
 .sim-stage{display:flex;flex-direction:column}.sim-cap{order:-1;margin:0 0 16px}.sim-push{top:calc(72px + 9%)}.sim-float{bottom:66px}
 @media(max-width:420px){.sim-cap{margin:0 0 14px}.sim-float{bottom:56px}}
+/* mobile : éviter le double bouton (le CTA collant suffit) */
+@media(max-width:620px){.sim-copy>.btn{display:none}}

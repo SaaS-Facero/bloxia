@@ -64,7 +64,7 @@
   function burst(x, y, cols) { cols = cols || ['#ffc53d', '#5b9bff', '#2bd68f', '#ff6fa8', '#ffffff']; for (let k = 0; k < 16; k++) { const e = document.createElement('i'), a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 90; e.className = 'fx-bit'; e.style.cssText = `left:${x}px;top:${y}px;background:${cols[k % cols.length]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d - 30}px;--r:${Math.random() * 360}deg;--s:${.6 + Math.random() * .8}`; document.body.appendChild(e); setTimeout(() => e.remove(), 900); } }
   function drawer() { $('#fx-items').innerHTML = S.items.length ? S.items.map(k => `<div class="fx-li"><span class="fx-gt">${GL(ITEMS[k][0])}</span><div><b>${ITEMS[k][1]}</b><small>Débloqué</small></div></div>`).join('') : '<p class="fx-empty">Rien pour l\'instant. Réponds aux questions pour débloquer des objets.</p>'; }
   function hud() {
-    const on = S.i >= 1; $('#fx-hud').hidden = !on; $('#fx-guide').hidden = !on; $('#fx-minibox').hidden = !on || S.i === GEN || S.i === LAST; $('#fx-stage').className = 'fx-stage' + (S.i === 0 ? ' s0' : '');
+    const on = S.i >= 1; $('#fx-hud').hidden = !on; $('#fx-guide').hidden = !on || S.i === RES; $('#fx-minibox').hidden = !on || S.i === GEN || S.i === LAST; $('#fx-stage').className = 'fx-stage' + (S.i === 0 ? ' s0' : '');
     $('#fx-pbar').style.width = Math.min(100, S.i / LAST * 100) + '%'; $('#fx-back').style.visibility = (S.i > 1 && S.i < GEN) ? 'visible' : 'hidden';
     const n = Math.round(S.i / LAST * 5); $('#fx-stars').innerHTML = [0, 1, 2, 3, 4].map(k => ic('star', k < n ? 'on' : '')).join('');
     const g = G(); root.style.setProperty('--gc', g.c); $('#fx-av').innerHTML = AV.svg(g.id); $('#fx-gname').textContent = g.name;
@@ -177,7 +177,8 @@
         <div class="fx-labels" id="glab"></div><div class="fx-flash" id="gfl"></div>
         <div class="fx-stamp" id="gst"><small>Map prête</small><b></b></div></div>
       <div class="fx-bigbar"><i id="gb"></i></div>
-      <div class="fx-check">${['Terrain posé', 'Décors et objets', 'Économie du jeu', 'Scripts Luau', 'Finitions et optimisation mobile'].map(t => `<div>${ic('check-circle')}${t}</div>`).join('')}</div>`,
+      <div class="fx-check">${['Terrain posé', 'Décors et objets', 'Économie du jeu', 'Scripts Luau', 'Finitions et optimisation mobile'].map(t => `<div>${ic('check-circle')}${t}</div>`).join('')}</div>
+      <button class="fx-skip" id="gskip" hidden>Passer l'animation ${ic('arrow-right')}</button>`,
       after: st => {
         const a = an(), pk = E.makePack(a, phrase()), blocks = E.generate(a, phrase()).blocks, gx = st.querySelector('#gx');
         const w = new E.World(st.querySelector('#gc'), { autoRotate: true, speed: .5, scale: 2.7, offsetY: .04, ghost: true, dust: true }); extra.push(w);
@@ -186,7 +187,8 @@
         const ease = t => 1 - Math.pow(1 - t, 3), io = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         const tween = (to, ms, f = ease) => new Promise(res => { const o = w.o, from = {}; for (const k in to) from[k] = o[k]; const t0 = performance.now(); const step = t => { if (!alive()) return res(); const p = Math.min(1, (t - t0) / ms), e = f(p); for (const k in to) o[k] = from[k] + (to[k] - from[k]) * e; p < 1 ? requestAnimationFrame(step) : res(); }; requestAnimationFrame(step); });
         const rows = $$('.fx-check div', st), T0 = performance.now(), TOTAL = 16500, glowN = Math.max(6, Math.round(blocks.filter(b => b.z >= 1).length / 4));
-        let lines = 0;
+        let lines = 0, skipped = false;
+        setTimeout(() => { const sk = st.querySelector('#gskip'); if (!sk || !alive()) return; sk.hidden = false; sk.onclick = () => { if (skipped || !alive()) return; skipped = true; clearInterval(tick); if ('speechSynthesis' in window) speechSynthesis.cancel(); gain(100, 12); go(RES); }; }, 7000);
         const banner = (n, t) => { const pb = st.querySelector('#gpb'); pb.querySelector('small').textContent = 'Phase ' + n + ' sur 5'; pb.querySelector('b').textContent = t; pb.classList.remove('on'); void pb.offsetWidth; pb.classList.add('on'); gx.classList.remove('jolt'); void gx.offsetWidth; gx.classList.add('jolt'); };
         const phase = (n, t) => { banner(n, t); st.querySelector('#gpn').textContent = n + '/5'; const pt = st.querySelector('#gpt'); pt.textContent = t; pt.classList.remove('swap'); void pt.offsetWidth; pt.classList.add('swap'); rows.forEach((r, k) => r.classList.toggle('on', k < n - 1)); tone(300 + n * 90, .25, 'triangle', .04); };
         const label = (txt, icn) => { const box = st.querySelector('#glab'); const e = document.createElement('span'); e.className = 'fx-lbl'; e.innerHTML = ic(icn) + txt; e.style.left = (14 + Math.random() * 62) + '%'; e.style.top = (16 + Math.random() * 50) + '%'; box.appendChild(e); setTimeout(() => e.classList.add('out'), 1900); setTimeout(() => e.remove(), 2400); sfx.pick(); };
@@ -222,6 +224,7 @@
       } },
     { say: () => `${S.a.name}, voilà ta map. Et regarde tout le code qui l'accompagne.`, html: () => { const a = an(), th = E.THEMES[a.theme], ge = E.GENRES[a.genre];
         return `<div class="fx-res"><canvas id="rc"></canvas><span class="fx-hint">${ic('move')}Glisse pour tourner la map</span></div>${title(esc(a.title.split(' ')[0]), esc(a.title.split(' ').slice(1).join(' ')))}<div class="mas-res" aria-hidden="true"><img class="mas-img" src="/assets/img/mascot/joie.png" width="200" height="200" alt="" decoding="async"></div>
+        ${(S.a.phrase || '').trim() ? `<p class="fx-idea">${ic('pen')}<span>D'après ton idée : « ${esc(S.a.phrase.trim().slice(0, 90))} »</span></p>` : ''}
         <div class="fx-rtags"><span class="fx-rtag">${ic(ge.icon)}${E.GENRES[a.genre].label}</span><span class="fx-rtag">${ic(th.icon)}${th.fr}</span><span class="fx-rtag">${ic('check-circle')}Syntaxe vérifiée</span></div>
         <div class="ide-stats" id="istats">${[['code', 'lignes de code', 'il'], ['file', 'fichiers prêts', 'if'], ['terminal', 'prompts Studio', 'ip'], ['zap', 'fonctions', 'ifn']].map(([i, l, id]) => `<div><span>${ic(i)}</span><b id="${id}">0</b><small>${l}</small></div>`).join('')}</div>
         <div class="ide" id="ide"><div class="ide-bar"><i></i><i></i><i></i><span>Bloxia Studio · ${esc(a.title.toLowerCase().replace(/\s+/g, '-'))}.rbxl</span><em id="ilive"><span class="ide-dot"></span>Généré pour toi</em></div>
@@ -270,18 +273,18 @@
           const core = d.files.findIndex(f => /Core$/.test(f.nom)); openFile(core >= 0 ? core : 0);
         }).catch(() => { if (!alive()) return; st.querySelector('#istats').hidden = true; st.querySelector('#itree').innerHTML = '<div class="ide-ph">Aperçu indisponible. Ton pack complet reste prêt.</div>'; st.querySelector('#icode').innerHTML = `<div class="ln"><span>1</span><code>${esc(fallbackHead)}</code></div>`; });
       } },
-    { say: () => 'Choisis ta formule. L\'annuel commence par 3 jours gratuits.',
+    { say: () => 'Choisis ta formule. L\'annuel est à \u221240 %, et tu es remboursé sous 14 jours si ça ne te va pas.',
       html: () => `<div class="fx-offer" id="ofb"><span class="fx-ofl"><span class="fx-ofg">${PA.ticket()}</span><span><small>Offre de bienvenue</small><b>−30 % sur ton 1er mois</b></span></span><span class="fx-oft"><small id="ofs">Expire dans</small><b id="oft">10:00</b></span><i class="fx-ofbar" id="ofbar"></i></div>
         <div class="pr-head">${title('débloque', esc(an().title))}<p class="fx-help">Ta map est sauvegardée. Choisis la formule qui colle à ton objectif.</p></div>
         <div class="pr-cycle" role="radiogroup" aria-label="Période de facturation"><i class="pr-thumb"></i>
           <button type="button" role="radio" data-cycle="month">Mensuel</button>
           <button type="button" role="radio" data-cycle="year">Annuel <em>−40 %</em></button></div>
-        <p class="pr-trial" id="prtrial">${PA.fi('clock')}<span><b>3 jours d'essai gratuit</b> sur l'annuel. 0 € aujourd'hui.</span></p>
+        <p class="pr-trial" id="prtrial">${PA.fi('shield')}<span><b>\u221240 % sur l'annuel.</b> Satisfait ou remboursé sous 14 jours.</span></p>
         <div class="fx-plans" id="plans"><p class="fx-help">Chargement des formules…</p></div>
         <div class="pr-trust"><span>${PA.fi('shield')}Paiement sécurisé par Whop</span><span>${PA.fi('cancel')}Résiliable en un clic</span><span>${PA.fi('card')}Aucun débit pendant l'essai</span></div>
         <div class="pr-sec"><h2 class="pr-h2">Compare les formules</h2><div class="pr-table" id="prtable"></div></div>
         <div class="pr-sec"><h2 class="pr-h2">Questions sur le paiement</h2><div class="pr-faq">
-          <details><summary>Comment marche l'essai gratuit ?<span>${ic('chevron-down')}</span></summary><p>En annuel, tu ne paies rien pendant 3 jours. Tu as accès à tout. Si tu annules avant la fin de l'essai, tu n'es pas débité. Sinon, l'année est facturée au 4e jour.</p></details>
+          <details><summary>Et si ça ne me convient pas ?<span>${ic('chevron-down')}</span></summary><p>Tu as 14 jours pour tester ton pack. Si la map ou les scripts ne marchent pas, un message suffit : on te rembourse intégralement, sans discuter.</p></details>
           <details><summary>Je peux annuler quand je veux ?<span>${ic('chevron-down')}</span></summary><p>Oui, depuis ton compte Whop, en un clic. Tu gardes l'accès jusqu'à la fin de la période déjà payée.</p></details>
           <details><summary>Je peux changer de formule ?<span>${ic('chevron-down')}</span></summary><p>Oui, à tout moment. Le changement prend effet à la prochaine période.</p></details>
           <details><summary>J'ai moins de 18 ans, je peux m'abonner ?<span>${ic('chevron-down')}</span></summary><p>Oui, avec un parent : c'est lui qui fait le paiement, ou qui te donne son accord.</p></details>
@@ -300,7 +303,7 @@
         const calc = p => { const yr = cycle === 'year', d = expired || yr ? 0 : O.discount, full = yr ? p.annual : p.price, first = r2(full * (1 - d)), days = yr ? 365 : 30;
           return { yr, full, first, perDay: r2(first / days), strike: yr ? r2(p.price / 30) : (d ? r2(p.price / 30) : 0), save: r2(p.price * 12 - first) }; };
         const card = (p, k) => { const c = calc(p);
-          const bill = c.yr ? `<div class="pr-zero"><b>0 €</b><span>aujourd'hui</span></div><p class="pr-bill">puis ${eur(c.full)} par an après 3 jours d'essai</p>`
+          const bill = c.yr ? `<p class="pr-bill"><b class="pr-now">${eur(c.full)}</b> aujourd'hui, puis chaque année. <span class="pr-guar">Remboursé sous 14 jours.</span></p>`
                              : `<p class="pr-bill">${expired ? `${eur(c.full)} par mois` : `${eur(c.first)} le 1er mois, puis ${eur(c.full)} par mois`}</p>`;
           return `<article class="fx-plan pr-card ${p.featured ? 'feat' : ''}" data-id="${p.id}" style="--pc:${COL[p.id]};--d:${k * 90}ms"><span class="pr-glare"></span>
             ${p.featured ? `<span class="fx-rib">${ic('star')}Recommandé</span>` : ''}
@@ -309,8 +312,8 @@
             <div class="pr-spec"><small>Sa spécialité</small><b>${esc(p.specialty)}</b></div>
             <div class="pr-price">${c.strike ? `<s>${eur(c.strike)}</s>` : ''}<b data-v="${c.perDay}">${eur(c.perDay)}</b><span>/ jour</span></div>
             ${bill}${c.yr ? `<p class="pr-save">${PA.fi('yes')}Tu économises ${eur(c.save)} par an</p>` : ''}
-            <button class="btn ${p.featured ? 'btn-gold' : 'pr-btn'} btn-block" data-plan="${p.id}"><span class="lbl">${c.yr ? 'J\'essaie gratuitement' : esc(p.cta)}</span>${ic('arrow-right')}</button>
-            <p class="pr-micro">${c.yr ? 'Tu peux annuler avant la fin de l\'essai, sans frais' : 'Sans engagement, tu résilies en un clic'}</p>
+            <button class="btn ${p.featured ? 'btn-gold' : 'pr-btn'} btn-block" data-plan="${p.id}"><span class="lbl">${esc(p.cta)}</span>${ic('arrow-right')}</button>
+            <p class="pr-micro">${c.yr ? 'Satisfait ou remboursé sous 14 jours' : 'Sans engagement, tu résilies en un clic'}</p>
             <ul class="pr-feats">${p.plus ? `<li class="pr-plus">${PA.fi('plus')}<span>${esc(p.plus)}</span></li>` : ''}${p.features.map(([i, t]) => `<li>${PA.fi(i)}<span>${esc(t)}</span></li>`).join('')}</ul></article>`; };
         const table = () => { const rows = [['Jeux générés par mois', ['1', '5', 'Illimité']], ['Prompts Roblox Studio et scripts Luau', [1, 1, 1]], ['Boutique avec prix conseillés', [1, 1, 1]], ['Plan de lancement', [1, 1, 1]], ['Idées de vidéos TikTok', [0, 1, 1]], ['Packs mis à jour chaque semaine', [0, 1, 1]], ['Places pour ton équipe', ['1', '1', '3']], ['Coaching en visio', [0, 0, 'Mensuel']], ['Support', ['Standard', 'Prioritaire', 'Dédié 24 h']]];
           const cell = (v, id) => `<td style="--pc:${COL[id]}">${v === 1 ? PA.fi('yes') : v === 0 ? PA.fi('no') : `<b>${v}</b>`}</td>`;
@@ -322,8 +325,8 @@
           // L'offre −30 % ne vaut que pour le mensuel : on masque la bannière minuteur en annuel (évite 2 promos concurrentes).
           const ofb = st.querySelector('#ofb'); if (ofb) ofb.style.display = cycle === 'year' ? 'none' : '';
           st.querySelector('#plans').innerHTML = O.plans.map(card).join('');
-          st.querySelector('#prendsub').textContent = cycle === 'year' ? '3 jours d\'essai gratuit, 0 € aujourd\'hui. Annulable avant la fin de l\'essai.' : 'Sans engagement, résiliable en un clic.';
-          st.querySelector('#prmini').innerHTML = O.plans.map(p => { const c = calc(p); return `<div class="pr-mc ${p.featured ? 'feat' : ''}" style="--pc:${COL[p.id]}"><span class="pr-mce">${PA.emblem(p.id)}</span><div class="pr-mct"><b>${p.name}</b><span>${c.strike ? `<s>${eur(c.strike)}</s>` : ''}<strong>${eur(c.perDay)}</strong> / jour</span><small>${c.yr ? '0 € aujourd\'hui' : (expired ? eur(c.full) + ' / mois' : eur(c.first) + ' le 1er mois')}</small></div><button class="btn ${p.featured ? 'btn-gold' : 'pr-btn'}" data-plan="${p.id}"><span class="lbl">${c.yr ? 'J\'essaie' : 'Je choisis'}</span>${ic('arrow-right')}</button></div>`; }).join('');
+          st.querySelector('#prendsub').textContent = cycle === 'year' ? '\u221240 % en passant à l\'année. Satisfait ou remboursé sous 14 jours.' : 'Sans engagement, résiliable en un clic.';
+          st.querySelector('#prmini').innerHTML = O.plans.map(p => { const c = calc(p); return `<div class="pr-mc ${p.featured ? 'feat' : ''}" style="--pc:${COL[p.id]}"><span class="pr-mce">${PA.emblem(p.id)}</span><div class="pr-mct"><b>${p.name}</b><span>${c.strike ? `<s>${eur(c.strike)}</s>` : ''}<strong>${eur(c.perDay)}</strong> / jour</span><small>${c.yr ? eur(c.full) + ' / an' : (expired ? eur(c.full) + ' / mois' : eur(c.first) + ' le 1er mois')}</small></div><button class="btn ${p.featured ? 'btn-gold' : 'pr-btn'}" data-plan="${p.id}"><span class="lbl">Je choisis</span>${ic('arrow-right')}</button></div>`; }).join('');
           BX.hydrate(st);
           $$('.pr-card', st).forEach(tilt); if (animate) $$('.pr-price b', st).forEach(roll);
           $$('[data-plan]', st).forEach(btn => btn.onclick = async () => { const r0 = btn.getBoundingClientRect(); burst(r0.left + r0.width / 2, r0.top + r0.height / 2); $$('[data-plan]', st).forEach(x => x.disabled = true); BX.set({ done: true });
