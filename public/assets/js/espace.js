@@ -56,10 +56,10 @@
   }
 
   // ---------- sections ----------
-  const card = (id, n, title, sub, body, open) => `<div class="card ${done.has(id) ? 'done' : ''} ${open ? 'open' : ''}" data-card="${id}"><div class="ch"><span class="num">${n}</span><div class="ct"><b>${esc(title)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</div>${checkBtn(id)}<button class="toggle" aria-label="Afficher">${ic('chevron-down')}</button></div><div class="cb">${body}</div></div>`;
+  const card = (id, n, title, sub, body, open) => `<div class="card ${done.has(id) ? 'done' : ''} ${open ? 'open' : ''}" data-card="${id}"><div class="ch"><span class="num">${n}</span><div class="ct"><b>${title}</b>${sub ? `<span>${sub}</span>` : ''}</div>${checkBtn(id)}<button class="toggle" aria-label="Afficher">${ic('chevron-down')}</button></div><div class="cb">${body}</div></div>`;
   const R = {
     start: () => `<div class="sh"><div><h1>Démarrer</h1><p>Prépare Roblox Studio. Compte 15 minutes.</p></div></div>
-      ${D.start.map((s, i) => card('st' + i, i + 1, s.t, '', `<p>${esc(s.d)}</p>`, i === 0)).join('')}`,
+      ${D.start.map((s, i) => card('st' + i, i + 1, esc(s.t), '', `<p>${esc(s.d)}</p>`, i === 0)).join('')}`,
     prompts: () => `<div class="sh"><div><h1>Prompts Studio</h1><p>Colle-les dans l'Assistant de Roblox Studio, dans l'ordre.</p></div></div>
       <div class="hint">${ic('bulb')}<span>Un prompt à la fois. Attends que l'Assistant ait fini, vérifie avec la liste, puis coche « Fait ».</span></div>
       ${D.prompts.map((p, i) => card(p.id, i + 1, esc(p.titre), esc(p.but), `<div class="code" data-tour="prompt">${esc(p.texte)}</div><div class="row"><button class="btn acc" data-copy="p${i}">${ic('copy')}Copier le prompt</button></div><ul class="ver">${p.verif.map(v => `<li>${ic('check-circle')}${esc(v)}</li>`).join('')}</ul>`, i === 0)).join('')}`,
@@ -75,7 +75,7 @@
       ${D.visuals.thumbs.map((t, i) => card('vt' + i, i + 2, 'Miniature ' + (i + 1), esc(t.brief), `<div class="code">${esc(t.prompt)}</div><div class="row"><button class="btn acc" data-copy="vt${i}">${ic('copy')}Copier le prompt image</button></div>`)).join('')}`,
     listing: () => `<div class="sh"><div><h1>Fiche du jeu</h1><p>Titre, description et réglages avant de publier.</p></div></div>
       <div class="card"><div class="ch"><div class="ct"><b>Titre</b><span>Choisis-en un</span></div></div><div class="cb" style="display:flex;flex-direction:column;gap:6px">${D.listing.titles.map((t, i) => `<div class="row" style="margin:0;align-items:center"><span class="tag" style="height:30px;font-size:13px">${esc(t)}</span><button class="btn" data-copy="ti${i}">${ic('copy')}Copier</button></div>`).join('')}</div></div>
-      <div class="card"><div class="ch"><div class="ct"><b>Description</b></div><button class="btn" data-copy="desc">${ic('copy')}Copier</button></div><div class="cb"><div class="code">${esc(D.listing.description)}</div></div></div>
+      <div class="card open"><div class="ch"><div class="ct"><b>Description</b></div><button class="btn" data-copy="desc">${ic('copy')}Copier</button><button class="toggle" aria-label="Afficher">${ic('chevron-down')}</button></div><div class="cb"><div class="code">${esc(D.listing.description)}</div></div></div>
       <div class="card"><div class="ch"><div class="ct"><b>Avant de publier</b><span>Coche chaque point</span></div></div><div class="cb days" style="grid-template-columns:1fr">${D.checklist.map((c, i) => dayBtn('ck' + i, '', c)).join('')}</div></div>
       <div class="card"><div class="ch"><div class="ct"><b>Réglages</b></div></div><ol class="steps">${D.listing.settings.map(t => `<li><span>${esc(t)}</span></li>`).join('')}</ol></div>`,
     videos: () => `<div class="sh"><div><h1>Vidéos TikTok</h1><p>3 vidéos courtes pour tes premiers joueurs.</p></div></div>
@@ -221,7 +221,7 @@
   const TOUR = [
     { sel: null, t: 'Bienvenue dans ton espace', p: 'Tout ce qu\'il faut pour publier ton jeu est ici, étape par étape. On fait le tour en une minute.' },
     { sel: '.nav', t: 'Le menu', p: 'Huit sections, dans l\'ordre où tu vas les faire. Le compteur à droite montre ce qui est terminé.' },
-    { sel: '#prog', t: 'Ta progression', p: 'Chaque étape cochée fait avancer cette barre. Elle est sauvegardée : tu reprends où tu t\'es arrêté.' },
+    { sel: '#ptxt', t: 'Ta progression', p: 'Chaque étape cochée fait avancer cette barre. Elle est sauvegardée : tu reprends où tu t\'es arrêté.' },
     { sel: '[data-card="st0"]', sec: 'start', t: 'Démarrer', p: 'Commence ici : installer Roblox Studio et préparer ton jeu. Clique sur une étape pour l\'ouvrir.' },
     { sel: '[data-card="st0"] .check', sec: 'start', t: 'Coche « Fait »', p: 'Quand une étape est terminée, coche-la. Le compteur et la barre se mettent à jour tout seuls.' },
     { sel: '[data-copy="p0"]', sec: 'prompts', t: 'Les prompts', p: 'Copie le prompt, colle-le dans l\'Assistant de Roblox Studio, puis vérifie le résultat avec la liste en dessous.' },
