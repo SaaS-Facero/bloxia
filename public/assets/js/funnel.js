@@ -249,7 +249,7 @@
           if (!alive()) return; P = d;
           count(st.querySelector('#il'), d.totalLines); count(st.querySelector('#if'), d.files.length); count(st.querySelector('#ip'), d.prompts.length); count(st.querySelector('#ifn'), d.functions);
           const core = d.files.findIndex(f => /Core$/.test(f.nom)); openFile(core >= 0 ? core : 0);
-        }).catch(() => { if (!alive()) return; st.querySelector('#itree').innerHTML = '<div class="ide-ph">Aperçu indisponible. Ton pack complet reste prêt.</div>'; st.querySelector('#icode').innerHTML = `<div class="ln"><span>1</span><code>${esc(fallbackHead)}</code></div>`; });
+        }).catch(() => { if (!alive()) return; st.querySelector('#istats').hidden = true; st.querySelector('#itree').innerHTML = '<div class="ide-ph">Aperçu indisponible. Ton pack complet reste prêt.</div>'; st.querySelector('#icode').innerHTML = `<div class="ln"><span>1</span><code>${esc(fallbackHead)}</code></div>`; });
       } },
     { say: () => 'Choisis ta formule. L\'annuel commence par 3 jours gratuits.',
       html: () => `<div class="fx-offer" id="ofb"><span class="fx-ofl"><span class="fx-ofg">${PA.ticket()}</span><span><small>Offre de bienvenue</small><b>−30 % sur ta première période</b></span></span><span class="fx-oft"><small id="ofs">Expire dans</small><b id="oft">10:00</b></span><i class="fx-ofbar" id="ofbar"></i></div>
