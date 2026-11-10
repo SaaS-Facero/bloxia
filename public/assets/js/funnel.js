@@ -170,7 +170,7 @@
         em.value ? pw.focus() : em.focus();
       } },
     { say: () => 'Je lance la construction. Regarde bien.', html: () => `<div class="fx-kick">${ic('hammer')}Génération en direct</div>${title('je construis', 'ton monde')}
-      <div class="fx-gen scanning" id="gx"><div class="fx-rays"></div><div class="fx-gfloor"></div><canvas id="gc"></canvas><div class="fx-speed"></div><div class="fx-ring" id="grg"></div><div class="fx-cd" id="gcd"></div><div class="fx-pban" id="gpb"><small></small><b></b></div><div class="fx-scan"></div><div class="fx-vgn"></div>
+      <div class="fx-gen scanning" id="gx"><div class="mas-walk" aria-hidden="true"><img class="mas-img" src="/assets/img/mascot/marche.png" width="200" height="200" alt="" decoding="async"></div><div class="fx-rays"></div><div class="fx-gfloor"></div><canvas id="gc"></canvas><div class="fx-speed"></div><div class="fx-ring" id="grg"></div><div class="fx-cd" id="gcd"></div><div class="fx-pban" id="gpb"><small></small><b></b></div><div class="fx-scan"></div><div class="fx-vgn"></div>
         <div class="fx-phase"><b id="gpn">1/5</b><span id="gpt">Initialisation</span></div>
         <div class="fx-gstats"><span>${ic('cube')}<b id="gs1">0</b> blocs</span><span>${ic('flag')}<b id="gs2">0</b> objets</span><span>${ic('code')}<b id="gs3">0</b> lignes</span></div>
         <div class="fx-term" id="gterm"><div class="fx-termh"><i></i><i></i><i></i><span>GameManager.server.lua</span></div><pre id="gtx"></pre></div>
@@ -221,7 +221,7 @@
         })();
       } },
     { say: () => `${S.a.name}, voilà ta map. Et regarde tout le code qui l'accompagne.`, html: () => { const a = an(), th = E.THEMES[a.theme], ge = E.GENRES[a.genre];
-        return `<div class="fx-res"><canvas id="rc"></canvas><span class="fx-hint">${ic('move')}Glisse pour tourner la map</span></div>${title(esc(a.title.split(' ')[0]), esc(a.title.split(' ').slice(1).join(' ')))}
+        return `<div class="fx-res"><canvas id="rc"></canvas><span class="fx-hint">${ic('move')}Glisse pour tourner la map</span></div>${title(esc(a.title.split(' ')[0]), esc(a.title.split(' ').slice(1).join(' ')))}<div class="mas-res" aria-hidden="true"><img class="mas-img" src="/assets/img/mascot/joie.png" width="200" height="200" alt="" decoding="async"></div>
         <div class="fx-rtags"><span class="fx-rtag">${ic(ge.icon)}${E.GENRES[a.genre].label}</span><span class="fx-rtag">${ic(th.icon)}${th.fr}</span><span class="fx-rtag">${ic('check-circle')}Syntaxe vérifiée</span></div>
         <div class="ide-stats" id="istats">${[['code', 'lignes de code', 'il'], ['file', 'fichiers prêts', 'if'], ['terminal', 'prompts Studio', 'ip'], ['zap', 'fonctions', 'ifn']].map(([i, l, id]) => `<div><span>${ic(i)}</span><b id="${id}">0</b><small>${l}</small></div>`).join('')}</div>
         <div class="ide" id="ide"><div class="ide-bar"><i></i><i></i><i></i><span>Bloxia Studio · ${esc(a.title.toLowerCase().replace(/\s+/g, '-'))}.rbxl</span><em id="ilive"><span class="ide-dot"></span>Généré pour toi</em></div>
@@ -286,7 +286,7 @@
           <details><summary>Je peux changer de formule ?<span>${ic('chevron-down')}</span></summary><p>Oui, à tout moment. Le changement prend effet à la prochaine période.</p></details>
           <details><summary>J'ai moins de 18 ans, je peux m'abonner ?<span>${ic('chevron-down')}</span></summary><p>Oui, avec un parent : c'est lui qui fait le paiement, ou qui te donne son accord.</p></details>
         </div></div>
-        <section class="pr-g2" aria-label="Garantie satisfait ou remboursé"><div class="pr-g2l"><span class="pr-g2seal">${PA.seal(BLOXIA_CONFIG.guaranteeDays)}</span><span class="pr-g2pct"><b>100 %</b><small>remboursé</small></span></div>
+        <section class="pr-g2" aria-label="Garantie satisfait ou remboursé"><div class="pr-g2l"><img class="mas-g2" src="/assets/img/mascot/pointe.png" width="200" height="200" alt="" decoding="async"><span class="pr-g2seal">${PA.seal(BLOXIA_CONFIG.guaranteeDays)}</span><span class="pr-g2pct"><b>100 %</b><small>remboursé</small></span></div>
           <div class="pr-g2r"><span class="fx-kick" style="justify-content:flex-start">${ic('shield')}Garantie ${BLOXIA_CONFIG.guaranteeDays} jours</span><h2 class="pr-g2t">Ça ne marche pas ? <b>On te rembourse.</b></h2>
           <p class="pr-g2p">Tu as ${BLOXIA_CONFIG.guaranteeDays} jours pour tester ton pack. Zéro risque pour toi.</p>
           <ul class="pr-g2list" style="--pc:#2bd68f"><li>${PA.fi('yes')}<span><b>Ta map ne s'importe pas</b> dans Roblox Studio : remboursé.</span></li><li>${PA.fi('yes')}<span><b>Un script ne fonctionne pas</b> : on le corrige avec toi, ou remboursé.</span></li><li>${PA.fi('yes')}<span><b>Un simple message suffit</b>, remboursement intégral.</span></li></ul></div></section>

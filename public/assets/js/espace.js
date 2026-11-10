@@ -169,11 +169,12 @@
     $$('[data-step]', main).forEach(b => b.onclick = () => {
       const id = b.dataset.step, d = D.plan[planDay - 1], wasDone = dayDone(d);
       done.has(id) ? done.delete(id) : (done.add(id), markActivity()); b.classList.toggle('on', done.has(id)); saveProg(); refreshProgress();
-      if (!wasDone && dayDone(d)) { sfx.win(); burst(b); show('plan'); toast(`Jour ${d.j} terminé`); } else if (done.has(id)) { sfx.check(); show('plan'); } else show('plan');
+      if (!wasDone && dayDone(d)) { sfx.win(); burst(b); masPop(); show('plan'); toast(`Jour ${d.j} terminé`); } else if (done.has(id)) { sfx.check(); show('plan'); } else show('plan');
     });
     const ics = $('#ics', main); if (ics) ics.onclick = () => { download('bloxia-programme-14-jours.ics', calendar()); sfx.tap(); };
     clearInterval(bindPlan.t); bindPlan.t = setInterval(() => { const c = $('#cdown'); if (!c) return clearInterval(bindPlan.t); c.textContent = nextUnlockText(); if (todayN() !== +($('.dtile.today b') || {}).textContent) { sfx.unlock(); show('plan'); } }, 30000);
   }
+  function masPop() { const m = $('#maspop'); m.classList.remove('on'); void m.offsetWidth; m.classList.add('on'); clearTimeout(masPop.t); masPop.t = setTimeout(() => m.classList.remove('on'), 2600); }
   function burst(el) { const r = el.getBoundingClientRect(), cols = ['#4f6bed', '#16a34a', '#f59e0b', '#ec4899']; for (let k = 0; k < 18; k++) { const e = document.createElement('i'), a = Math.random() * Math.PI * 2, dd = 40 + Math.random() * 80; e.className = 'bit'; e.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;background:${cols[k % 4]};--dx:${Math.cos(a) * dd}px;--dy:${Math.sin(a) * dd - 30}px`; document.body.appendChild(e); setTimeout(() => e.remove(), 900); } }
   function calendar() {
     const pad = x => String(x).padStart(2, '0'), start = midnight(planStart()), url = location.origin + '/espace.html', L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Bloxia//Programme 14 jours//FR', 'CALSCALE:GREGORIAN'];
@@ -244,6 +245,7 @@
     if (zoomed) { zoomed.classList.remove('zoom'); zoomed = null; }
     if (s.sec && s.sec !== current) show(s.sec);
     const hole = $('#hole'), tip = $('#tip');
+    const poses = ['joie', 'pointe', 'reflechit', 'pointe', 'marche']; $('#tmas').src = '/assets/img/mascot/' + (ti === TOUR.length - 1 ? 'joie' : ti ? poses[ti % poses.length] : 'joie') + '.png';
     $('#tstep').textContent = `Étape ${ti + 1} sur ${TOUR.length}`; $('#ttitle').textContent = s.t; $('#ttext').textContent = s.p;
     $('#tdots').innerHTML = TOUR.map((_, k) => `<i class="${k === ti ? 'on' : ''}"></i>`).join('');
     $('#tprev').style.visibility = ti ? 'visible' : 'hidden'; $('#tnext').textContent = ti === TOUR.length - 1 ? 'Terminer' : 'Suivant';

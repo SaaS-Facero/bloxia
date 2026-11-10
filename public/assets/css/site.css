@@ -125,3 +125,10 @@ transition:width .5s var(--ease),height .5s var(--ease),padding .5s var(--ease),
 @media(max-width:900px){.story,.offer{grid-template-columns:minmax(0,1fr)}.step h3,.step p{overflow-wrap:anywhere}}
 @media(max-width:760px){.cmp{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:560px){.nav-actions .btn{max-width:calc(100vw - 190px)}}
+
+/* mascotte Bloxy */
+.mas-hero{position:relative;display:flex;align-items:flex-end;gap:10px;margin:8px 0 -14px;z-index:2;pointer-events:none}
+.mas-hero .mas-img{width:92px;height:92px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.35));animation:masbob 3.2s ease-in-out infinite}
+.mas-bub{position:relative;margin-bottom:34px;padding:8px 12px;border-radius:12px 12px 12px 4px;background:#fff;color:#0b0d18;font-weight:700;font-size:13.500px;box-shadow:0 10px 24px -10px rgba(0,0,0,.5)}
+@keyframes masbob{50%{translate:0 -6px}}
+@media(prefers-reduced-motion:reduce){.mas-hero .mas-img{animation:none}}
