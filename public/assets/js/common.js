@@ -6,7 +6,7 @@
     set(p) { try { localStorage.setItem(KEY, JSON.stringify(Object.assign(BX.get(), p))); } catch {} },
     icon: (n, cls = '') => `<svg class="i ${cls}" aria-hidden="true"><use href="/assets/icons.svg#${n}"></use></svg>`,
     hydrate(root = document) { root.querySelectorAll('i[data-i]').forEach(e => { const t = document.createElement('span'); t.innerHTML = BX.icon(e.dataset.i, e.className); const s = t.firstChild; e.replaceWith(s); }); },
-    esc: s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+    esc: s => String(s).replace(/[&<>"'/]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#47;' }[c]))
   };
   const LOGO = id => `<svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fa6ff"/><stop offset="1" stop-color="#9b6bff"/></linearGradient></defs><path d="M16 3l11 6.3-11 6.3L5 9.3z" fill="#dfe5ff"/><path d="M5 9.3l11 6.3v12.6L5 21.9z" fill="url(#${id})"/><path d="M27 9.3l-11 6.3v12.6l11-6.3z" fill="#3b2a8f"/></svg>`;
   BX.logo = LOGO;
