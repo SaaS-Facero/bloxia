@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Installer le plugin Bloxia pour Roblox Studio</title>
+<meta name="description" content="Installe le plugin Bloxia dans Roblox Studio : tes scripts générés s'installent automatiquement dans ton jeu, sans copier-coller.">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css"></head>
+<body>
+<header class="nav nav-float" id="nav"><div class="nav-bar">
+  <a class="logo" href="/" aria-label="Bloxia"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3l11 6.3-11 6.3L5 9.3z" fill="#c7d2fe"/><path d="M5 9.3l11 6.3v12.6L5 21.9z" fill="#4f6bed"/><path d="M27 9.3l-11 6.3v12.6l11-6.3z" fill="#2f3fa8"/></svg><span>Bloxia</span></a>
+  <div class="nav-actions"><a class="btn btn-light btn-sm" href="/espace.html">Mon espace</a></div>
+</div></header>
+<main id="main" style="max-width:720px;margin:0 auto;padding:120px 18px 70px">
+  <span class="mono" style="color:var(--accent-ink,#8fa6ff);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px">Plugin Roblox Studio</span>
+  <h1 style="font:800 clamp(28px,5vw,42px)/1.08 var(--display,sans-serif);letter-spacing:-.02em;margin:10px 0 14px">Installe tes scripts en un clic</h1>
+  <p style="color:var(--ink-2);font-size:18px;line-height:1.5;margin-bottom:28px">Le plugin Bloxia récupère ton pack et pose <b style="color:var(--ink)">tous les scripts au bon endroit</b> dans ton jeu, directement dans Roblox Studio. Fini le copier-coller.</p>
+
+  <a class="btn btn-gold" href="/plugin/bloxia.lua" download style="margin-bottom:34px"><span class="lbl">Télécharger le plugin (bloxia.lua)</span></a>
+
+  <ol style="list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:18px;padding:0">
+    <li style="counter-increment:s;position:relative;padding:20px 20px 20px 66px;background:var(--surface);border:1px solid var(--line);border-radius:16px">
+      <span style="position:absolute;left:18px;top:18px;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4f6bed,#2f3fa8);color:#fff;display:grid;place-items:center;font:800 17px var(--display,sans-serif)">1</span>
+      <b style="display:block;margin-bottom:4px">Télécharge le plugin</b><span style="color:var(--ink-2)">Clique sur le bouton ci-dessus pour récupérer le fichier <code style="font-family:var(--mono,monospace)">bloxia.lua</code>.</span></li>
+    <li style="counter-increment:s;position:relative;padding:20px 20px 20px 66px;background:var(--surface);border:1px solid var(--line);border-radius:16px">
+      <span style="position:absolute;left:18px;top:18px;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4f6bed,#2f3fa8);color:#fff;display:grid;place-items:center;font:800 17px var(--display,sans-serif)">2</span>
+      <b style="display:block;margin-bottom:4px">Ajoute-le à Studio</b><span style="color:var(--ink-2)">Dans Roblox Studio : crée un <b>Script</b> (clic droit sur ServerScriptService → Insert Object → Script), ouvre <code style="font-family:var(--mono,monospace)">bloxia.lua</code>, copie tout le code et colle-le dans ce Script. Puis <b>clic droit sur le Script → « Save as Local Plugin »</b>, nomme-le « Bloxia ». Supprime ensuite le Script, il est devenu un plugin.</span></li>
+    <li style="counter-increment:s;position:relative;padding:20px 20px 20px 66px;background:var(--surface);border:1px solid var(--line);border-radius:16px">
+      <span style="position:absolute;left:18px;top:18px;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4f6bed,#2f3fa8);color:#fff;display:grid;place-items:center;font:800 17px var(--display,sans-serif)">3</span>
+      <b style="display:block;margin-bottom:4px">Connecte ton compte</b><span style="color:var(--ink-2)">Va dans <a href="/espace.html" style="color:var(--accent-ink,#8fa6ff)">ton espace Bloxia → Roblox Studio</a>, copie ton <b>code d'appairage</b>. Dans Studio, ouvre <b>Bloxia</b> depuis la barre d'outils (onglet Plugins), colle le code et clique <b>« Installer »</b>.</span></li>
+  </ol>
+
+  <div style="margin-top:28px;padding:16px 18px;background:rgba(255,197,61,.08);border:1px solid rgba(255,197,61,.25);border-radius:14px;color:var(--ink-2);font-size:14px;line-height:1.5">
+    <b style="color:var(--ink)">Autorise les requêtes HTTP</b> : la première fois, Studio te demande d'autoriser le plugin à accéder à Internet (pour récupérer ton pack). Clique « Allow ».
+  </div>
+  <p style="margin-top:18px;color:var(--muted);font-size:13px">Plugin original Bloxia. Non affilié à Roblox Corporation.</p>
+</main>
+</body></html>

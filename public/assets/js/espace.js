@@ -34,6 +34,7 @@
   const saveProg = () => { try { localStorage.setItem(PK(), JSON.stringify([...done])); } catch {} clearTimeout(syncT); syncT = setTimeout(pushProg, 800); };
   const SECTIONS = [
     ['start', 'Démarrer', 'rocket', () => D.start.map((_, i) => 'st' + i)],
+    ['studio', 'Roblox Studio', 'gamepad', () => []],
     ['prompts', 'Prompts Studio', 'terminal', () => D.prompts.map(p => p.id)],
     ['scripts', 'Scripts Luau', 'code', () => D.scripts.map(s => s.id)],
     ['shop', 'Boutique', 'store', () => D.shop.map(s => 'sh' + s.key)],
@@ -46,7 +47,7 @@
   function refreshProgress() {
     const ids = allIds(), n = ids.filter(i => done.has(i)).length;
     $('#pbar').style.width = (n / ids.length * 100) + '%'; $('#ptxt').textContent = `${n} sur ${ids.length} étapes`;
-    SECTIONS.forEach(([k, , , f]) => { const ids2 = f(), c = ids2.filter(i => done.has(i)).length, em = $(`.nav [data-s="${k}"] em`); if (em) { em.textContent = `${c}/${ids2.length}`; em.classList.toggle('done', c === ids2.length); } });
+    SECTIONS.forEach(([k, , , f]) => { const ids2 = f(), c = ids2.filter(i => done.has(i)).length, em = $(`.nav [data-s="${k}"] em`); if (em) { if (!ids2.length) { em.textContent = ''; return; } em.textContent = `${c}/${ids2.length}`; em.classList.toggle('done', c === ids2.length); } });
   }
   const checkBtn = (id, label = 'Fait') => `<button class="check ${done.has(id) ? 'on' : ''}" data-done="${id}">${ic('check')}<span>${done.has(id) ? 'Fait' : label}</span></button>`;
   function bindChecks(root) {
@@ -58,6 +59,17 @@
   // ---------- sections ----------
   const card = (id, n, title, sub, body, open) => `<div class="card ${done.has(id) ? 'done' : ''} ${open ? 'open' : ''}" data-card="${id}"><div class="ch"><span class="num">${n}</span><div class="ct"><b>${title}</b>${sub ? `<span>${sub}</span>` : ''}</div>${checkBtn(id)}<button class="toggle" aria-label="Afficher">${ic('chevron-down')}</button></div><div class="cb">${body}</div></div>`;
   const R = {
+    studio: () => `<div class="sh"><div><h1>Roblox Studio</h1><p>Installe tous tes scripts d'un coup, directement dans ton jeu.</p></div></div>
+      <div class="card open stu"><div class="ch"><div class="ct"><b>Le plugin Bloxia</b><span>Zéro copier-coller</span></div></div><div class="cb">
+        <p class="stu-p">Notre plugin Roblox Studio récupère ton pack et <b>pose tous les scripts au bon endroit</b> dans ton jeu, automatiquement. Tu gardes la main : tu peux tout relire et modifier.</p>
+        <div class="stu-code"><span class="stu-cl">${ic('key')}Ton code d'appairage</span><code id="plugcode">…</code><button class="btn acc" id="cpcode">${ic('copy')}Copier</button></div>
+        <ol class="stu-steps">
+          <li><b>Installe le plugin</b> dans Roblox Studio <a href="/plugin/" target="_blank" rel="noopener">(guide d'installation)</a>.</li>
+          <li><b>Ouvre Bloxia</b> depuis la barre d'outils de Studio.</li>
+          <li><b>Colle ton code</b> ci-dessus et clique « Installer ». Tes scripts apparaissent dans ton jeu.</li>
+        </ol>
+        <a class="btn btn-sm" href="/plugin/" target="_blank" rel="noopener">${ic('download')}Installer le plugin</a>
+      </div></div>`,
     start: () => `<div class="sh"><div><h1>Démarrer</h1><p>Prépare Roblox Studio. Compte 15 minutes.</p></div></div>
       ${D.start.map((s, i) => card('st' + i, i + 1, esc(s.t), '', `<p>${esc(s.d)}</p>`, i === 0)).join('')}`,
     prompts: () => `<div class="sh"><div><h1>Prompts Studio</h1><p>Colle-les dans l'Assistant de Roblox Studio, dans l'ordre.</p></div></div>
@@ -193,6 +205,12 @@
     $$('.card .ch', main).forEach(h => h.onclick = () => h.parentElement.classList.toggle('open'));
     $$('[data-day]', main).forEach(b => b.onclick = () => { const id = b.dataset.day; done.has(id) ? done.delete(id) : done.add(id); saveProg(); b.classList.toggle('on', done.has(id)); refreshProgress(); });
     const z = $('#zip'); if (z) z.onclick = () => download(`${D.titre.replace(/\s+/g, '-')}-scripts.zip`, zip(D));
+    if (k === 'studio') {
+      const cc = $('#plugcode');
+      fetch(`/api/plugin/code?id=${encodeURIComponent(ses.id)}&token=${encodeURIComponent(ses.token)}`).then(r => r.json())
+        .then(d => { if (cc) cc.textContent = d.code || 'indisponible'; }).catch(() => { if (cc) cc.textContent = 'indisponible'; });
+      const cp = $('#cpcode'); if (cp) cp.onclick = () => { const v = cc && cc.textContent; if (v && v !== '…') copy(v); };
+    }
     bindChecks(main); if (k === 'plan') bindPlan(main); window.scrollTo({ top: 0 });
     try { sessionStorage.setItem('bloxia.sec', k); } catch {}
   }

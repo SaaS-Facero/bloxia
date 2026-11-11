@@ -102,3 +102,10 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px 12p
   .card table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
   .nav button{min-height:44px}
 }
+/* section Roblox Studio (plugin) */
+.card.stu .stu-p{color:var(--ink2,#555);line-height:1.6;margin-bottom:16px}
+.stu-code{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(79,107,237,.1),rgba(47,63,168,.06));border:1px solid rgba(79,107,237,.25);margin-bottom:16px}
+.stu-cl{display:flex;align-items:center;gap:7px;font:700 12px var(--mono,monospace);letter-spacing:.08em;text-transform:uppercase;color:var(--acc,#4f6bed);width:100%}.stu-cl .i{width:15px;height:15px}
+.stu-code code{font:700 22px var(--mono,monospace);letter-spacing:3px;color:var(--ink,#111);flex:1;min-width:120px}
+.stu-steps{margin:0 0 16px;padding-left:20px;display:flex;flex-direction:column;gap:9px;color:var(--ink2,#555);line-height:1.5}
+.stu-steps a{color:var(--acc,#4f6bed)}
