@@ -20,6 +20,7 @@
         <p>Une question sur ton jeu, ton pack ou ton paiement ? L'équipe te répond, en français.</p>
         <a class="f-mail" href="mailto:${C.supportEmail}">${BX.icon('mail')}${C.supportEmail}</a>${soc ? `<div class="socs">${soc}</div>` : ''}</div>
       <div><h4 class="mono">Produit</h4><a href="/#comment">Comment ça marche</a><a href="/#offre">Le pack</a><a href="/funnel.html">Créer mon jeu</a><a href="/#faq">Questions fréquentes</a></div>
+      <div><h4 class="mono">Ressources</h4><a href="/blog/">Tous les guides</a><a href="/blog/creer-un-jeu-roblox-sans-coder.html">Créer un jeu sans coder</a><a href="/blog/combien-gagne-un-createur-roblox.html">Combien gagne un créateur</a><a href="/blog/idees-de-jeux-roblox.html">Idées de jeux Roblox</a></div>
       <div><h4 class="mono">Bloxia</h4><a href="/espace.html">Mon espace</a><a href="mailto:${C.supportEmail}">Nous contacter</a><a href="/legal/remboursement.html">Garantie ${C.guaranteeDays} jours</a></div>
       <div><h4 class="mono">Légal</h4><a href="/legal/cgv.html">Conditions générales de vente</a><a href="/legal/mentions.html">Mentions légales</a><a href="/legal/confidentialite.html">Politique de confidentialité</a><a href="/legal/remboursement.html">Politique de remboursement</a><a href="/legal/cookies.html">Cookies</a></div></div>
       <div class="f-giant" aria-hidden="true">Bloxia</div>
