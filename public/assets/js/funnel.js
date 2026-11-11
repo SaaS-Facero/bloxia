@@ -64,13 +64,13 @@
       wrap.querySelector('#eye').onclick = () => { pw.type = pw.type === 'password' ? 'text' : 'password'; };
       wrap.querySelector('#sw').onclick = () => { mode = mode === 'login' ? 'signup' : 'login'; wrap.querySelector('#ok .lbl').textContent = mode === 'login' ? 'Je me connecte' : 'Je débloque ma map'; wrap.querySelector('#swt').textContent = mode === 'login' ? 'Pas encore de compte ?' : 'Déjà un compte ?'; wrap.querySelector('#sw').textContent = mode === 'login' ? 'Créer un compte' : 'Se connecter'; err.textContent = ''; };
       wrap.querySelector('#acc').onsubmit = async e => { e.preventDefault(); if (ok.disabled) return; ok.disabled = true;
-        try { const res = await fetch('/api/' + mode, { method: 'POST', body: JSON.stringify({ email: em.value.trim(), password: pw.value, name: S.a.name, answers: S.a }) }); const r = await res.json();
+        try { const res = await fetch('/api/' + mode, { method: 'POST', body: JSON.stringify({ email: em.value.trim(), password: pw.value, name: S.a.name, answers: S.a, ref: BX.ref() }) }); const r = await res.json();
           if (res.status === 401) { err.textContent = r.error === 'exists' ? 'Ce compte existe déjà. Vérifie ton mot de passe ou connecte-toi.' : 'E-mail ou mot de passe incorrect.'; if (r.error === 'exists') wrap.querySelector('#sw').click(); ok.disabled = false; return; }
           if (res.status === 429) { err.textContent = 'Trop d\'essais, réessaie dans quelques minutes.'; ok.disabled = false; return; }
           if (!res.ok) throw 0; S.a.email = em.value.trim(); done(r);
         } catch { err.textContent = 'Connexion impossible. Réessaie.'; ok.disabled = false; } };
       // Google
-      const gcb = async credential => { try { const res = await fetch('/api/google', { method: 'POST', body: JSON.stringify({ credential, answers: S.a }) }); const r = await res.json(); if (!res.ok) throw 0; done(r); } catch { err.textContent = 'Connexion Google impossible. Essaie l\'e-mail.'; } };
+      const gcb = async credential => { try { const res = await fetch('/api/google', { method: 'POST', body: JSON.stringify({ credential, answers: S.a, ref: BX.ref() }) }); const r = await res.json(); if (!res.ok) throw 0; done(r); } catch { err.textContent = 'Connexion Google impossible. Essaie l\'e-mail.'; } };
       const fb = wrap.querySelector('#gfallback');
       const ready = cfg => {
         if (cfg && cfg.googleClientId && window.google && google.accounts && google.accounts.id) {

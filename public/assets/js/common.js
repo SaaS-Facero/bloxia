@@ -21,7 +21,7 @@
         <a class="f-mail" href="mailto:${C.supportEmail}">${BX.icon('mail')}${C.supportEmail}</a>${soc ? `<div class="socs">${soc}</div>` : ''}</div>
       <div><h4 class="mono">Produit</h4><a href="/#comment">Comment ça marche</a><a href="/#offre">Le pack</a><a href="/funnel.html">Créer mon jeu</a><a href="/#faq">Questions fréquentes</a></div>
       <div><h4 class="mono">Ressources</h4><a href="/blog/">Tous les guides</a><a href="/blog/creer-un-jeu-roblox-sans-coder.html">Créer un jeu sans coder</a><a href="/blog/combien-gagne-un-createur-roblox.html">Combien gagne un créateur</a><a href="/blog/idees-de-jeux-roblox.html">Idées de jeux Roblox</a></div>
-      <div><h4 class="mono">Bloxia</h4><a href="/espace.html">Mon espace</a><a href="mailto:${C.supportEmail}">Nous contacter</a><a href="/legal/remboursement.html">Garantie ${C.guaranteeDays} jours</a></div>
+      <div><h4 class="mono">Bloxia</h4><a href="/espace.html">Mon espace</a><a href="/partenaire.html">Programme partenaire</a><a href="mailto:${C.supportEmail}">Nous contacter</a><a href="/legal/remboursement.html">Garantie ${C.guaranteeDays} jours</a></div>
       <div><h4 class="mono">Légal</h4><a href="/legal/cgv.html">Conditions générales de vente</a><a href="/legal/mentions.html">Mentions légales</a><a href="/legal/confidentialite.html">Politique de confidentialité</a><a href="/legal/remboursement.html">Politique de remboursement</a><a href="/legal/cookies.html">Cookies</a></div></div>
       <div class="f-giant" aria-hidden="true">Bloxia</div>
       <div class="f-copy"><p>©${new Date().getFullYear()} Bloxia</p><p class="f-legal">Bloxia n'est pas affilié à Roblox Corporation. Roblox, Roblox Studio et Robux sont des marques de Roblox Corporation. Aucun revenu n'est garanti.</p></div></div>`;
@@ -46,5 +46,12 @@
     els.forEach(e => io.observe(e));
   };
   BX.glow = function () { document.querySelectorAll('.card').forEach(c => c.addEventListener('pointermove', e => { const r = c.getBoundingClientRect(); c.style.setProperty('--mx', e.clientX - r.left + 'px'); c.style.setProperty('--my', e.clientY - r.top + 'px'); })); };
-  document.addEventListener('DOMContentLoaded', () => { BX.hydrate(); BX.renderFooter(); BX.reveal(); BX.glow(); BX.backdrops(); });
+  // Affiliation : capte ?ref=CODE (30 jours), compte le clic une fois. Lu par le funnel à l'inscription.
+  BX.ref = function () { try { const o = JSON.parse(localStorage.getItem('bloxia.ref') || 'null'); return o && Date.now() - o.t < 2592e6 ? o.code : null; } catch { return null; } };
+  BX.affCapture = function () {
+    try { const c = (new URLSearchParams(location.search).get('ref') || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 24); if (!c) return;
+      localStorage.setItem('bloxia.ref', JSON.stringify({ code: c, t: Date.now() }));
+      const k = 'bloxia.refclick.' + c; if (!localStorage.getItem(k)) { localStorage.setItem(k, '1'); fetch('/api/aff/click?code=' + encodeURIComponent(c)).catch(() => {}); }
+    } catch {} };
+  document.addEventListener('DOMContentLoaded', () => { BX.affCapture(); BX.hydrate(); BX.renderFooter(); BX.reveal(); BX.glow(); BX.backdrops(); });
 })();
