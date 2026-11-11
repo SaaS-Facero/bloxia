@@ -35,6 +35,58 @@
   }
   const toast = (t, info) => { const e = $('#fx-toast'); e.className = 'fx-toast show' + (info ? ' info' : ''); e.innerHTML = t; clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('show'), 2400); };
 
+  // Pop-up de connexion affichée PENDANT la génération. Bouton Google en avant + e-mail en secours.
+  // Résout quand le compte est prêt (S.a._id posé). Déjà connecté -> résout tout de suite.
+  let GCFG = null; // { googleClientId } mis en cache
+  function authPopup() {
+    if (S.a._id) return Promise.resolve();
+    return new Promise(resolve => {
+      const done = r => { S.a._id = r.id; S.a._t = r.token; if (r.name && !S.a.name) S.a.name = r.name; if (r.existing && r.answers) for (const [k, v] of Object.entries(r.answers)) if (S.a[k] == null) S.a[k] = v;
+        try { localStorage.setItem('bloxia.session', JSON.stringify({ id: r.id, token: r.token })); } catch {} gain(60, 10); sync(); sfx.unlock();
+        wrap.classList.add('out'); setTimeout(() => wrap.remove(), 260); resolve(); };
+      const wrap = document.createElement('div'); wrap.className = 'fx-pop-wrap'; wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true');
+      wrap.innerHTML = `<div class="fx-pop">
+        <div class="fx-pop-top"><span class="fx-pop-ic">${GL('lock', 'xl')}</span><h2>On sauvegarde ta map</h2><p>Crée ton compte pour débloquer ta map. <b>2 min, pas plus.</b></p></div>
+        <div class="fx-gbtn" id="gbtn"><button type="button" class="gbig" id="gfallback"><span class="gg">${googleG()}</span>Continuer avec Google</button></div>
+        <div class="fx-or"><span>ou avec ton e-mail</span></div>
+        <form class="fx-form" id="acc" novalidate>
+          <div class="fx-inp">${ic('mail')}<input id="em" type="email" inputmode="email" autocomplete="email" placeholder="toi@mail.com" value="${esc(S.a.email || '')}"></div>
+          <div class="fx-inp">${ic('lock')}<input id="pw" type="password" autocomplete="new-password" placeholder="Ton mot de passe"><button type="button" class="fx-eye" id="eye" aria-label="Afficher">${ic('eye')}</button></div>
+          <p class="fx-err" id="err" role="alert"></p>
+          <button class="btn btn-gold btn-block" id="ok" disabled><span class="lbl">Je débloque ma map</span>${ic('arrow-right')}</button>
+        </form>
+        <p class="fx-foot"><span id="swt">Déjà un compte ?</span> <button type="button" class="fx-link" id="sw">Se connecter</button></p>
+        <p class="fx-foot fx-safe">${ic('shield')}Tes infos restent privées. Zéro spam.</p></div>`;
+      document.body.appendChild(wrap); requestAnimationFrame(() => wrap.classList.add('on'));
+      // e-mail / mot de passe
+      let mode = 'signup'; const em = wrap.querySelector('#em'), pw = wrap.querySelector('#pw'), err = wrap.querySelector('#err'), ok = wrap.querySelector('#ok');
+      const chk = () => { ok.disabled = !/^\S+@\S+\.\S+$/.test(em.value.trim()) || !pw.value; err.textContent = ''; }; em.oninput = chk; pw.oninput = chk; chk();
+      wrap.querySelector('#eye').onclick = () => { pw.type = pw.type === 'password' ? 'text' : 'password'; };
+      wrap.querySelector('#sw').onclick = () => { mode = mode === 'login' ? 'signup' : 'login'; wrap.querySelector('#ok .lbl').textContent = mode === 'login' ? 'Je me connecte' : 'Je débloque ma map'; wrap.querySelector('#swt').textContent = mode === 'login' ? 'Pas encore de compte ?' : 'Déjà un compte ?'; wrap.querySelector('#sw').textContent = mode === 'login' ? 'Créer un compte' : 'Se connecter'; err.textContent = ''; };
+      wrap.querySelector('#acc').onsubmit = async e => { e.preventDefault(); if (ok.disabled) return; ok.disabled = true;
+        try { const res = await fetch('/api/' + mode, { method: 'POST', body: JSON.stringify({ email: em.value.trim(), password: pw.value, name: S.a.name, answers: S.a }) }); const r = await res.json();
+          if (res.status === 401) { err.textContent = r.error === 'exists' ? 'Ce compte existe déjà. Vérifie ton mot de passe ou connecte-toi.' : 'E-mail ou mot de passe incorrect.'; if (r.error === 'exists') wrap.querySelector('#sw').click(); ok.disabled = false; return; }
+          if (res.status === 429) { err.textContent = 'Trop d\'essais, réessaie dans quelques minutes.'; ok.disabled = false; return; }
+          if (!res.ok) throw 0; S.a.email = em.value.trim(); done(r);
+        } catch { err.textContent = 'Connexion impossible. Réessaie.'; ok.disabled = false; } };
+      // Google
+      const gcb = async credential => { try { const res = await fetch('/api/google', { method: 'POST', body: JSON.stringify({ credential, answers: S.a }) }); const r = await res.json(); if (!res.ok) throw 0; done(r); } catch { err.textContent = 'Connexion Google impossible. Essaie l\'e-mail.'; } };
+      const fb = wrap.querySelector('#gfallback');
+      const ready = cfg => {
+        if (cfg && cfg.googleClientId && window.google && google.accounts && google.accounts.id) {
+          google.accounts.id.initialize({ client_id: cfg.googleClientId, callback: res => gcb(res.credential) });
+          const host = wrap.querySelector('#gbtn'); host.innerHTML = '<div id="gsi"></div>';
+          google.accounts.id.renderButton(wrap.querySelector('#gsi'), { type: 'standard', theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with', logo_alignment: 'left', width: 320 });
+        } else { fb.onclick = () => { err.textContent = 'La connexion Google arrive bientôt. Utilise ton e-mail pour l\'instant.'; em.focus(); }; }
+      };
+      const boot = cfg => { GCFG = cfg; if (cfg && cfg.googleClientId) loadGsi(() => ready(cfg)); else ready(cfg); };
+      if (GCFG) boot(GCFG); else fetch('/api/pubcfg').then(r => r.json()).then(boot).catch(() => boot({}));
+      setTimeout(() => (em.value ? pw : em).focus(), 350);
+    });
+  }
+  function loadGsi(cb) { if (window.google && google.accounts && google.accounts.id) return cb(); let s = document.getElementById('gsi-src'); if (s) { s.addEventListener('load', cb); return; } s = document.createElement('script'); s.id = 'gsi-src'; s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.defer = true; s.onload = cb; s.onerror = () => cb(); document.head.appendChild(s); }
+  function googleG() { return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.4a5.5 5.5 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.6-5.2 3.6-8.8Z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.9-3a7.2 7.2 0 0 1-10.7-3.8h-4v3.1A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8l4-3.1Z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1A7.2 7.2 0 0 1 12 4.8Z"/></svg>'; }
+
   // ---------- mondes 3D ----------
   let extra = [];
   const theme = a => { const t = E.THEMES[a.theme]; root.style.setProperty('--sky1', t.sky[0]); root.style.setProperty('--sky2', t.sky[1]); root.style.setProperty('--glow', t.glow); };
@@ -146,7 +198,7 @@
     { say: () => 'Dis-moi ton idée en une phrase. Tape-la ou dis-la à voix haute.', html: () => `${title('ton', 'idée', 'en une phrase')}${field('v', 'textarea', 'Ex : un tycoon de glace avec des pingouins', S.a.phrase || prof.idea || '', 180)}<p class="fx-help">Pas d'idée ? Touche-en une :</p><div class="fx-chips" style="grid-template-columns:1fr">${SUGG.map(s => `<button class="fx-chip sm">${ic('wand')}${s}</button>`).join('')}</div><button class="btn btn-gold btn-block" id="ok" disabled><span class="lbl">Je génère mon monde</span>${ic('bolt')}</button>`,
       after: st => { const i = st.querySelector('#v'), ok = st.querySelector('#ok'); let t = 0; const chk = () => { ok.disabled = i.value.trim().length < 6; clearTimeout(t); t = setTimeout(() => { S.a.phrase = i.value.trim(); if (S.a.phrase.length >= 6) worlds(true, 1000); }, 450); }; i.oninput = chk; ok.disabled = i.value.trim().length < 6; mic(st.querySelector('.fx-field'), i);
         $$('.fx-chip', st).forEach(c => c.onclick = () => { i.value = c.textContent; chk(); sfx.pick(); });
-        ok.onclick = () => { if (ok.disabled) return; S.a.phrase = i.value.trim(); gain(80, 9); if (S.a._id) { sync(); go(GEN); } else go(10); }; i.focus(); } },
+        ok.onclick = () => { if (ok.disabled) return; S.a.phrase = i.value.trim(); gain(80, 9); if (S.a._id) sync(); go(GEN); }; i.focus(); } },
     { say: () => `Ta map est prête à naître, ${S.a.name}. Pour la sauvegarder et me souvenir de toi, j'ai juste besoin de ton e-mail et d'un mot de passe.`, html: () => S.a._id ? `<div class="fx-acc">${GL('key', 'xl')}</div>${title('compte', 'créé')}<p class="fx-help">Connecté avec ${esc(S.a.email || '')}.</p><button class="btn btn-gold btn-block" id="ok"><span class="lbl">Je continue</span>${ic('arrow-right')}</button>` :
       `<div class="fx-acc">${GL('lock', 'xl')}</div>${title('on sauvegarde ta', 'map')}<p class="fx-help" id="sub">Pour se souvenir de toi, on a besoin de :</p>
       <form class="fx-form" id="acc" novalidate><label class="fx-lab" for="em">E-mail</label><div class="fx-inp">${ic('mail')}<input id="em" type="email" inputmode="email" autocomplete="email" placeholder="toi@mail.com" value="${esc(S.a.email || '')}"></div>
@@ -188,7 +240,7 @@
         const tween = (to, ms, f = ease) => new Promise(res => { const o = w.o, from = {}; for (const k in to) from[k] = o[k]; const t0 = performance.now(); const step = t => { if (!alive()) return res(); const p = Math.min(1, (t - t0) / ms), e = f(p); for (const k in to) o[k] = from[k] + (to[k] - from[k]) * e; p < 1 ? requestAnimationFrame(step) : res(); }; requestAnimationFrame(step); });
         const rows = $$('.fx-check div', st), T0 = performance.now(), TOTAL = 16500, glowN = Math.max(6, Math.round(blocks.filter(b => b.z >= 1).length / 4));
         let lines = 0, skipped = false;
-        setTimeout(() => { const sk = st.querySelector('#gskip'); if (!sk || !alive()) return; sk.hidden = false; sk.onclick = () => { if (skipped || !alive()) return; skipped = true; clearInterval(tick); if ('speechSynthesis' in window) speechSynthesis.cancel(); gain(100, 12); go(RES); }; }, 7000);
+        setTimeout(() => { const sk = st.querySelector('#gskip'); if (!sk || !alive()) return; sk.hidden = false; sk.onclick = () => { if (skipped || !alive() || !S.a._id) return; skipped = true; clearInterval(tick); if ('speechSynthesis' in window) speechSynthesis.cancel(); gain(100, 12); go(RES); }; }, 7000);
         const banner = (n, t) => { const pb = st.querySelector('#gpb'); pb.querySelector('small').textContent = 'Phase ' + n + ' sur 5'; pb.querySelector('b').textContent = t; pb.classList.remove('on'); void pb.offsetWidth; pb.classList.add('on'); gx.classList.remove('jolt'); void gx.offsetWidth; gx.classList.add('jolt'); };
         const phase = (n, t) => { banner(n, t); st.querySelector('#gpn').textContent = n + '/5'; const pt = st.querySelector('#gpt'); pt.textContent = t; pt.classList.remove('swap'); void pt.offsetWidth; pt.classList.add('swap'); rows.forEach((r, k) => r.classList.toggle('on', k < n - 1)); tone(300 + n * 90, .25, 'triangle', .04); };
         const label = (txt, icn) => { const box = st.querySelector('#glab'); const e = document.createElement('span'); e.className = 'fx-lbl'; e.innerHTML = ic(icn) + txt; e.style.left = (14 + Math.random() * 62) + '%'; e.style.top = (16 + Math.random() * 50) + '%'; box.appendChild(e); setTimeout(() => e.classList.add('out'), 1900); setTimeout(() => e.remove(), 2400); sfx.pick(); };
@@ -205,6 +257,8 @@
           // 2. terrain : les blocs montent couche par couche, dézoom en tournant
           phase(2, 'Terrain'); gx.classList.remove('scanning'); guideSay('Je pose le terrain, couche par couche.'); w.revealTo(.5, 3.6);
           label('Zone de spawn', 'flag'); tween({ scale: 1.12, offsetY: .12, speed: 3.2 }, 3600, io); await sleep(1300); label('Zone 1', 'map'); await sleep(1300); label('Relief', 'cube'); await sleep(1000); if (!alive()) return;
+          // Pendant que la map se construit : pop-up de connexion (sauf si déjà connecté).
+          if (!S.a._id) { await authPopup(); if (!alive()) return; }
           // 3. décors : zoom sur un coin, objets qui tombent
           phase(3, 'Décors et objets'); guideSay('J\'ajoute les décors, les objets et les points de sauvegarde.'); w.revealTo(.84, 3.2);
           await tween({ scale: 1.75, offsetX: -.16, offsetY: .22, speed: .35 }, 1500); label('Checkpoint', 'check-circle'); await sleep(900); label('Décor', 'image'); await tween({ scale: 1.25, offsetX: .12, offsetY: .16, speed: .8 }, 1400); label('Obstacle', 'zap'); if (!alive()) return;
