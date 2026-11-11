@@ -87,6 +87,58 @@
   function loadGsi(cb) { if (window.google && google.accounts && google.accounts.id) return cb(); let s = document.getElementById('gsi-src'); if (s) { s.addEventListener('load', cb); return; } s = document.createElement('script'); s.id = 'gsi-src'; s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.defer = true; s.onload = cb; s.onerror = () => cb(); document.head.appendChild(s); }
   function googleG() { return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.4a5.5 5.5 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.6-5.2 3.6-8.8Z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.9-3a7.2 7.2 0 0 1-10.7-3.8h-4v3.1A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8l4-3.1Z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1A7.2 7.2 0 0 1 12 4.8Z"/></svg>'; }
 
+  // ---------- Analyse d'idée (score de potentiel, calcul instantané, estimation) ----------
+  function scoreIdea() {
+    const a = an(), g = a.genre, p = (phrase() || '').toLowerCase(), words = p.split(/\s+/).filter(Boolean);
+    const VIR = { obby: 76, tycoon: 86, simulator: 84, horror: 81, td: 75, rp: 72 }, MON = { obby: 68, tycoon: 90, simulator: 86, horror: 74, td: 73, rp: 80 }, EAS = { obby: 90, tycoon: 76, simulator: 82, horror: 78, td: 74, rp: 70 };
+    const hash = [...p].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7), jit = n => (hash >> n) % 5 - 2;
+    const mech = /(boss|niveau|vague|manche|équipe|team|collect|améli|upgrade|course|chrono|surviv|craft|pet|échap|escape|pvp|duel|défi|secret|combo|classement|rareté|rare)/.test(p);
+    let viral = (VIR[g] || 76) + (p.length >= 45 ? 6 : p.length >= 25 ? 3 : -3) + (mech ? 5 : 0) + jit(1);
+    let money = (MON[g] || 78) + (mech ? 3 : 0) + jit(2);
+    let ease = (EAS[g] || 80) + (words.length <= 16 ? 4 : -2) + jit(3);
+    const cl = n => Math.max(58, Math.min(96, Math.round(n)));
+    viral = cl(viral); money = cl(money); ease = cl(ease);
+    const overall = Math.max(64, Math.min(95, Math.round(viral * .45 + money * .3 + ease * .25)));
+    const GN = E.GENRES[g].label, strengths = [], tips = [];
+    strengths.push(`Le genre « ${GN} » tourne très bien sur Roblox en ce moment.`);
+    if (money >= 84) strengths.push('Fort potentiel de monétisation : facile d\'y placer une boutique et des Game Pass.');
+    if (ease >= 84) strengths.push('Prise en main rapide : un joueur comprend le but en quelques secondes.');
+    if (mech) strengths.push('Ta phrase contient une mécanique claire : c\'est ce qui fait revenir les joueurs.');
+    if (p.length >= 45) strengths.push('Idée détaillée : la génération aura de la matière pour te surprendre.');
+    if (!mech) tips.push('Ajoute une mécanique qui accroche : un boss, des manches, une course contre la montre ou un objet rare.');
+    if (p.length < 25) tips.push('Précise un détail unique (un lieu, un twist, un objectif) pour sortir du lot.');
+    if (money < 82) tips.push('Pense à un objet à vendre dès le départ (skin, pet, pass VIP) pour monétiser plus vite.');
+    tips.push('Prévois une mise à jour par semaine : c\'est ce qui fait grimper un jeu Roblox.');
+    return { overall, viral, money, ease, strengths: strengths.slice(0, 3), tips: tips.slice(0, 2), verdict: overall >= 85 ? 'Très prometteur' : overall >= 75 ? 'Solide' : 'Bon potentiel' };
+  }
+  function analyzeIdea() {
+    return new Promise(resolve => {
+      const r = scoreIdea(), ph = phrase().trim();
+      const wrap = document.createElement('div'); wrap.className = 'fx-pop-wrap';
+      const bar = (lbl, v, c) => `<div class="fx-anb"><span>${lbl}</span><i><b style="--w:${v}%;--c:${c}"></b></i><em data-v="${v}">0</em></div>`;
+      wrap.innerHTML = `<div class="fx-pop fx-ana">
+        <div class="fx-anh"><span class="fx-kick">${ic('chart')}Analyse de ton idée</span><p class="fx-anq">« ${esc(ph.slice(0, 110))} »</p></div>
+        <div class="fx-anscore"><svg viewBox="0 0 120 120" class="fx-ring"><circle class="t" cx="60" cy="60" r="52"/><circle class="v" cx="60" cy="60" r="52" id="anring"/></svg><div class="fx-ancen"><b id="ansc">0</b><small>/ 100</small></div></div>
+        <p class="fx-anverd"><b>${r.verdict}.</b> Estimation automatique, pas une garantie.</p>
+        <div class="fx-anbars">${bar('Potentiel viral', r.viral, '#ff6fa8')}${bar('Monétisation', r.money, '#ffc53d')}${bar('Prise en main', r.ease, '#2bd68f')}</div>
+        <div class="fx-ancols">
+          <div><h4>${ic('check-circle')}Points forts</h4><ul>${r.strengths.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>
+          <div><h4>${ic('bulb')}Pour aller plus loin</h4><ul>${r.tips.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>
+        </div>
+        <button class="btn btn-gold btn-block" id="ango"><span class="lbl">Lancer la génération</span>${ic('arrow-right')}</button>
+      </div>`;
+      document.body.appendChild(wrap); requestAnimationFrame(() => wrap.classList.add('on'));
+      // animations : anneau + score + barres
+      const circ = 2 * Math.PI * 52, ring = wrap.querySelector('#anring'); ring.style.strokeDasharray = circ; ring.style.strokeDashoffset = circ;
+      const t0 = performance.now(), D = 1100, sc = wrap.querySelector('#ansc'), bars = [...wrap.querySelectorAll('.fx-anb em')];
+      const tick = t => { const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3);
+        sc.textContent = Math.round(r.overall * e); ring.style.strokeDashoffset = circ * (1 - r.overall / 100 * e);
+        bars.forEach(b => b.textContent = Math.round(+b.dataset.v * e)); if (k < 1) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick); sfx.pick && sfx.pick();
+      wrap.querySelector('#ango').onclick = () => { sfx.unlock && sfx.unlock(); wrap.classList.add('out'); setTimeout(() => wrap.remove(), 240); resolve(); };
+    });
+  }
+
   // ---------- mondes 3D ----------
   let extra = [];
   const theme = a => { const t = E.THEMES[a.theme]; root.style.setProperty('--sky1', t.sky[0]); root.style.setProperty('--sky2', t.sky[1]); root.style.setProperty('--glow', t.glow); };
@@ -201,7 +253,7 @@
     { say: () => 'Dis-moi ton idée en une phrase. Tape-la ou dis-la à voix haute.', html: () => `${title('ton', 'idée', 'en une phrase')}${field('v', 'textarea', 'Ex : un tycoon de glace avec des pingouins', S.a.phrase || prof.idea || '', 180)}<p class="fx-help">Pas d'idée ? Touche-en une :</p><div class="fx-chips" style="grid-template-columns:1fr">${SUGG.map(s => `<button class="fx-chip sm">${ic('wand')}${s}</button>`).join('')}</div><button class="btn btn-gold btn-block" id="ok" disabled><span class="lbl">Je génère mon monde</span>${ic('bolt')}</button>`,
       after: st => { const i = st.querySelector('#v'), ok = st.querySelector('#ok'); let t = 0; const chk = () => { ok.disabled = i.value.trim().length < 6; clearTimeout(t); t = setTimeout(() => { S.a.phrase = i.value.trim(); if (S.a.phrase.length >= 6) worlds(true, 1000); }, 450); }; i.oninput = chk; ok.disabled = i.value.trim().length < 6; mic(st.querySelector('.fx-field'), i);
         $$('.fx-chip', st).forEach(c => c.onclick = () => { i.value = c.textContent; chk(); sfx.pick(); });
-        ok.onclick = () => { if (ok.disabled) return; S.a.phrase = i.value.trim(); gain(80, 9); if (S.a._id) sync(); go(GEN); }; i.focus(); } },
+        ok.onclick = () => { if (ok.disabled) return; S.a.phrase = i.value.trim(); gain(80, 9); if (S.a._id) sync(); analyzeIdea().then(() => go(GEN)); }; i.focus(); } },
     { say: () => '', html: () => '', after: () => go(GEN) }, // écran compte retiré : le login se fait en pop-up pendant la génération
     { say: () => 'Je lance la construction. Regarde bien.', html: () => `<div class="fx-kick">${ic('hammer')}Génération en direct</div>${title('je construis', 'ton monde')}
       <div class="fx-gen scanning" id="gx"><div class="mas-walk" aria-hidden="true"><img class="mas-img" src="/assets/img/mascot/marche.png" width="200" height="200" alt="" decoding="async"></div><div class="fx-rays"></div><div class="fx-gfloor"></div><canvas id="gc"></canvas><div class="fx-speed"></div><div class="fx-ring" id="grg"></div><div class="fx-cd" id="gcd"></div><div class="fx-pban" id="gpb"><small></small><b></b></div><div class="fx-scan"></div><div class="fx-vgn"></div>
