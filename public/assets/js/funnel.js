@@ -199,28 +199,7 @@
       after: st => { const i = st.querySelector('#v'), ok = st.querySelector('#ok'); let t = 0; const chk = () => { ok.disabled = i.value.trim().length < 6; clearTimeout(t); t = setTimeout(() => { S.a.phrase = i.value.trim(); if (S.a.phrase.length >= 6) worlds(true, 1000); }, 450); }; i.oninput = chk; ok.disabled = i.value.trim().length < 6; mic(st.querySelector('.fx-field'), i);
         $$('.fx-chip', st).forEach(c => c.onclick = () => { i.value = c.textContent; chk(); sfx.pick(); });
         ok.onclick = () => { if (ok.disabled) return; S.a.phrase = i.value.trim(); gain(80, 9); if (S.a._id) sync(); go(GEN); }; i.focus(); } },
-    { say: () => `Ta map est prête à naître, ${S.a.name}. Pour la sauvegarder et me souvenir de toi, j'ai juste besoin de ton e-mail et d'un mot de passe.`, html: () => S.a._id ? `<div class="fx-acc">${GL('key', 'xl')}</div>${title('compte', 'créé')}<p class="fx-help">Connecté avec ${esc(S.a.email || '')}.</p><button class="btn btn-gold btn-block" id="ok"><span class="lbl">Je continue</span>${ic('arrow-right')}</button>` :
-      `<div class="fx-acc">${GL('lock', 'xl')}</div>${title('on sauvegarde ta', 'map')}<p class="fx-help" id="sub">Pour se souvenir de toi, on a besoin de :</p>
-      <form class="fx-form" id="acc" novalidate><label class="fx-lab" for="em">E-mail</label><div class="fx-inp">${ic('mail')}<input id="em" type="email" inputmode="email" autocomplete="email" placeholder="toi@mail.com" value="${esc(S.a.email || '')}"></div>
-      <label class="fx-lab" for="pw">Mot de passe</label><div class="fx-inp">${ic('lock')}<input id="pw" type="password" autocomplete="new-password" placeholder="Ton mot de passe"><button type="button" class="fx-eye" id="eye" aria-label="Afficher le mot de passe">${ic('eye')}</button></div>
-      <p class="fx-err" id="err" role="alert"></p><button class="btn btn-gold btn-block" id="ok" disabled><span class="lbl">Je sauvegarde ma map</span>${ic('arrow-right')}</button></form>
-      <p class="fx-foot"><span id="swt">Déjà un compte ?</span> <button type="button" class="fx-link" id="sw">Se connecter</button></p><p class="fx-foot fx-safe">${ic('shield')}Tes infos restent privées. Zéro spam.</p>`,
-      after: st => {
-        const ok = st.querySelector('#ok'); if (S.a._id) { ok.onclick = () => { sync(); go(GEN); }; return; }
-        let mode = 'signup'; const em = st.querySelector('#em'), pw = st.querySelector('#pw'), err = st.querySelector('#err');
-        const chk = () => { ok.disabled = !/^\S+@\S+\.\S+$/.test(em.value.trim()) || !pw.value; err.textContent = ''; }; em.oninput = chk; pw.oninput = chk; chk();
-        st.querySelector('#eye').onclick = () => { pw.type = pw.type === 'password' ? 'text' : 'password'; };
-        const setMode = m => { mode = m; st.querySelector('.fx-title').innerHTML = m === 'login' ? 'content de te <b>revoir</b>' : 'on sauvegarde ta <b>map</b>'; st.querySelector('#sub').textContent = m === 'login' ? 'Connecte-toi pour sauvegarder ta map :' : 'Pour se souvenir de toi, on a besoin de :'; st.querySelector('#ok .lbl').textContent = m === 'login' ? 'Je me connecte et je génère' : 'Je sauvegarde ma map'; st.querySelector('#swt').textContent = m === 'login' ? 'Pas encore de compte ?' : 'Déjà un compte ?'; st.querySelector('#sw').textContent = m === 'login' ? 'Créer un compte' : 'Se connecter'; pw.autocomplete = m === 'login' ? 'current-password' : 'new-password'; err.textContent = ''; };
-        st.querySelector('#sw').onclick = () => setMode(mode === 'login' ? 'signup' : 'login');
-        st.querySelector('#acc').onsubmit = async e => { e.preventDefault(); if (ok.disabled) return; ok.disabled = true;
-          try { const res = await fetch('/api/' + mode, { method: 'POST', body: JSON.stringify({ email: em.value.trim(), password: pw.value, name: S.a.name, answers: S.a }) }); const r = await res.json();
-            if (res.status === 401) { err.textContent = r.error === 'exists' ? 'Un compte existe déjà avec cet e-mail. Vérifie ton mot de passe ou connecte-toi.' : 'E-mail ou mot de passe incorrect.'; if (r.error === 'exists') setMode('login'); ok.disabled = false; return; }
-            if (!res.ok) throw 0; S.a._id = r.id; S.a._t = r.token; S.a.email = em.value.trim(); if (r.existing && r.answers) for (const [k, v] of Object.entries(r.answers)) if (S.a[k] == null) S.a[k] = v;
-            try { localStorage.setItem('bloxia.session', JSON.stringify({ id: r.id, token: r.token })); } catch {}
-            gain(60, 10); sync(); go(GEN);
-          } catch { err.textContent = 'Connexion impossible. Réessaie dans un instant.'; ok.disabled = false; } };
-        em.value ? pw.focus() : em.focus();
-      } },
+    { say: () => '', html: () => '', after: () => go(GEN) }, // écran compte retiré : le login se fait en pop-up pendant la génération
     { say: () => 'Je lance la construction. Regarde bien.', html: () => `<div class="fx-kick">${ic('hammer')}Génération en direct</div>${title('je construis', 'ton monde')}
       <div class="fx-gen scanning" id="gx"><div class="mas-walk" aria-hidden="true"><img class="mas-img" src="/assets/img/mascot/marche.png" width="200" height="200" alt="" decoding="async"></div><div class="fx-rays"></div><div class="fx-gfloor"></div><canvas id="gc"></canvas><div class="fx-speed"></div><div class="fx-ring" id="grg"></div><div class="fx-cd" id="gcd"></div><div class="fx-pban" id="gpb"><small></small><b></b></div><div class="fx-scan"></div><div class="fx-vgn"></div>
         <div class="fx-phase"><b id="gpn">1/5</b><span id="gpt">Initialisation</span></div>
