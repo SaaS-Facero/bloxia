@@ -117,14 +117,17 @@
   function drawer() { $('#fx-items').innerHTML = S.items.length ? S.items.map(k => `<div class="fx-li"><span class="fx-gt">${GL(ITEMS[k][0])}</span><div><b>${ITEMS[k][1]}</b><small>Débloqué</small></div></div>`).join('') : '<p class="fx-empty">Rien pour l\'instant. Réponds aux questions pour débloquer des objets.</p>'; }
   function hud() {
     const on = S.i >= 1; $('#fx-hud').hidden = !on; $('#fx-guide').hidden = !on || S.i === RES; $('#fx-minibox').hidden = !on || S.i === GEN || S.i === LAST; $('#fx-stage').className = 'fx-stage' + (S.i === 0 ? ' s0' : '');
-    $('#fx-pbar').style.width = Math.min(100, S.i / LAST * 100) + '%'; $('#fx-back').style.visibility = (S.i > 1 && S.i < GEN) ? 'visible' : 'hidden';
+    $('#fx-pbar').style.width = Math.min(100, S.i / LAST * 100) + '%'; $('#fx-back').style.visibility = backOf(S.i) >= 0 ? 'visible' : 'hidden';
     const n = Math.round(S.i / LAST * 5); $('#fx-stars').innerHTML = [0, 1, 2, 3, 4].map(k => ic('star', k < n ? 'on' : '')).join('');
     const g = G(); root.style.setProperty('--gc', g.c); $('#fx-av').innerHTML = AV.svg(g.id); $('#fx-gname').textContent = g.name;
   }
   $('#fx-snd').innerHTML = ic(S.snd ? 'volume' : 'volume-off');
   $('#fx-snd').onclick = () => { S.snd = !S.snd; try { localStorage.setItem('bloxia.snd', S.snd ? '1' : '0'); } catch {} $('#fx-snd').innerHTML = ic(S.snd ? 'volume' : 'volume-off'); if (!S.snd) { speechSynthesis && speechSynthesis.cancel(); wave(false); } else sfx.pick(); };
   $('#fx-bag').onclick = () => $('#fx-drawer').classList.toggle('open'); $('#fx-dclose').onclick = () => $('#fx-drawer').classList.remove('open');
-  $('#fx-back').onclick = () => { if (S.i > 1 && S.i < GEN) go(S.i - 1); };
+  // Cible du retour : paywall -> résultat, résultat -> écran idée (pour changer et relancer),
+  // questions -> étape précédente. Pas de retour pendant la génération ni avant l'étape 1.
+  function backOf(i) { if (i === LAST) return RES; if (i === RES) return 9; if (i === GEN || i === 10 || i === 0) return -1; return i - 1; }
+  $('#fx-back').onclick = () => { const t = backOf(S.i); if (t >= 0) { sfx.pick && sfx.pick(); go(t); } };
 
   // ---------- micro (dictée vocale) ----------
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
