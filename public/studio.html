@@ -16,17 +16,31 @@
 <main id="main"><div class="s3-stage">
   <div id="s3-canvas"><div id="s3-wait">Chargement…</div></div>
   <div class="s3-hud"><span class="s3-badge"><i data-i="wand"></i>Studio en direct · démo</span>
-    <span class="s3-drag"><i data-i="move"></i>Glisse pour tourner</span></div>
+    <span class="s3-tools">
+      <button id="s3-playbtn" class="s3-tool s3-tool-play"><i data-i="gamepad"></i><span>Jouer</span></button>
+      <button id="s3-capture" class="s3-tool" title="Capturer l'écran"><i data-i="image"></i></button>
+    </span></div>
+  <div id="s3-hint" class="s3-hintbox"><b>Mode jeu</b> ZQSD / flèches pour bouger · Espace pour sauter · Maj pour courir · souris pour regarder · Échap pour sortir</div>
+  <div id="s3-pad" class="s3-pad" aria-hidden="true">
+    <div class="s3-dpad"><button id="s3-f-up" class="s3-pbtn s3-up">▲</button>
+      <button id="s3-f-left" class="s3-pbtn s3-left">◀</button>
+      <button id="s3-f-right" class="s3-pbtn s3-right">▶</button>
+      <button id="s3-f-down" class="s3-pbtn s3-down">▼</button></div>
+    <button id="s3-f-jump" class="s3-jump">Saut</button>
+  </div>
 
   <aside class="s3-chat">
     <div class="s3-chead"><span class="s3-dot"></span><b>Bloxia AI</b>
       <div class="s3-models"><button class="s3-model on" data-m="flash">Flash</button><button class="s3-model" data-m="pro">Pro</button><button class="s3-model" data-m="max">Max</button></div></div>
     <div class="s3-log" id="s3-log"></div>
     <div class="s3-chips">
-      <button class="s3-chip" data-q="ajoute une forêt d'arbres">🌲 Une forêt</button>
-      <button class="s3-chip" data-q="ajoute une montagne">⛰️ Une montagne</button>
-      <button class="s3-chip" data-q="ajoute un lac">💧 Un lac</button>
-      <button class="s3-chip" data-q="ajoute un village">🏘️ Un village</button>
+      <button class="s3-chip" data-q="ajoute une forêt d'arbres">🌲 Forêt</button>
+      <button class="s3-chip" data-q="ajoute une voiture">🚗 Voiture</button>
+      <button class="s3-chip" data-q="ajoute un immeuble">🏢 Immeuble</button>
+      <button class="s3-chip" data-q="ajoute une montagne">⛰️ Montagne</button>
+      <button class="s3-chip" data-q="ajoute une côte avec la plage">🏖️ Côte</button>
+      <button class="s3-chip" data-q="ajoute un village avec une route">🏘️ Village</button>
+      <button class="s3-chip" data-q="ajoute un château">🏰 Château</button>
       <button class="s3-chip" data-q="mets de la neige">❄️ Neige</button>
       <button class="s3-chip" data-q="la nuit tombe">🌙 Nuit</button>
     </div>

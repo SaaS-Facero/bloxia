@@ -8,6 +8,30 @@
 .s3-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(10,14,26,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);color:#fff;font:700 12.5px var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .s3-badge .i{width:15px;height:15px;color:#ffd23d}
 .s3-drag{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:999px;background:rgba(10,14,26,.5);backdrop-filter:blur(6px);color:#fff;font-size:12.5px}.s3-drag .i{width:14px;height:14px}
+/* outils HUD */
+.s3-tools{display:inline-flex;gap:8px;pointer-events:auto}
+.s3-tool{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(10,14,26,.58);backdrop-filter:blur(8px);color:#fff;font:700 13px var(--body);cursor:pointer;transition:.15s}
+.s3-tool .i{width:17px;height:17px}
+.s3-tool:hover{background:rgba(10,14,26,.8);border-color:rgba(255,255,255,.3)}
+.s3-tool-play{background:linear-gradient(135deg,#ffc53d,#ff9e2c);color:#1a1a22;border:0;box-shadow:0 8px 22px -8px rgba(255,170,40,.7)}
+.s3-tool-play:hover{background:linear-gradient(135deg,#ffd159,#ffab3a)}
+/* bandeau d'aide mode jeu */
+.s3-hintbox{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);background:rgba(10,14,26,.82);backdrop-filter:blur(10px);color:#fff;padding:14px 20px;border-radius:16px;border:1px solid rgba(255,255,255,.16);font-size:13.5px;line-height:1.6;max-width:min(92vw,520px);text-align:center;opacity:0;pointer-events:none;transition:.4s;z-index:4}
+.s3-hintbox b{display:block;font-size:15px;color:#ffd23d;margin-bottom:4px}
+.s3-hintbox.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+/* viseur + pad : seulement en mode jeu */
+.s3-pad{display:none}
+.s3-play .s3-stage::after{content:"";position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:rgba(255,255,255,.75);box-shadow:0 0 0 2px rgba(0,0,0,.35);pointer-events:none;z-index:2}
+.s3-play .s3-chat,.s3-play .s3-drag,.s3-play .s3-badge{opacity:.25;transition:.25s}
+.s3-play .s3-chat:hover{opacity:1}
+/* pad tactile (mobile, mode jeu) */
+@media(pointer:coarse){
+  .s3-play .s3-pad{display:flex;position:absolute;left:0;right:0;bottom:16px;justify-content:space-between;align-items:flex-end;padding:0 20px;z-index:5;pointer-events:none}
+  .s3-dpad{position:relative;width:150px;height:150px;pointer-events:auto}
+  .s3-pbtn{position:absolute;width:50px;height:50px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(10,14,26,.55);color:#fff;font-size:16px;backdrop-filter:blur(6px);display:grid;place-items:center}
+  .s3-up{top:0;left:50px}.s3-down{bottom:0;left:50px}.s3-left{left:0;top:50px}.s3-right{right:0;top:50px}
+  .s3-jump{pointer-events:auto;width:84px;height:84px;border-radius:50%;border:0;background:linear-gradient(135deg,#ffc53d,#ff9e2c);color:#1a1a22;font:800 15px var(--body);box-shadow:0 10px 26px -8px rgba(255,170,40,.7)}
+}
 /* chat */
 .s3-chat{position:absolute;right:20px;bottom:20px;top:150px;width:360px;display:flex;flex-direction:column;background:rgba(14,17,28,.82);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.14);border-radius:22px;box-shadow:0 30px 70px -20px rgba(0,0,0,.7);overflow:hidden}
 .s3-chead{display:flex;align-items:center;gap:9px;padding:15px 18px;border-bottom:1px solid rgba(255,255,255,.1)}
