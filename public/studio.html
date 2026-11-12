@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Studio Bloxia · crée ta map Roblox en parlant</title>
+<meta name="description" content="Teste le studio Bloxia : décris ce que tu veux (des arbres, une montagne, un lac…) et vois-le apparaître sur ta map Roblox en direct. Essaie gratuitement.">
+<meta name="theme-color" content="#05060b">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css"><link rel="stylesheet" href="/assets/css/studio.css"></head>
+<body>
+<header class="nav nav-float" id="nav"><div class="nav-bar">
+  <a class="logo" href="/" aria-label="Bloxia"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3l11 6.3-11 6.3L5 9.3z" fill="#c7d2fe"/><path d="M5 9.3l11 6.3v12.6L5 21.9z" fill="#4f6bed"/><path d="M27 9.3l-11 6.3v12.6l11-6.3z" fill="#2f3fa8"/></svg><span>Bloxia</span></a>
+  <nav class="nav-center" aria-label="Navigation"><a href="/#comment">Comment ça marche</a><a href="/studio.html" aria-current="page">Studio</a><a href="/blog/">Ressources</a></nav>
+  <div class="nav-actions"><a class="btn btn-light btn-sm" href="/espace.html">Mon espace</a><a class="btn" href="/funnel.html" data-cta="studio-nav"><span class="lbl">Je crée mon jeu</span><i data-i="arrow-right"></i></a></div>
+</div></header>
+
+<main id="main"><section class="st-wrap">
+  <div class="st-left">
+    <span class="st-kick"><i data-i="wand"></i>Studio en direct · démo</span>
+    <h1>Parle. <span class="grad">Ta map prend vie.</span></h1>
+    <p class="st-lead">Décris ce que tu veux voir sur ta map Roblox. Bloxia le construit sous tes yeux. Essaie : « ajoute des arbres », « une montagne », « un lac »…</p>
+
+    <div class="st-models" role="group" aria-label="Modèle d'IA">
+      <button class="s-model on" data-m="flash"><b>Flash</b><span>rapide</span></button>
+      <button class="s-model" data-m="pro"><b>Pro</b><span>détaillé</span></button>
+      <button class="s-model" data-m="max"><b>Max</b><span>maximum</span></button>
+    </div>
+
+    <form class="st-prompt" id="s-form" autocomplete="off">
+      <i data-i="pen"></i>
+      <input id="s-input" type="text" maxlength="80" placeholder="Ajoute des arbres, une montagne, un lac…" aria-label="Décris ce que tu veux ajouter">
+      <button class="btn btn-gold" type="submit" aria-label="Générer"><i data-i="bolt"></i></button>
+    </form>
+    <div class="st-chips">
+      <button class="s-chip" data-q="ajoute une forêt d'arbres">Une forêt</button>
+      <button class="s-chip" data-q="ajoute une montagne">Une montagne</button>
+      <button class="s-chip" data-q="ajoute un lac">Un lac</button>
+      <button class="s-chip" data-q="ajoute un château">Un château</button>
+      <button class="s-chip" data-q="mets de la neige">De la neige</button>
+      <button class="s-chip" data-q="ajoute un village">Un village</button>
+      <button class="s-chip" data-q="thème volcan">Un volcan</button>
+      <button class="s-chip" data-q="ajoute des cristaux">Des cristaux</button>
+    </div>
+
+    <div class="st-log-wrap"><div class="st-log-h"><span>Éléments ajoutés</span><button id="s-reset" class="st-reset"><i data-i="rotate"></i>Réinitialiser</button></div><div class="s-log" id="s-log"></div></div>
+
+    <a class="btn btn-block" href="/funnel.html" data-cta="studio-cta"><span class="lbl">Je crée mon vrai jeu</span><i data-i="arrow-right"></i></a>
+    <p class="st-note">Démo : ceci est un aperçu du moteur. Ton vrai jeu, généré avec scripts et boutique, se crée dans le funnel.</p>
+  </div>
+
+  <div class="st-right">
+    <div class="st-stage">
+      <canvas id="smap" aria-label="Ta map, glisse pour la tourner"></canvas>
+      <div class="st-hud"><span><i data-i="cube"></i><b id="s-count">0</b> éléments</span><span><i data-i="palette"></i><b id="s-theme">Prairie</b></span></div>
+      <div class="st-gen" id="s-gen"><span class="st-ring"></span><b>Bloxia construit…</b></div>
+      <span class="st-drag"><i data-i="move"></i>Glisse pour tourner</span>
+    </div>
+  </div>
+</section></main>
+<div class="st-toast" id="s-toast"></div>
+<script src="/assets/js/i18n.js"></script><script src="/assets/js/config.js"></script><script src="/assets/js/engine.js"></script><script src="/assets/js/common.js"></script><script src="/assets/js/glyphs.js"></script><script src="/assets/js/studio.js"></script>
+</body></html>

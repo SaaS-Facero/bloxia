@@ -11,7 +11,7 @@
   // Dictionnaire FR -> EN. Clé = texte français exact tel qu'affiché.
   var EN = {
     // nav
-    'Aperçu': 'Preview', 'Comment ça marche': 'How it works', 'Le pack': 'The pack', 'Ressources': 'Resources', 'FAQ': 'FAQ',
+    'Aperçu': 'Preview', 'Comment ça marche': 'How it works', 'Le pack': 'The pack', 'Ressources': 'Resources', 'FAQ': 'FAQ', 'Studio': 'Studio',
     'Mon espace': 'My space', 'Je crée mon jeu': 'Create my game', 'Je crée mon jeu gratuitement': 'Create my game for free',
     'Je reprends': 'Resume', 'Connexion partenaire': 'Partner login',
     // hero
