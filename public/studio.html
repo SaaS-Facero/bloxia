@@ -18,9 +18,20 @@
   <div class="s3-hud"><span class="s3-badge"><i data-i="wand"></i>Studio en direct · démo</span>
     <span class="s3-tools">
       <button id="s3-playbtn" class="s3-tool s3-tool-play"><i data-i="gamepad"></i><span>Jouer</span></button>
+      <button id="s3-viewbtn" class="s3-tool" style="display:none"><i data-i="target"></i><span>1re pers.</span></button>
       <button id="s3-capture" class="s3-tool" title="Capturer l'écran"><i data-i="image"></i></button>
     </span></div>
-  <div id="s3-hint" class="s3-hintbox"><b>Mode jeu</b> ZQSD / flèches pour bouger · Espace pour sauter · Maj pour courir · souris pour regarder · Échap pour sortir</div>
+  <div id="s3-hint" class="s3-hintbox"><b>Mode jeu</b> ZQSD / flèches pour marcher · Espace sauter · Maj courir · souris ou glisser pour regarder · <b style="display:inline;color:#fff">C</b> vue 1re/3e personne · Échap sortir</div>
+  <div class="s3-skins" id="s3-skins">
+    <span class="s3-skins-l">Skin</span>
+    <button class="s3-skin on" data-skin="defaut">Défaut</button>
+    <button class="s3-skin" data-skin="ninja">Ninja</button>
+    <button class="s3-skin" data-skin="robot">Robot</button>
+    <button class="s3-skin" data-skin="astronaute">Astronaute</button>
+    <button class="s3-skin" data-skin="chevalier">Chevalier</button>
+    <button class="s3-skin" data-skin="zombie">Zombie</button>
+    <button class="s3-skin" data-skin="roi">Roi</button>
+  </div>
   <div id="s3-pad" class="s3-pad" aria-hidden="true">
     <div class="s3-dpad"><button id="s3-f-up" class="s3-pbtn s3-up">▲</button>
       <button id="s3-f-left" class="s3-pbtn s3-left">◀</button>
@@ -39,6 +50,8 @@
       <button class="s3-chip" data-q="ajoute un immeuble">🏢 Immeuble</button>
       <button class="s3-chip" data-q="ajoute une montagne">⛰️ Montagne</button>
       <button class="s3-chip" data-q="ajoute une côte avec la plage">🏖️ Côte</button>
+      <button class="s3-chip" data-q="ajoute une route">🛣️ Route</button>
+      <button class="s3-chip" data-q="ajoute un mur">🧱 Mur</button>
       <button class="s3-chip" data-q="ajoute un village avec une route">🏘️ Village</button>
       <button class="s3-chip" data-q="ajoute un château">🏰 Château</button>
       <button class="s3-chip" data-q="mets de la neige">❄️ Neige</button>

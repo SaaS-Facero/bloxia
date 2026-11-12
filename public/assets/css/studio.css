@@ -19,6 +19,14 @@
 .s3-hintbox{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);background:rgba(10,14,26,.82);backdrop-filter:blur(10px);color:#fff;padding:14px 20px;border-radius:16px;border:1px solid rgba(255,255,255,.16);font-size:13.5px;line-height:1.6;max-width:min(92vw,520px);text-align:center;opacity:0;pointer-events:none;transition:.4s;z-index:4}
 .s3-hintbox b{display:block;font-size:15px;color:#ffd23d;margin-bottom:4px}
 .s3-hintbox.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+/* barre de skins */
+.s3-skins{position:absolute;left:20px;bottom:20px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:min(52vw,560px);background:rgba(14,17,28,.72);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:8px 10px;z-index:4}
+.s3-skins-l{color:rgba(255,255,255,.55);font:700 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:0 4px}
+.s3-skin{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#dfe4ef;font:600 12.5px var(--body);padding:6px 11px;border-radius:999px;cursor:pointer;transition:.15s}
+.s3-skin:hover{border-color:#4f6bed;background:rgba(79,107,237,.18)}
+.s3-skin.on{background:#ffc53d;border-color:#ffc53d;color:#1a1a22}
+.s3-play .s3-skins{opacity:.3;transition:.25s}.s3-play .s3-skins:hover{opacity:1}
+@media(max-width:860px){.s3-skins{left:10px;right:10px;bottom:calc(46vh + 18px);max-width:none;justify-content:center}}
 /* viseur + pad : seulement en mode jeu */
 .s3-pad{display:none}
 .s3-play .s3-stage::after{content:"";position:absolute;top:50%;left:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:rgba(255,255,255,.75);box-shadow:0 0 0 2px rgba(0,0,0,.35);pointer-events:none;z-index:2}

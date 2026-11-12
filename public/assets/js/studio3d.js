@@ -33,19 +33,35 @@
   var water = new T.Mesh(new T.CircleGeometry(8, 44), waterMat); water.rotation.x = -Math.PI / 2; water.position.y = -0.4; water.visible = false; scene.add(water);
   var group = new T.Group(); scene.add(group);
 
-  // ---------- personnage original ----------
-  function makeChar() {
-    var g = new T.Group();
-    var skin = new T.MeshStandardMaterial({ color: '#f1c088', flatShading: true }), shirt = new T.MeshStandardMaterial({ color: '#4f6bed', flatShading: true }), pants = new T.MeshStandardMaterial({ color: '#2a2f45', flatShading: true });
-    function box(w, h, d, m, y, x) { var b = new T.Mesh(new T.BoxGeometry(w, h, d), m); b.position.set(x || 0, y, 0); b.castShadow = true; g.add(b); return b; }
-    box(1.1, 1.1, 0.7, shirt, 1.5); box(0.8, 0.8, 0.8, skin, 2.5);
-    var armL = box(0.3, 1.0, 0.3, skin, 1.5, 0.75), armR = box(0.3, 1.0, 0.3, skin, 1.5, -0.75);
-    var legL = box(0.42, 1.0, 0.42, pants, 0.5, 0.28), legR = box(0.42, 1.0, 0.42, pants, 0.5, -0.28);
-    var eye = new T.MeshStandardMaterial({ color: '#1a1a22' });
-    [0.18, -0.18].forEach(function (ex) { var e = new T.Mesh(new T.BoxGeometry(0.12, 0.14, 0.06), eye); e.position.set(ex, 2.55, 0.42); g.add(e); });
+  // ---------- personnage original + skins (tous originaux, aucun perso sous licence) ----------
+  var SKINS = {
+    defaut:     { label: 'Défaut',     skin: '#f1c088', shirt: '#4f6bed', pants: '#2a2f45', hair: '#2a1a0e' },
+    ninja:      { label: 'Ninja',      skin: '#f1c088', shirt: '#e8732a', pants: '#243b55', hair: '#15151c', acc: 'bandeau', eyes: '#1a1a22' },
+    robot:      { label: 'Robot',      skin: '#b9c2cc', shirt: '#6b7682', pants: '#3a434d', metal: 1, acc: 'antenne', eyes: '#35e0ff' },
+    astronaute: { label: 'Astronaute', skin: '#eef2f7', shirt: '#eef2f7', pants: '#d7dde6', acc: 'casque', eyes: '#1a1a22' },
+    chevalier:  { label: 'Chevalier',  skin: '#c6ccd6', shirt: '#9aa3af', pants: '#6b7280', metal: 1, acc: 'casque', eyes: '#1a1a22' },
+    zombie:     { label: 'Zombie',     skin: '#7bb86b', shirt: '#46593a', pants: '#2e2a22', hair: '#2a3320', eyes: '#ffe14d' },
+    roi:        { label: 'Roi',        skin: '#f1c088', shirt: '#b4263b', pants: '#3a2150', hair: '#caa23a', acc: 'couronne' }
+  };
+  function makeChar(cfg) {
+    cfg = cfg || SKINS.defaut; var g = new T.Group();
+    var mm = function (c, m) { return new T.MeshStandardMaterial({ color: c, flatShading: true, metalness: m ? 0.8 : 0, roughness: m ? 0.35 : 0.85 }); };
+    var skinM = mm(cfg.skin, cfg.metal), shirtM = mm(cfg.shirt, cfg.metal), pantsM = mm(cfg.pants, cfg.metal);
+    function box(w, h, d, m, y, x, z) { var b = new T.Mesh(new T.BoxGeometry(w, h, d), m); b.position.set(x || 0, y, z || 0); b.castShadow = true; g.add(b); return b; }
+    box(1.1, 1.1, 0.7, shirtM, 1.5); var head = box(0.85, 0.85, 0.85, skinM, 2.52);
+    var armL = box(0.3, 1.0, 0.3, (cfg.metal ? shirtM : skinM), 1.5, 0.75), armR = box(0.3, 1.0, 0.3, (cfg.metal ? shirtM : skinM), 1.5, -0.75);
+    var legL = box(0.42, 1.0, 0.42, pantsM, 0.5, 0.28), legR = box(0.42, 1.0, 0.42, pantsM, 0.5, -0.28);
+    var eyeM = new T.MeshStandardMaterial({ color: cfg.eyes || '#1a1a22', emissive: (cfg.eyes && cfg.eyes !== '#1a1a22') ? cfg.eyes : '#000', emissiveIntensity: 0.6 });
+    [0.2, -0.2].forEach(function (ex) { var e = new T.Mesh(new T.BoxGeometry(0.13, 0.15, 0.06), eyeM); e.position.set(ex, 2.56, 0.43); g.add(e); });
+    if (cfg.hair) box(0.92, 0.26, 0.92, mm(cfg.hair), 2.95);
+    if (cfg.acc === 'bandeau') { box(0.92, 0.2, 0.92, mm('#1a1a22'), 2.78); var plate = new T.Mesh(new T.BoxGeometry(0.34, 0.16, 0.05), mm('#c7cdd6', 1)); plate.position.set(0, 2.78, 0.46); g.add(plate); }
+    if (cfg.acc === 'antenne') { var ant = new T.Mesh(new T.CylinderGeometry(0.03, 0.03, 0.4, 6), mm('#3a434d')); ant.position.set(0, 3.15, 0); g.add(ant); var bulb = new T.Mesh(new T.SphereGeometry(0.1, 8, 8), new T.MeshStandardMaterial({ color: '#ff4d6d', emissive: '#ff4d6d', emissiveIntensity: 1 })); bulb.position.set(0, 3.4, 0); g.add(bulb); }
+    if (cfg.acc === 'casque') { var helm = new T.Mesh(new T.BoxGeometry(0.98, 0.5, 0.98), mm(cfg.metal ? '#aeb6c2' : '#eef2f7', cfg.metal)); helm.position.y = 2.95; helm.castShadow = true; g.add(helm); var visor = new T.Mesh(new T.BoxGeometry(0.7, 0.3, 0.1), new T.MeshStandardMaterial({ color: '#7fd4ff', transparent: true, opacity: 0.6, metalness: 0.5, roughness: 0.1 })); visor.position.set(0, 2.55, 0.45); g.add(visor); }
+    if (cfg.acc === 'couronne') { for (var c = 0; c < 6; c++) { var spike = new T.Mesh(new T.ConeGeometry(0.08, 0.3, 4), mm('#ffd23d', 1)); var a = c / 6 * 6.283; spike.position.set(Math.cos(a) * 0.4, 3.1, Math.sin(a) * 0.4); g.add(spike); } var band = new T.Mesh(new T.CylinderGeometry(0.46, 0.46, 0.18, 8), mm('#ffd23d', 1)); band.position.y = 2.95; g.add(band); }
     g.userData.limbs = { armL: armL, armR: armR, legL: legL, legR: legR }; return g;
   }
-  var hero = makeChar(); scene.add(hero);
+  var curSkin = 'defaut', hero = makeChar(SKINS.defaut); scene.add(hero);
+  function applySkin(name) { if (!SKINS[name]) return; var vis = hero.visible; scene.remove(hero); hero = makeChar(SKINS[name]); hero.visible = vis; scene.add(hero); curSkin = name; document.querySelectorAll('.s3-skin').forEach(function (b) { b.classList.toggle('on', b.dataset.skin === name); }); }
   var PH = 3; // hauteur yeux approx
   var player = { x: 0, z: 0, y: terrainH(0, 0), vy: 0, yaw: 0, pitch: 0, onGround: true };
 
@@ -64,7 +80,8 @@
   function house() { var p = fp(5), x = p[0], z = p[1], g = new T.Group(); var body = new T.Mesh(new T.BoxGeometry(3, 2.2, 3), mat('#e7cda1')); body.position.y = 1.1; body.castShadow = true; g.add(body); var roof = new T.Mesh(new T.ConeGeometry(2.6, 1.6, 4), mat('#b84a3e')); roof.position.y = 3; roof.rotation.y = Math.PI / 4; roof.castShadow = true; g.add(roof); var door = new T.Mesh(new T.BoxGeometry(0.7, 1.2, 0.1), mat('#5a3a22')); door.position.set(0, 0.6, 1.55); g.add(door); at(g, x, z); g.rotation.y = Math.random() * 6.28; pop(g); }
   function building() { var p = fp(6), x = p[0], z = p[1], g = new T.Group(); var fl = 4 + Math.floor(Math.random() * 6), w = 3 + Math.random() * 2, hgt = fl * 1.6; var body = new T.Mesh(new T.BoxGeometry(w, hgt, w), mat('#8a93a8')); body.position.y = hgt / 2; body.castShadow = true; g.add(body); var winMat = mat('#cfe6ff', { emissive: '#bfe0ff', emissiveIntensity: 0.35 }); for (var f = 0; f < fl; f++) for (var c = -1; c <= 1; c++) { var win = new T.Mesh(new T.BoxGeometry(0.6, 0.8, 0.05), winMat); win.position.set(c * (w / 3), 1 + f * 1.6, w / 2 + 0.02); g.add(win); var win2 = win.clone(); win2.position.z = -w / 2 - 0.02; g.add(win2); } at(g, x, z); pop(g); }
   function car() { var p = fp(5), x = p[0], z = p[1], g = new T.Group(); var col = ['#e23b3b', '#3b7de2', '#ffce3b', '#2bd68f', '#ffffff', '#2a2f45'][Math.floor(Math.random() * 6)]; var body = new T.Mesh(new T.BoxGeometry(3.4, 0.8, 1.6), mat(col)); body.position.y = 0.8; body.castShadow = true; g.add(body); var cab = new T.Mesh(new T.BoxGeometry(1.8, 0.8, 1.5), mat(col)); cab.position.set(-0.2, 1.5, 0); g.add(cab); var glass = mat('#9fd3ff', { opacity: 0.7, transparent: true }); var win = new T.Mesh(new T.BoxGeometry(1.7, 0.6, 1.52), glass); win.position.set(-0.2, 1.55, 0); g.add(win); var wm = mat('#15151a'); [[1.1, 0.8], [1.1, -0.8], [-1.1, 0.8], [-1.1, -0.8]].forEach(function (w) { var wh = new T.Mesh(new T.CylinderGeometry(0.45, 0.45, 0.3, 10), wm); wh.rotation.x = Math.PI / 2; wh.position.set(w[0], 0.45, w[1]); wh.castShadow = true; g.add(wh); }); var lm = mat('#fff3b0', { emissive: '#fff3b0', emissiveIntensity: 0.6 }); [0.6, -0.6].forEach(function (y) { var l = new T.Mesh(new T.BoxGeometry(0.1, 0.25, 0.25), lm); l.position.set(1.7, 0.85, y); g.add(l); }); at(g, x, z, 0); g.rotation.y = Math.random() * 6.28; pop(g); }
-  function road() { var p = fp(0, 18), x = p[0], z = p[1]; var r = new T.Mesh(new T.PlaneGeometry(6, 26), mat('#333843')); r.rotation.x = -Math.PI / 2; r.position.set(x, terrainH(x, z) + 0.05, z); r.rotation.z = Math.random() * 3.14; r.receiveShadow = true; var line = new T.Mesh(new T.PlaneGeometry(0.3, 24), mat('#ffd23d')); line.rotation.x = -Math.PI / 2; line.position.y = 0.02; r.add(line); pop(r); }
+  function road() { var p = fp(0, 16), x = p[0], z = p[1], g = new T.Group(); var asph = new T.Mesh(new T.BoxGeometry(7, 0.25, 28), mat('#2b2f38')); asph.position.y = 0.12; asph.receiveShadow = true; g.add(asph); [-3.2, 3.2].forEach(function (sx) { var side = new T.Mesh(new T.BoxGeometry(0.8, 0.35, 28), mat('#aeb4bd')); side.position.set(sx, 0.17, 0); side.receiveShadow = true; g.add(side); }); var dm = mat('#ffd23d'); for (var k = -6; k <= 6; k++) { var dash = new T.Mesh(new T.BoxGeometry(0.22, 0.02, 1.3), dm); dash.position.set(0, 0.26, k * 2.1); g.add(dash); } g.position.set(x, terrainH(x, z), z); g.rotation.y = Math.random() * 3.14; pop(g); }
+  function wall() { var p = fp(5), x = p[0], z = p[1], g = new T.Group(); var body = new T.Mesh(new T.BoxGeometry(8, 2.4, 0.7), mat('#9aa0ab')); body.position.y = 1.2; body.castShadow = true; body.receiveShadow = true; g.add(body); for (var k = -3; k <= 3; k++) { var cren = new T.Mesh(new T.BoxGeometry(0.8, 0.6, 0.7), mat('#8a9099')); cren.position.set(k * 1.1, 2.6, 0); g.add(cren); } var line = mat('#7c828c'); for (var r2 = 0; r2 < 3; r2++) { var seam = new T.Mesh(new T.BoxGeometry(8.02, 0.06, 0.72), line); seam.position.y = 0.6 + r2 * 0.6; g.add(seam); } at(g, x, z); g.rotation.y = Math.random() * 6.28; pop(g); }
   function bridge() { lake(); var g = new T.Group(); var deck = new T.Mesh(new T.BoxGeometry(14, 0.4, 3), mat('#8a5a2b')); deck.position.y = 0.5; deck.castShadow = true; g.add(deck); [-6, 6].forEach(function (dx) { [1.2, -1.2].forEach(function (dz) { var post = new T.Mesh(new T.CylinderGeometry(0.18, 0.18, 1.6, 6), mat('#6b4a2b')); post.position.set(dx, -0.1, dz); g.add(post); }); }); g.position.set(water.position.x, 0.2, water.position.z); pop(g); }
   function streetlamp() { var p = fp(4), x = p[0], z = p[1], g = new T.Group(); var pole = new T.Mesh(new T.CylinderGeometry(0.1, 0.14, 4.4, 8), mat('#3a3f4a')); pole.position.y = 2.2; pole.castShadow = true; g.add(pole); var head = new T.Mesh(new T.SphereGeometry(0.4, 10, 10), mat('#fff3b0', { emissive: '#ffe680', emissiveIntensity: 1 })); head.position.y = 4.4; g.add(head); var pl = new T.PointLight('#ffe39a', 0.9, 14); pl.position.y = 4.4; g.add(pl); at(g, x, z); pop(g); }
   function fence() { var p = fp(5), x = p[0], z = p[1], g = new T.Group(), dir = Math.random() * 6.28; for (var k = -3; k <= 3; k++) { var post = new T.Mesh(new T.BoxGeometry(0.2, 1.2, 0.2), mat('#b58a52')); post.position.set(k * 1.1, 0.6, 0); g.add(post); } var rail = new T.Mesh(new T.BoxGeometry(7, 0.15, 0.15), mat('#c99a62')); rail.position.y = 0.9; g.add(rail); g.rotation.y = dir; at(g, x, z); pop(g); }
@@ -88,7 +105,14 @@
   function norm(x) { return (x || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
   function num(q, d) { var m = q.match(/\d+/); return m ? Math.min(20, +m[0]) : d; }
   function many(fn, n) { for (var i = 0; i < n; i++) fn(); }
+  var BRANDED = /(naruto|goku|dragon ?ball|sonic|mario|luigi|spider|batman|superman|pikachu|pokemon|sasuke|anime|one ?piece|luffy|minecraft|steve|fortnite|aizen)/;
   var RULES = [
+    [/\b(skin|skins|perso|personnage|avatar|tenue|costume|habille)\b/, function (q) {
+      var map = { ninja: 'ninja', robot: 'robot', astronaute: 'astronaute', astronaut: 'astronaute', spationaute: 'astronaute', zombie: 'zombie', chevalier: 'chevalier', knight: 'chevalier', armure: 'chevalier', roi: 'roi', king: 'roi', couronne: 'roi', defaut: 'defaut', default: 'defaut', base: 'defaut' };
+      for (var k in map) if (q.indexOf(k) >= 0) { applySkin(map[k]); return 'ton skin : ' + SKINS[map[k]].label + ' 🎭'; }
+      if (BRANDED.test(q)) { applySkin('ninja'); return 'un skin ninja orange original — je ne peux pas copier un perso sous licence 🥷'; }
+      return 'choisis ton skin en bas (ninja, robot, astronaute, chevalier, zombie, roi) 🎭';
+    }],
     [/(foret|arbre|tree|forest|sapin|bois)/, function (q) { var n = num(q, 5); many(tree, n); return n + ' arbres 🌲'; }],
     [/(palmier|palm|cocotier)/, function (q) { var n = num(q, 3); many(palm, n); return n + ' palmiers 🌴'; }],
     [/(montagne|mountain|colline|cliff)/, function (q) { var n = num(q, 1); many(mountain, n); return (n > 1 ? n + ' montagnes' : 'une montagne') + ' ⛰️'; }],
@@ -101,6 +125,7 @@
     [/(route|road|rue|street)/, function () { road(); return 'une route 🛣️'; }],
     [/(pont|bridge)/, function () { bridge(); return 'un pont 🌉'; }],
     [/(lampadaire|lampe|streetlamp|lamp|reverbere)/, function (q) { var n = num(q, 2); many(streetlamp, n); return n + ' lampadaires 💡'; }],
+    [/\b(mur|murs|wall|walls|muraille|rempart)\b/, function (q) { var n = num(q, 1); many(wall, n); return (n > 1 ? n + ' murs' : 'un mur') + ' 🧱'; }],
     [/(cloture|barriere|fence|palissade)/, function () { fence(); return 'une clôture 🚧'; }],
     [/(banc|bench)/, function () { bench(); return 'un banc 🪑'; }],
     [/\b(chien|chiens|dog|dogs|animal|animaux|chat|chats|cat|cats)\b/, function (q) { var n = num(q, 1); many(dog, n); return (n > 1 ? n + ' animaux' : 'un animal') + ' 🐕'; }],
@@ -122,24 +147,35 @@
   function handle(q) { var n = norm(q), out = [], hit = false; for (var i = 0; i < RULES.length; i++) if (RULES[i][0].test(n)) { hit = true; out.push(RULES[i][1](n)); } if (!hit) { many(tree, 3); out.push('quelques arbres 🌳'); } return out.join(', puis '); }
   function resetScene() { spawned.forEach(function (o) { group.remove(o); }); spawned = []; water.visible = false; grassMat.color = new T.Color('#63c24f'); mood('jour'); }
 
-  // ---------- modes : Explorer (orbite) / Jouer (1re personne) ----------
-  var mode = 'view', camA = 0.7, camTarget = 0.7, auto = true, drag = false, px = 0, py = 0;
+  // ---------- modes : Explorer (orbite) / Jouer (1re ou 3e personne) ----------
+  var mode = 'view', camA = 0.7, camTarget = 0.7, auto = true, drag = false, px = 0, py = 0, fpv = true;
   var keys = {}, run = false;
+  function typing() { var a = document.activeElement; return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA'); }
   function setMode(m) {
     mode = m; document.body.classList.toggle('s3-play', m === 'play');
-    var pb = $('s3-playbtn'); if (pb) pb.querySelector('span').textContent = m === 'play' ? 'Quitter le jeu' : 'Jouer';
-    if (m === 'play') { player.x = 0; player.z = 0; player.yaw = -camA + Math.PI; hero.visible = false; try { cv.requestPointerLock && cv.requestPointerLock(); } catch (e) {} var hint = $('s3-hint'); if (hint) { hint.classList.add('on'); setTimeout(function () { hint.classList.remove('on'); }, 3500); } }
+    var pb = $('s3-playbtn'); if (pb) { pb.querySelector('span').textContent = m === 'play' ? 'Quitter' : 'Jouer'; pb.blur(); }
+    var vb = $('s3-viewbtn'); if (vb) vb.style.display = m === 'play' ? 'inline-flex' : 'none';
+    if (m === 'play') { player.x = 0; player.z = 0; player.y = terrainH(0, 0); player.vy = 0; player.yaw = -camA + Math.PI; player.pitch = 0; hero.visible = !fpv; var hint = $('s3-hint'); if (hint) { hint.classList.add('on'); clearTimeout(hint._t); hint._t = setTimeout(function () { hint.classList.remove('on'); }, 4200); } }
     else { hero.visible = true; try { document.exitPointerLock && document.exitPointerLock(); } catch (e) {} auto = true; }
   }
-  // clavier
-  addEventListener('keydown', function (e) { if (mode !== 'play') return; keys[e.code] = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') run = true; if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].indexOf(e.code) >= 0) e.preventDefault(); if (e.code === 'Escape') setMode('view'); });
+  function setFpv(v) { fpv = v; hero.visible = (mode !== 'play') || !fpv; var vb = $('s3-viewbtn'); if (vb) vb.querySelector('span').textContent = fpv ? '1re pers.' : '3e pers.'; }
+  // clavier (écoute globale : marche avec ou sans pointer-lock)
+  addEventListener('keydown', function (e) {
+    if (e.code === 'Enter' && !typing() && mode === 'view') { setMode('play'); return; }
+    if (mode !== 'play') return;
+    if (typing()) return;
+    keys[e.code] = true;
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') run = true;
+    if (e.code === 'KeyC') setFpv(!fpv);
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].indexOf(e.code) >= 0) e.preventDefault();
+    if (e.code === 'Escape') setMode('view');
+  });
   addEventListener('keyup', function (e) { keys[e.code] = false; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') run = false; });
-  // souris (pointer lock)
+  // souris : pointer-lock si dispo, sinon glisser pour regarder — dans les deux cas le déplacement clavier fonctionne
   document.addEventListener('mousemove', function (e) { if (mode !== 'play' || document.pointerLockElement !== cv) return; player.yaw -= e.movementX * 0.0025; player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch - e.movementY * 0.0025)); });
-  document.addEventListener('pointerlockchange', function () { if (mode === 'play' && document.pointerLockElement !== cv) { /* laissé en jeu, clic pour reprendre le regard */ } });
-  cv.addEventListener('pointerdown', function (e) { if (mode === 'play') { if (document.pointerLockElement !== cv) { try { cv.requestPointerLock && cv.requestPointerLock(); } catch (er) {} } return; } drag = true; auto = false; px = e.clientX; cv.setPointerCapture(e.pointerId); });
-  cv.addEventListener('pointermove', function (e) { if (mode === 'play') return; if (!drag) return; camTarget += (e.clientX - px) * 0.008; px = e.clientX; });
-  cv.addEventListener('pointerup', function () { if (mode === 'play') return; drag = false; setTimeout(function () { auto = true; }, 3000); });
+  cv.addEventListener('pointerdown', function (e) { if (mode === 'play') { drag = true; px = e.clientX; py = e.clientY; if (cv.requestPointerLock && document.pointerLockElement !== cv) { try { cv.requestPointerLock(); } catch (er) {} } try { cv.setPointerCapture(e.pointerId); } catch (er) {} return; } drag = true; auto = false; px = e.clientX; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', function (e) { if (mode === 'play') { if (drag && document.pointerLockElement !== cv) { player.yaw -= (e.clientX - px) * 0.004; player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch - (e.clientY - py) * 0.004)); px = e.clientX; py = e.clientY; } return; } if (!drag) return; camTarget += (e.clientX - px) * 0.008; px = e.clientX; });
+  cv.addEventListener('pointerup', function () { if (mode === 'play') { drag = false; return; } drag = false; setTimeout(function () { auto = true; }, 3000); });
   // contrôles tactiles (mobile, en jeu)
   var mv = { f: 0, s: 0 };
   function bindPad() { ['f-up', 'f-down', 'f-left', 'f-right', 'f-jump'].forEach(function (id) { var el = $('s3-' + id); if (!el) return; var set = function (v) { return function (e) { e.preventDefault(); if (id === 'f-up') mv.f = v ? 1 : 0; if (id === 'f-down') mv.f = v ? -1 : 0; if (id === 'f-left') mv.s = v ? -1 : 0; if (id === 'f-right') mv.s = v ? 1 : 0; if (id === 'f-jump' && v) keys.Space = true; }; }; el.addEventListener('touchstart', set(1)); el.addEventListener('touchend', set(0)); el.addEventListener('mousedown', set(1)); window.addEventListener('mouseup', set(0)); }); var look = $('s3-look'); }
@@ -174,12 +210,22 @@
       player.vy -= 26 * dt; player.y += player.vy * dt;
       if (player.y <= gy) { player.y = gy; player.vy = 0; player.onGround = true; } else player.onGround = false;
       if ((keys.Space) && player.onGround) { player.vy = 9.5; player.onGround = false; } keys.Space = false;
-      // caméra 1re personne
-      var ey = player.y + PH;
-      camera.position.set(player.x, ey, player.z);
-      var lx = player.x - Math.sin(player.yaw) * Math.cos(player.pitch), lz = player.z - Math.cos(player.yaw) * Math.cos(player.pitch), ly = ey + Math.sin(player.pitch);
-      camera.lookAt(lx, ly, lz);
-      if (fwd || strafe) walkT += dt * (run ? 16 : 10);
+      var moving = (fwd || strafe);
+      // avatar : position + orientation + animation de marche
+      hero.position.set(player.x, player.y, player.z);
+      hero.rotation.y = player.yaw + Math.PI;
+      var lb = hero.userData.limbs;
+      if (lb) { if (moving) { walkT += dt * (run ? 16 : 10); var sw = Math.sin(walkT) * 0.6; lb.legL.rotation.x = sw; lb.legR.rotation.x = -sw; lb.armL.rotation.x = -sw; lb.armR.rotation.x = sw; } else { ['legL', 'legR', 'armL', 'armR'].forEach(function (k) { lb[k].rotation.x *= 0.8; }); } }
+      if (fpv) {
+        var ey = player.y + PH;
+        camera.position.set(player.x, ey, player.z);
+        var lx = player.x - Math.sin(player.yaw) * Math.cos(player.pitch), lz = player.z - Math.cos(player.yaw) * Math.cos(player.pitch), ly = ey + Math.sin(player.pitch);
+        camera.lookAt(lx, ly, lz);
+      } else {
+        var back = 9, cp = Math.cos(player.pitch);
+        camera.position.set(player.x + Math.sin(player.yaw) * back * cp, player.y + 4.5 - Math.sin(player.pitch) * back, player.z + Math.cos(player.yaw) * back * cp);
+        camera.lookAt(player.x, player.y + 2.2, player.z);
+      }
     }
     renderer.render(scene, camera);
   }
@@ -196,6 +242,9 @@
   document.querySelectorAll('.s3-model').forEach(function (b) { b.addEventListener('click', function () { document.querySelectorAll('.s3-model').forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on'); }); });
   var rb = $('s3-reset'); if (rb) rb.addEventListener('click', function () { resetScene(); bubble('ai', 'Map réinitialisée. Dis-moi ce que tu veux construire 🌱'); });
   var pb = $('s3-playbtn'); if (pb) pb.addEventListener('click', function () { setMode(mode === 'play' ? 'view' : 'play'); });
+  var vb = $('s3-viewbtn'); if (vb) vb.addEventListener('click', function () { setFpv(!fpv); }); setFpv(true);
+  document.querySelectorAll('.s3-skin').forEach(function (b) { b.addEventListener('click', function () { applySkin(b.dataset.skin); }); });
+  window.BloxiaStudio = { setMode: setMode, setFpv: function (v) { setFpv(v); }, applySkin: applySkin, say: send, player: player, get mode() { return mode; } };
   var cap = $('s3-capture'); if (cap) cap.addEventListener('click', function () { try { renderer.render(scene, camera); var url = renderer.domElement.toDataURL('image/png'); var a = document.createElement('a'); a.href = url; a.download = 'bloxia-map.png'; a.click(); } catch (e) {} });
 
   bubble('ai', 'Salut ! Décris ce que tu veux sur ta map : une forêt, une voiture, un immeuble, un lac… Et clique « Jouer » pour te balader dedans.');
