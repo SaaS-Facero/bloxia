@@ -21,7 +21,7 @@ section{position:relative}.sec{padding:clamp(80px,11vw,150px) 0}
 .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}.reveal.in{opacity:1;transform:none}.d1{transition-delay:.08s}.d2{transition-delay:.16s}
 /* boutons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 24px;border-radius:15px;border:0;background:var(--accent);color:#fff;font-weight:700;font-size:16px;white-space:nowrap;max-width:100%;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 -2px 0 rgba(0,0,0,.25) inset;transition:transform .2s var(--ease),filter .2s}
-.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}.btn .lbl{overflow:hidden;text-overflow:ellipsis}.btn .i-arrow,.btn>.i:last-child{transition:transform .2s}.btn:hover>.i:last-child{transform:translateX(4px)}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}.btn .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.btn .i-arrow,.btn>.i:last-child{transition:transform .2s}.btn:hover>.i:last-child{transform:translateX(4px)}
 .btn-ghost{background:var(--surface);border:1px solid var(--line-2);backdrop-filter:blur(12px);box-shadow:none}.btn-sm{min-height:42px;padding:0 16px;border-radius:12px;font-size:14px}
 .btn-light{background:#fff;color:#0b0d18;box-shadow:none}.btn-light:hover{background:#eef1ff;filter:none}.btn-block{width:100%}
 .swap{animation:swap .45s var(--ease)}@keyframes swap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -36,7 +36,7 @@ background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.03));b
 box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.08),inset 0 0 30px rgba(255,255,255,.05),0 24px 60px -24px rgba(0,0,0,.7);
 transition:width .5s var(--ease),height .5s var(--ease),padding .5s var(--ease),background .5s}
 .nav-bar::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(120% 140% at 28% -30%,rgba(255,255,255,.28),transparent 45%),radial-gradient(80% 100% at 90% 130%,rgba(255,255,255,.12),transparent 50%)}
-.nav-center{display:flex;gap:6px;font-size:19px;font-weight:600;color:var(--ink-2);transition:font-size .5s var(--ease)}.nav-center a{padding:8px 14px;border-radius:999px;transition:color .2s,background .2s}.nav-center a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav-center{display:flex;align-items:center;gap:2px;font-size:17px;font-weight:600;color:var(--ink-2);white-space:nowrap;transition:font-size .5s var(--ease)}.nav-center a{white-space:nowrap;padding:8px 13px;border-radius:999px;transition:color .2s,background .2s}.nav-center a:hover{color:#fff;background:rgba(255,255,255,.08)}
 .nav-actions{display:flex;align-items:center;gap:10px}.nav-actions .btn{border-radius:999px;min-height:52px;transition:min-height .5s var(--ease)}
 .nav.scrolled .nav-bar{width:min(1000px,100%);height:62px;padding:0 10px 0 22px;background:linear-gradient(180deg,rgba(16,18,28,.62),rgba(16,18,28,.45))}
 .nav.scrolled .logo{font-size:21px}.nav.scrolled .logo svg{width:28px;height:28px}.nav.scrolled .nav-center{font-size:15px}.nav.scrolled .nav-actions .btn{min-height:42px;font-size:14px;padding:0 16px}
