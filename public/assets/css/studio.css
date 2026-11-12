@@ -58,6 +58,8 @@
 .s3-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.08)}
 .s3-chip{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#dfe4ef;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:999px;cursor:pointer;transition:.15s}
 .s3-chip:hover{border-color:#4f6bed;background:rgba(79,107,237,.18)}
+.s3-chip-map{border-color:rgba(255,197,61,.5);background:rgba(255,197,61,.12);color:#ffe3a0}
+.s3-chip-map:hover{border-color:#ffc53d;background:rgba(255,197,61,.22)}
 .s3-form{display:flex;gap:8px;padding:12px 14px}
 .s3-form input{flex:1;min-width:0;height:44px;border:1.5px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(0,0,0,.25);color:#fff;padding:0 14px;font:600 15px var(--body);outline:0}
 .s3-form input:focus{border-color:#4f6bed}
